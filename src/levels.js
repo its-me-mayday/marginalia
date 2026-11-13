@@ -347,7 +347,7 @@ const BOSS_TARGETS = [
   ['Qualcnuo mi rielgge', 'Qualcuno mi rilegge', 810, 432]
 ];
 function lv9() {
-  const L = mkLevel({ name: 'La pagina', date: '', theme: 'boss', mood: 8, boss: true, fixed: true });
+  const L = mkLevel({ name: 'La pagina', date: '', theme: 'boss', mood: 8, boss: true, fixed: true, targets: BOSS_TARGETS, bossSay: ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'] });
   const P = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   P(60, 470, 840, 'Questa è la mia casa. Questa è la mia pagina. Tu sei soltanto una nota a margine.');
   P(150, 360, 170, 'un margine,');
@@ -373,3 +373,217 @@ const CHAPTERS = [
   { id: 1, roman: 'I', title: 'La casa di Vetrano', levels: [lv1, lv2, lv3, lv4, lv5, lv6, lv7, lv8, lv9] }
 ];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+
+/* ================= LIBRO SECONDO — C'era una volta, forse ================= */
+Object.assign(THEMES, {
+  meadow:  { p0: '#fffaf0', p1: '#e4f1c8', decor: 'hills', fairy: true },
+  forest:  { p0: '#f6f7e4', p1: '#cfe3b4', decor: 'trees', fairy: true },
+  wolf:    { p0: '#f3ecdb', p1: '#d9c9a4', decor: 'trees', fairy: true },
+  sky:     { p0: '#fff3d6', p1: '#bfe3f2', decor: 'sky', fairy: true },
+  sea:     { p0: '#d6f1f4', p1: '#63aebf', decor: 'waves', fairy: true },
+  rhyme:   { p0: '#fdf0f7', p1: '#dcd3f2', decor: 'stars', fairy: true },
+  lantern: { p0: '#b9c3d8', p1: '#59628a', decor: 'trees', fairy: true, dark: .9, light: 250, brinaLight: true },
+  teller:  { p0: '#fbf3df', p1: '#e8c9a8', decor: 'boss', fairy: true }
+});
+Object.assign(HINTS, {
+  copy:  ['tocca una parola: Postilla la ricalca per un po\'', 'tocca una parola: Postilla la ricalca per un po\''],
+  swap:  ['X — rimetti a posto la parola scambiata', '✎ — rimetti a posto la parola scambiata'],
+  wolf:  ['quando apre l\'occhio: immobile!', 'quando apre l\'occhio: immobile!'],
+  sun:   ['X — cancella il sole (o la luna)', '✎ — cancella il sole (o la luna)'],
+  swim:  ['qui si nuota: salta per risalire', 'qui si nuota: ▲ per risalire'],
+  sasso: ['da sasso si sfondano i rovi', 'da sasso si sfondano i rovi']
+});
+// estensioni del costruttore per la fiaba
+function fbuilder(L, x, y) {
+  const b = builder(L, x, y, 1); let wx = null;
+  L.words = L.words || []; L.wolves = L.wolves || []; L.npcs = L.npcs || [];
+  b.word = (k, fx) => { const p = b.last; L.words.push({ x: p.x + p.w * (fx === undefined ? .5 : fx), y: p.y - 44, k, cd: 0 }); return b; };
+  b.sw = (bad, good, gap, dy) => b.ln(bad, gap, dy, { kind: 'swap', good, w: Math.max(110, Math.round(good.length * 9.2 + 30)) });
+  b.rh = (text, key, gap, dy, reveals) => b.ln(text, gap, dy, { kind: 'rhyme', key, reveals });
+  b.rev = (key) => { b.last.reveals = key; return b; };
+  b.rovi = (fx) => { const p = b.last; L.blocks.push({ x: p.x + p.w * fx - 20, y: p.y - 300, w: 40, h: 300, twig: true, off: 0 }); return b; };
+  b.npc = (fx, text) => { const p = b.last; L.npcs.push({ x: p.x + p.w * (fx === undefined ? .7 : fx), y: p.y, text, seen: false, a: 1 }); return b; };
+  b.wolfStart = () => { wx = b.last.x + b.last.w + 10; return b; };
+  b.wolfEnd = () => { const p = b.last; L.wolves.push({ x0: wx, x1: p.x + p.w + 10, y: p.y, t: 0 }); return b; };
+  return b;
+}
+
+function fb1() {
+  const L = mkLevel({ name: 'C\'era una volta', date: 'pagina 1', theme: 'meadow', mood: 9, brina: false });
+  fbuilder(L, 120, 400)
+    .ln('C\'era una volta una bambina di nome Brina,').spawn()
+    .ln('che abitava dove finisce il prato', 100, -20)
+    .ln('e comincia il bosco.', 110, -30).mark()
+    .ln('Una sera la mamma le diede una lanterna:', 120, 40).check().say('In questo libro Postilla sa ricalcare le parole. Toccale.')
+    .ln('«Portala alla nonna, prima che faccia notte.»', 120, 0).word('rana', .82).hint('copy', 120, -110)
+    .ln('Il sentiero saliva,', 110, -235)
+    .ln('saliva,', 100, -60).mark()
+    .ln('e poi scendeva nella valle.', 110, 80).mark().check()
+    .ln('Brina aveva paura dei burroni,', 120, 30).word('piuma', .82)
+    .ln('ma quella sera si sentiva leggera come una piuma.', 430, 70)
+    .ln('Attraversò il prato,', 120, -20).bug('parto', 'prato', 60)
+    .ln('salutò le lucciole,', 110, -40).mark()
+    .ln('e arrivò al limitare del bosco.', 120, 40).check()
+    .ln('Fin qui, la fiaba andava come doveva.', 120, -20, { glitch: ['doveva', 'dolveva'] }).exit();
+  return L;
+}
+function fb2() {
+  const L = mkLevel({ name: 'Parole scambiate', date: 'pagina 7', theme: 'forest', mood: 10, brina: true });
+  fbuilder(L, 120, 400)
+    .ln('Nel bosco, però, qualcosa non tornava.').spawn()
+    .ln('Brina cercò il ponte sul ruscello.', 110, -20).say('Qui il Refuso non macchia: scambia. E Brina si fida di ciò che legge.')
+    .sw('fumo', 'ponte', 120, 0).hint('swap', -180, -100)
+    .ln('Dall\'altra parte il sentiero continuava.', 120, 0).check().mark()
+    .sw('nebbia', 'pietra', 110, -40).sw('sogno', 'gradino', 100, -50).mark()
+    .ln('Un viandante, seduto su un ceppo, scriveva qualcosa.', 120, 40).npc(.8, '«Non badare a me», ha detto. E più avanti una parola è cambiata.')
+    .ln('Quando Brina si avvicinò, non c\'era più.', 120, -20).check()
+    .sw('vento', 'tronco', 120, 30)
+    .ln('Gli scoiattoli si chiamavano sassi,', 120, -30).bug('scoiattloi', 'scoiattoli', 70)
+    .sw('aria', 'radice', 120, -40).sw('eco', 'ramo', 110, -40).sw('nulla', 'foglia', 110, 40).mark()
+    .ln('e i sassi non rispondevano.', 120, 40).check().mark()
+    .ln('La civetta faceva chicchirichì,', 120, -30).bug('cicvetta', 'civetta', 80)
+    .sw('ombra', 'sasso', 120, -30).sw('fiato', 'muschio', 110, 50).mark()
+    .ln('In fondo al sentiero c\'era una casetta.', 120, 30).exit();
+  return L;
+}
+function fb3() {
+  const L = mkLevel({ name: 'Un, due, tre, lupo', date: 'pagina 12', theme: 'wolf', mood: 11, brina: true });
+  fbuilder(L, 120, 400)
+    .ln('Davanti alla casetta dormiva un lupo.').spawn()
+    .ln('Brina si mise a camminare in punta di piedi.', 110, 0).say('Quando il lupo apre l\'occhio, resta immobile.').hint('wolf', 60, -100)
+    .wolfStart()
+    .ln('Un passo,', 80, 0).ln('un altro passo,', 80, -20).ln('e ferma.', 80, 0)
+    .wolfEnd()
+    .ln('Il lupo si girò dall\'altra parte.', 110, 30).check().mark()
+    .wolfStart()
+    .ln('Zitta zitta,', 90, -30).ln('piano piano,', 90, -30).mark().ln('col cuore in gola,', 90, 30).stain(.5, 46).ln('passò oltre.', 90, 30)
+    .wolfEnd()
+    .ln('Poi il lupo parlò, con la voce della nonna:', 120, 0).check().say('Nella fiaba che ricordo, il lupo non parlava così.')
+    .wolfStart()
+    .ln('«Vieni più vicino,', 90, -40).ln('bambina mia,', 90, -40).bug('bmabina', 'bambina', 50).ln('che non ti vedo bene.»', 100, 40).mark().ln('«E parla più forte.»', 90, 40)
+    .wolfEnd()
+    .ln('«Tu non sei la nonna», disse Brina.', 120, 30).check().mark()
+    .ln('«E tu non sei sola», disse il lupo, guardando Postilla.', 120, -20).exit();
+  return L;
+}
+function fb4() {
+  const L = mkLevel({ name: 'Giorno e notte', date: 'pagina 19', theme: 'sky', mood: 12, brina: true, mirror: true, autoPeriod: 3.4, labels: ['— giorno —', '— notte —'] });
+  const A = (w) => ({ layer: 1, w }), B = (w) => ({ layer: 2, w });
+  fbuilder(L, 120, 400)
+    .ln('Uscita dal bosco, Brina alzò gli occhi.').spawn().auto().say('Il sole e la luna si sono scambiati il turno. E non si mettono d\'accordo.')
+    .ln('Il cielo cambiava idea ogni momento.', 110, -20).hint('sun', 40, -100).mark(.8)
+    .ln('di giorno', 110, -30, A(130)).ln('di notte', 100, 0, B(130))
+    .ln('Le ombre non sapevano da che parte stare.', 110, 30).check().mark()
+    .ln('col sole', 110, -40, A(130)).ln('con la luna', 100, -40, B(130)).ln('col sole', 100, 30, A(130))
+    .ln('I galli cantavano e i gufi rispondevano.', 110, 40).check().word('rana', .85)
+    .ln('lassù', 110, -235).mark()
+    .ln('di notte', 100, 0, B(130)).ln('di giorno', 100, 40, A(130))
+    .ln('Brina rise: non aveva mai visto due albe in un minuto.', 120, 60).check().mark(.8)
+    .ln('Di giorno il sentiero scottava. Di notte un cancello lo chiudeva.', 130, 30).stain(.3, 230, 1).wall('NOTTE', .78, 2)
+    .ln('Poi il sole e la luna si misero in fila,', 130, -20).check()
+    .ln('uno', 110, -40, A(110)).ln('due', 100, -40, B(110)).ln('uno', 100, -40, A(110)).mark()
+    .ln('e il cielo tornò uno solo.', 120, 90).exit();
+  return L;
+}
+function fb5() {
+  const L = mkLevel({ name: 'Il bosco allagato', date: 'pagina 26', theme: 'sea', mood: 13, brina: true, water: true, flatY: true });
+  const P0 = { kind: 'line', layer: 0, x: 120, x0: 120, y: 300, w: 400, h: LH, text: 'Dove doveva esserci il bosco, c\'era il mare.', say: 'Qualcuno ha scambiato «bosco» con «mare». Si nuota.' };
+  L.plats.push(P0); L.spawn = { x: 160, y: 270 }; L.hints.push({ x: 300, y: 210, k: 'swim' });
+  // meduse d'inchiostro: [x, y, w, h, ampiezza, velocità]
+  const M = [[760, 60, 90, 190], [1020, 330, 90, 180], [1290, 50, 90, 150], [1290, 360, 90, 150], [1580, 190, 80, 110, 110, 1.3], [1880, 50, 100, 230], [2150, 300, 100, 210],
+    [2450, 200, 80, 100, 130, 1.6], [2740, 40, 90, 170], [2740, 340, 90, 170], [3040, 150, 80, 100, 120, 2], [3320, 300, 90, 110, 110, 1.4], [3620, 50, 100, 250], [3900, 290, 100, 220],
+    [4190, 60, 90, 170], [4190, 350, 90, 160], [4480, 200, 80, 100, 140, 2.1], [4770, 120, 80, 100, 100, 1.7], [5060, 60, 100, 240], [5330, 280, 100, 230]];
+  for (const m of M) L.stains.push({ x: m[0], y: m[1], y0: m[1], w: m[2], h: m[3], layer: 0, amp: m[4] || 0, sp: m[5] || 0, jelly: true });
+  [[1160, 270], [2020, 290], [2900, 270], [3780, 280], [4640, 300]].forEach(c => L.checks.push({ x: c[0], y: c[1], inv: false, float: true }));
+  [[1290, 262], [2450, 80], [3620, 400], [4190, 285], [5200, 150]].forEach(m => L.marks.push({ x: m[0], y: m[1] }));
+  const P1 = { kind: 'line', layer: 0, x: 5560, x0: 5560, y: 300, w: 480, h: LH, text: 'Brina toccò terra, bagnata fino alle trecce.' };
+  L.plats.push(P1); L.exit = { x: P1.x + P1.w - 54, y: P1.y - 74, w: 40, h: 74 };
+  return L;
+}
+function fb6() {
+  const L = mkLevel({ name: 'Le rime', date: 'pagina 33', theme: 'rhyme', mood: 14, brina: true });
+  fbuilder(L, 120, 400)
+    .ln('Sull\'altra riva la fiaba parlava in rima.').spawn().say('Ogni riga chiama la sua rima. Ma la rima dura poco.')
+    .ln('Brina guardò la luna,', 110, -20).rev('a')
+    .rh('e non ne vide nessuna,', 'a', 110, -30, 'b').rh('né bianca né bruna.', 'b', 100, -30)
+    .ln('Allora batté le mani,', 110, 40).check().rev('c')
+    .rh('e i sassi si fecero pani,', 'c', 110, -40, 'd').rh('e i lupi si fecero cani', 'd', 100, -40).mark()
+    .ln('che scodinzolavano piano.', 110, 50).check().mark()
+    .ln('Poi volle passare il torrente,', 120, -20).word('piuma', .85).rev('e')
+    .rh('leggera come niente,', 'e', 400, 60, 'f').rh('sopra la corrente.', 'f', 110, -30)
+    .ln('Atterrò tra i girasoli,', 110, 30).check().mark().rev('g')
+    .rh('che di notte restano soli,', 'g', 110, -40, 'h').rh('e di giorno prendono voli', 'h', 100, -40, 'i').rh('di parole.', 'i', 100, 40).mark()
+    .ln('Il viandante applaudì, da dietro un albero.', 110, 40).check().npc(.75, '«Brava», ha detto. Poi ha cancellato un verso.')
+    .ln('E una rima, da allora, non tornò più.', 120, -20).rev('j')
+    .rh('Brina cercò l\'uscita,', 'j', 110, -30, 'k').rh('con la fiaba mezza sparita,', 'k', 100, 40, 'l').rh('e la trovò con le dita.', 'l', 100, -40).mark()
+    .ln('Ormai faceva buio.', 110, 50).exit();
+  return L;
+}
+function fb7() {
+  const L = mkLevel({ name: 'La lanterna', date: 'pagina 41', theme: 'lantern', mood: 15, brina: true });
+  fbuilder(L, 120, 400)
+    .ln('Si fece notte davvero, e Brina accese la lanterna.').spawn().say('La luce è di Brina. Non correre troppo avanti.')
+    .ln('La casa della nonna era oltre i rovi.', 110, -20).word('sasso', .3).rovi(.82).hint('sasso', 30, -100)
+    .ln('Brina passò dove Postilla aveva aperto.', 120, 0).check().mark()
+    .sw('paura', 'sentiero', 110, -30).sw('silenzio', 'scalino', 100, -40).mark()
+    .ln('Una finestra accesa, laggiù.', 120, 50).stain(.6, 56).mark(.15)
+    .ln('Ma tra lei e la finestra c\'era il viandante.', 120, -20).check().npc(.8, '«Questa fiaba la so a memoria. Finiva male. L\'ho cambiata io.»')
+    .ln('«Da bambino piangevo sempre, a questo punto.»', 120, 30).word('sasso', .12).rovi(.5).rovi(.88)
+    .ln('«Così ho preso la matita.»', 120, -30).mark()
+    .sw('forse', 'ponte', 110, -40).sw('quasi', 'soglia', 100, 30).sw('mai', 'zerbino', 100, 30)
+    .ln('Brina bussò alla porta della nonna.', 120, 0).check().bug('nnona', 'nonna', 60)
+    .ln('«E la prima cosa che scrissi», disse lui, «sei tu.»', 120, -30).mark()
+    .ln('Aprì qualcuno che voleva raccontarla a modo suo.', 120, 30).exit();
+  return L;
+}
+const FB_TARGETS = [
+  ['Il lupo abitava nel parto', 'Brina abitava oltre il prato', 235, 322],
+  ['Il ponte era di fumo', 'Il ponte era di pietra', 725, 322],
+  ['La nonna dormiva nel bosco', 'Il lupo dormiva nel bosco', 480, 236],
+  ['Il mare era un bosco', 'Il bosco era un bosco', 480, 432],
+  ['Di giorno faceva notte', 'Di notte faceva notte', 235, 322],
+  ['Le rime non tornavano', 'Le rime tornavano tutte', 725, 322],
+  ['La lanterna si spense', 'La lanterna restò accesa', 480, 236],
+  ['Nessuno aprì la porta', 'La nonna aprì la porta', 150, 432],
+  ['E vissero, forse', 'E vissero felici e contenti', 810, 432]
+];
+function fb8() {
+  const L = mkLevel({ name: 'Il Narratore', date: '', theme: 'teller', mood: 16, boss: true, fixed: true, brina: true, fairyBoss: true, targets: FB_TARGETS,
+    bossSay: ['«Le fiabe sono mie. Le racconto come mi pare.»', '«Vuoi il bosco? Eccoti il mare.»', '«Spengo la luce. Vediamo se la sai a memoria.»'] });
+  const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
+  Pl(60, 470, 840, 'C\'era una volta chi decideva come finiscono le storie. E non eri tu, piccola nota.');
+  Pl(150, 360, 170, 'forse sì,'); Pl(640, 360, 170, 'forse no,'); Pl(395, 270, 170, 'forse.');
+  L.spawn = { x: 110, y: 440 };
+  return L;
+}
+const NOTES2 = [
+  ['QUESTO LIBRO È MIO', 'BRINA È BRAVA', 'IO NON HO PAURA DEL BOSCO', 'UN PO\' SÌ'],
+  ['QUI C\'È UNA PAROLA SBAGLIATA', 'L\'HO CORRETTA IO CON LA MATITA', 'LA MAESTRA DICE CHE NON SI SCRIVE SUI LIBRI', 'IO SCRIVO PIANO', 'COSÌ NON SI VEDE'],
+  ['IL LUPO MI FA PAURA', 'GIRO LA PAGINA VELOCE', 'STANOTTE LA LEGGO CON LA LUCE ACCESA', 'IL LUPO NON È CATTIVO, HA SONNO'],
+  ['HO DISEGNATO UN SOLE QUI', 'E UNA LUNA', 'MAMMA DICE CHE È ORA DI DORMIRE', 'ANCORA UNA PAGINA', 'UNA SOLA'],
+  ['HO ROVESCIATO IL BICCHIERE SUL LIBRO', 'LE PAGINE SONO TUTTE ONDULATE', 'SCUSA LIBRO', 'L\'HO ASCIUGATO COL PHON', 'SI LEGGE ANCORA'],
+  ['QUESTA LA SO A MEMORIA', 'LUNA, NESSUNA, BRUNA', 'HO INVENTATO UNA RIMA ANCH\'IO', 'NON È TANTO BELLA', 'MA È MIA'],
+  ['NON MI PIACE COME FINISCE', 'LA NONNA NON APRE', 'SE POTESSI ENTRARE GLIELO DIREI', 'LA PRIMA COSA CHE HO SCRITTO: CIAO', 'E IL LIBRO, MI PARE, HA RISPOSTO'],
+  []
+];
+
+CHAPTERS[0].notes = NOTES; CHAPTERS[0].secret = '✶  Ultima nota a margine: «Questa volta, fallo uscire.»';
+CHAPTERS[0].cover = ['#3a2a1c', '#c9a86a'];
+CHAPTERS[0].ending = [
+  { left: true, mark: true, dur: 8.5, lines: [['Giunsi a villa Vetrano al calare della sera.', .4], ['Fui accolto con ogni cortesia.', 1.8], ['Ripartii di buon mattino.', 3.2]] },
+  { dur: 4.2, big: true, lines: [['Lo stesso lettore.', .3]] },
+  { dur: 7, lines: [['Una nota a margine. Un errore di stampa.', .3], ['Due tracce della stessa mano:', 2.2], ['chi legge un libro, lo cambia.', 3.8]] },
+  { dur: 9, lines: [['Ora il libro finisce bene: l\'ospite riparte al mattino.', .3], ['Ma nessuno ricorda come finiva prima.', 2.4], ['Postilla lo ha riparato. O lo ha riscritto?', 4.6, VIOLET]] }
+];
+CHAPTERS[0].shelf = ['Nella Biblioteca dei Margini i libri non finiscono mai.', 'E su un altro scaffale, un\'altra pagina comincia a macchiarsi.'];
+CHAPTERS.push({
+  id: 2, roman: 'II', title: 'C\'era una volta, forse', levels: [fb1, fb2, fb3, fb4, fb5, fb6, fb7, fb8], notes: NOTES2,
+  secret: '✶  Ultima nota a margine: «CIAO. — Ciao.»', cover: ['#b8433a', '#ffe9a8'],
+  ending: [
+    { left: true, mark: true, dur: 8.5, lines: [['Brina arrivò dalla nonna prima di notte.', .4], ['La lanterna restò accesa sul davanzale.', 1.8], ['E vissero felici e contenti.', 3.2]] },
+    { dur: 4.2, big: true, lines: [['Forse.', .3]] },
+    { dur: 8, lines: [['Il viandante chiuse il libro dall\'interno.', .3], ['«Avevo sei anni», disse a Postilla.', 2.2], ['«La mia prima nota a margine fu: ciao.»', 4]] },
+    { dur: 9, lines: [['«Volevo solo che le storie finissero bene.»', .3], ['«Ma una storia che finisce come voglio io', 2.4], ['è ancora la storia di qualcun altro?»', 3.6, VIOLET]] }
+  ],
+  shelf: ['Due libri riparati. O riscritti.', 'Tra gli scaffali, il lettore e la sua nota cercano il prossimo.']
+});

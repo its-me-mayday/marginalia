@@ -1,6 +1,6 @@
-# Marginalia — La casa di Vetrano
+# Marginalia
 
-Platform narrativo per browser. Postilla, una nota a margine fatta d'inchiostro, entra in un romanzo gotico per ripararlo dal Refuso.
+Platform narrativo per browser. Postilla, una nota a margine fatta d'inchiostro, entra nei libri per ripararli dal Refuso.
 
 - **Gioca online:** https://its-me-mayday.github.io/marginalia/
 - **In locale:** apri `index.html` (file unico, autonomo: nessun server, nessuna dipendenza esterna).
@@ -8,9 +8,12 @@ Platform narrativo per browser. Postilla, una nota a margine fatta d'inchiostro,
 
 ## Il gioco
 
-Otto livelli e un boss dentro un diario gotico, «La casa di Vetrano». Le piattaforme sono le righe del testo, e ogni livello ha una meccanica propria: il diario che mente al buio, le righe che scappano, le piattaforme che esistono solo sul battito, la pagina letta al contrario, le lettere giganti, lo specchio a due versioni. Gli asterischi a matita nascondono le note del lettore che ha dato origine a tutto.
+Le piattaforme sono le righe del testo. Ogni libro è un genere, e ogni livello ha una meccanica propria.
 
-Durata: circa 20–30 minuti. I progressi si salvano nel browser.
+- **Libro I — «La casa di Vetrano»**: un diario gotico. Otto livelli e un boss: il diario che mente al buio, le righe che scappano, le piattaforme che esistono solo sul battito, la pagina letta al contrario, le lettere giganti, lo specchio a due versioni.
+- **Libro II — «C'era una volta, forse»**: una fiaba illustrata, che si apre solo a primo libro finito. Sette livelli e un boss: le parole da ricalcare (rana, piuma, sasso), le parole scambiate, il lupo che non va svegliato, il giorno e la notte che si alternano, il bosco allagato, le rime, la lanterna di Brina.
+
+Gli asterischi a matita nascondono le note del lettore che ha dato origine a tutto. In pausa c'è il registro del lettore, con punti e statistiche di ogni libro. I progressi si salvano nel browser.
 
 ## Come è nato
 
@@ -23,10 +26,10 @@ Il sorgente è in `src/`; `node build.js` rigenera `index.html` unendo i file e 
 | File | Contenuto |
 |---|---|
 | `src/core.js` | canvas, input (tastiera, touch, gamepad), audio procedurale, particelle |
-| `src/levels.js` | capitoli, livelli, testi, annotazioni |
+| `src/levels.js` | libri, livelli, testi, annotazioni, finali |
 | `src/game.js` | fisica, Postilla, nemici, boss |
 | `src/render.js` | disegno del mondo |
-| `src/ui.js` | biblioteca, HUD, transizioni, finale, salvataggio |
+| `src/ui.js` | biblioteca, HUD, registro, transizioni, finali, salvataggio |
 
 Regole: commit in formato Conventional Commits; a ogni modifica del gioco si aggiorna anche `PROMPT.md`.
 

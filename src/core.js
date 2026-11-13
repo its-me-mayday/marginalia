@@ -218,6 +218,8 @@ const AU = {
       case 'shoot': this.tone(240, .25, 'square', .035, null, null, 120); break;
       case 'thunder': this.noise(1.6, .5, 'lowpass', 900, 60, .7); this.tone(48, 1.2, 'sine', .3, null, null, 30); break;
       case 'crack': this.noise(.12, .2, 'highpass', 5000, 7000, 2); this.tone(2400, .1, 'square', .03); this.noise(.1, .16, 'highpass', 4200, 6400, 2, this.ctx.currentTime + .22); break;
+      case 'swim': this.noise(.16, .1, 'lowpass', 700, 250, 1); this.tone(300, .12, 'sine', .04, null, null, 520); break;
+      case 'growl': this.tone(70, .7, 'sawtooth', .12, null, null, 48); this.noise(.6, .1, 'lowpass', 300, 120, 2); break;
       case 'win': [293.66, 440, 587.33, 880].forEach((f, i) => this.tone(f, 2.2, 'sine', .08, this.echo, this.ctx.currentTime + i * .22)); break;
     }
   },
@@ -247,7 +249,7 @@ const AU = {
         const tones = [ch[0], ch[1], ch[2], ch[0] + 12, ch[1] + 12];
         const n = M.style === 'pluck' ? tones[[0, 1, 2, 3, 2, 1, 4, 2][inBar]] : pick(tones);
         const f = hz(M.root + 12 + n + (M.sour && Math.random() < .12 ? 1 : 0));
-        if (M.style === 'pluck') this.pluck(f, .07, w); else this.piano(f, .045 + Math.random() * .02, w, M.dec);
+        if (M.style === 'pluck') this.pluck(f, .07, w); else if (M.style === 'box') this.celesta(f * 2, .04, w); else this.piano(f, .045 + Math.random() * .02, w, M.dec);
       }
       if (inBar === 7) this.bar++;
       this.next += M.st * (M.style === 'pluck' || M.ost ? 1 : .92 + Math.random() * .16);
@@ -255,8 +257,8 @@ const AU = {
   }
 };
 // accordi (semitoni dalla tonica) e progressioni
-const CHORDS = { i: [0, 3, 7], VI: [-4, 0, 3], iv: [5, 8, 12], V: [-5, -1, 2], III: [3, 7, 10], VII: [-2, 2, 5], bII: [1, 5, 8] };
-const PROGS = [['i', 'VI', 'iv', 'V'], ['i', 'iv', 'VII', 'III'], ['i', 'i', 'VI', 'V'], ['i', 'bII', 'i', 'V'], ['i', 'VII', 'VI', 'V']];
+const CHORDS = { I: [0, 4, 7], IV: [5, 9, 12], Vm: [-5, -1, 2], vi: [-3, 0, 4], ii: [2, 5, 9], i: [0, 3, 7], VI: [-4, 0, 3], iv: [5, 8, 12], V: [-5, -1, 2], III: [3, 7, 10], VII: [-2, 2, 5], bII: [1, 5, 8] };
+const PROGS = [['i', 'VI', 'iv', 'V'], ['i', 'iv', 'VII', 'III'], ['i', 'i', 'VI', 'V'], ['i', 'bII', 'i', 'V'], ['i', 'VII', 'VI', 'V'], ['I', 'vi', 'IV', 'Vm'], ['I', 'IV', 'I', 'Vm'], ['vi', 'IV', 'I', 'Vm'], ['I', 'ii', 'IV', 'Vm']];
 // una voce diversa per ogni livello
 const MUSIC = [
   { root: 50, st: .46, prog: 0, dens: .5, pad: .03, bass: .09, motif: 0 },                    // L'arrivo / biblioteca
@@ -267,7 +269,16 @@ const MUSIC = [
   { root: 49, st: .44, prog: 4, dens: .55, pad: .03, bass: .09, motif: 1 },                   // A ritroso
   { root: 47, st: .27, prog: 2, dens: .7, pad: .02, bass: .08, ost: .028 },                   // Tra le lettere
   { root: 48, st: .5, prog: 1, dens: .45, pad: .034, bass: .09, motif: 3, dec: 3 },           // Lo specchio
-  { root: 44, st: .23, prog: 3, dens: .8, pad: .03, bass: .11, ost: .04, sour: true, dec: 1.2 } // La pagina
+  { root: 44, st: .23, prog: 3, dens: .8, pad: .03, bass: .11, ost: .04, sour: true, dec: 1.2 }, // La pagina
+  // libro secondo: carillon, pizzicati, tonalità maggiori
+  { root: 60, st: .3, prog: 5, dens: .7, pad: .02, bass: .07, style: 'box', motif: 0 },          // C'era una volta
+  { root: 62, st: .27, prog: 6, dens: .8, pad: .018, bass: .07, style: 'pluck', sour: true },    // Parole scambiate
+  { root: 57, st: .5, prog: 7, dens: .22, pad: .03, bass: .09, style: 'box', dec: 2 },           // Un, due, tre, lupo
+  { root: 65, st: .26, prog: 8, dens: .75, pad: .02, bass: .07, style: 'box', motif: 2 },        // Giorno e notte
+  { root: 58, st: .4, prog: 7, dens: .45, pad: .04, bass: .08, style: 'box', dec: 3 },           // Il bosco allagato
+  { root: 64, st: .3, prog: 5, dens: .7, pad: .02, bass: .07, style: 'pluck', motif: 1 },        // Le rime
+  { root: 55, st: .48, prog: 7, dens: .35, pad: .034, bass: .09, style: 'box', motif: 3 },       // La lanterna
+  { root: 52, st: .22, prog: 6, dens: .85, pad: .025, bass: .1, ost: .03, style: 'pluck', sour: true } // Il Narratore
 ];
 
 /* ---------- particelle ---------- */

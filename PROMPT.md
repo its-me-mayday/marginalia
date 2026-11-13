@@ -1,4 +1,4 @@
-# PROMPT — Marginalia: La casa di Vetrano
+# PROMPT — Marginalia
 
 Questo documento contiene il prompt completo per generare il gioco, sempre allineato allo stato attuale del repository. Ogni modifica al gioco va riportata qui: nel prompt stesso e nel registro in fondo.
 
@@ -72,9 +72,40 @@ In ogni livello sono sparsi asterischi a matita. Ognuno, raccolto, fa comparire 
 
 La pagina si ricompone e il diario ora finisce bene: l'ospite riparte al mattino. Accanto all'ultima riga compare un segno di matita identico a quello di Postilla. Poi, una schermata alla volta: «Lo stesso lettore.» — «Una nota a margine. Un errore di stampa. Due tracce della stessa mano: chi legge un libro, lo cambia.» — «Ora il libro finisce bene. Ma nessuno ricorda come finiva prima. Postilla lo ha riparato. O lo ha riscritto?» Si chiude sulla biblioteca: i libri non finiscono mai, e su un altro scaffale un'altra pagina comincia a macchiarsi. Riepilogo: tempo, annotazioni raccolte, cadute.
 
+### Secondo libro: «C'era una volta, forse»
+
+Si sblocca se e solo se il primo libro è stato finito. Stesso motore, stessa Postilla, ma un genere intero diverso: una fiaba illustrata.
+
+- **Storia**: Brina, una bambina, deve portare una lanterna alla nonna oltre il bosco. Qui il Refuso non macchia: scambia. Il lupo fa la nonna, il bosco diventa mare, il giorno diventa notte.
+- **Stile**: carta bianca, acquerelli vivaci (colline, alberi, sole e luna), testo in tondo e non in corsivo. Postilla è l'unica cosa nera.
+- **Musica**: carillon e pizzicati in tonalità maggiori, una voce per livello.
+- **Potere nuovo, il ricalco**: toccando una parola sospesa, Postilla la copia per qualche secondo. «Rana» salta altissimo, «piuma» cade lenta e plana, «sasso» sfonda i rovi (ma non può fare il doppio salto).
+- **Brina**: non si gioca, si accompagna. Segue Postilla con mezzo secondo di ritardo. Deve essere dettagliata e molto animata: gambe a due segmenti con calzini e stivaletti, mantellina gialla che svolazza, sciarpa rossa, due trecce con fiocco e una lanterna che oscillano come pendoli a molla, camminata, salto, caduta, nuoto, atterraggio con squash, battito di ciglia, sguardo che segue Postilla, saluto quando sta ferma, spavento quando il lupo apre l'occhio.
+- **Il viandante**: una figura a matita con il cappello che compare e svanisce. È il lettore, entrato nel libro come promesso nell'ultima nota del primo. Ambiguo: a volte commenta, a volte cambia una parola.
+- **Filo con il primo libro**: è il libro che il lettore leggeva da bambino. Le annotazioni sono in stampatello infantile, e l'ultima rivela che la sua prima nota a margine, «ciao», è il momento in cui è nata Postilla.
+
+Livelli:
+
+1. **C'era una volta** — tutorial del ricalco: una salita che richiede «rana», un burrone che richiede «piuma».
+2. **Parole scambiate** — righe che non reggono perché hanno la parola sbagliata («fumo» al posto di «ponte»): lo sbianchetto le rimette a posto. Primo incontro con il viandante.
+3. **Un, due, tre, lupo** — un lupo dorme. Quando apre l'occhio (preavviso con le orecchie) bisogna essere immobili a terra.
+4. **Giorno e notte** — sole e luna si alternano da soli a intervalli; alcune righe esistono solo di giorno, altre solo di notte. Lo sbianchetto cancella il sole o la luna.
+5. **Il bosco allagato** — «bosco» è stato scambiato con «mare»: si nuota tra meduse d'inchiostro, ferme e mobili.
+6. **Le rime** — ogni riga, quando ci atterri, fa comparire la sua rima per pochi secondi.
+7. **La lanterna** — notte vera: la luce è la lanterna di Brina, che ti segue. Rovi da sfondare come «sasso», parole scambiate, e il viandante che confessa.
+8. **Il Narratore** (boss) — tre fasi come nel primo, ma l'arena cambia: nella seconda si allaga, nella terza resta al buio con la sola lanterna.
+
+Finale: «E vissero felici e contenti. Forse.» Il viandante chiude il libro dall'interno e si chiede se una storia che finisce come vuole lui sia ancora la storia di qualcun altro.
+
+### Punti e registro del lettore
+
+- Punti: 100 per annotazione, 50 per parola corretta, 20 per parola rimessa a posto, 200 per livello finito, 1200 per libro finito, 40 per ogni caduta in meno di 15; ogni caduta toglie 10.
+- Il **registro del lettore** si vede in pausa e dalla biblioteca: la lettura in corso, la lettura migliore di ogni libro (punti, annotazioni, tempo, cadute) e il totale. Entra nel registro solo una lettura fatta dal primo all'ultimo livello.
+- I punti correnti sono sempre visibili nell'HUD.
+
 ### Cornice
 
-Schermata titolo: un libro aperto davanti agli scaffali, con Postilla accanto al titolo. Pulsanti per iniziare, continuare, ricominciare; indice dei livelli già raggiunti. HUD minimale: nome del livello, annotazioni, gomma con ricarica, barra della candela. Pausa («Segnalibro»). Pulsanti per audio, pausa e schermo intero.
+Schermata titolo: la biblioteca, con le copertine dei libri affiancate e Postilla seduta su quello selezionato. Un libro chiuso è scuro, macchiato, e dice cosa serve per aprirlo. Pulsanti per iniziare, continuare, ricominciare; indice dei livelli già raggiunti; registro del lettore. HUD minimale: nome del livello, annotazioni, gomma con ricarica, barra della candela. In pausa compare il registro del lettore. Pulsanti per audio, pausa e schermo intero.
 
 ### Qualità
 
@@ -102,3 +133,7 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 8 | Rimosso «Capitolo II — prossimamente»; finale aperto su altre storie possibili. | Richiesta dell'autore. |
 | 9 | Finale reso esplicito: «chi legge un libro, lo cambia» e il dubbio riparato/riscritto. | Il significato non arrivava. |
 | 10 | Gli asterischi diventano annotazioni del lettore, con nota finale per chi le trova tutte. | Dare uno scopo ai collezionabili. |
+| 11 | Secondo libro, la fiaba «C'era una volta, forse», sbloccato solo a primo libro finito; potere del ricalco; Brina e il viandante. | Richiesta dell'autore: una seconda storia con un filo che la lega alla prima. |
+| 12 | Punti e registro del lettore, visibile in pausa e dalla biblioteca, con il totale su tutti i libri. | Richiesta dell'autore. |
+| 13 | Brina ridisegnata: più dettagli, molte animazioni, lanterna e trecce a molla. | Richiesta dell'autore: era poco dettagliata. |
+| 14 | La forma «sasso» pesa meno e si esaurisce dopo aver sfondato i rovi. | In verifica, da sasso il salto successivo era impossibile. |
