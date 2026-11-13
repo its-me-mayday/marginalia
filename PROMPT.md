@@ -167,3 +167,4 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 16 | Terzo libro, il giallo «Chi ha strappato l'ultima pagina»: treno, Corsivo e Tondo, Postilla indagata, soluzione «sono stati tutti». | Richiesta dell'autore: noir con sapore di Sherlock Holmes e Agatha Christie. |
 | 17 | Nel pedinamento ogni fascio di torcia riposa su un'ombra ai due estremi. | In verifica, con fasci a metà corridoio l'attraversamento era impossibile. |
 | 18 | Quarto libro progettato come fantascienza comica alla Douglas Adams, al posto della versione seria. | Scelta dell'autore. |
+| 19 | Pedinamento semplificato: torce più lente, ombre più larghe, un solo fascio per tratto, e mezzo secondo di tolleranza prima di essere scoperti. | Richiesta dell'autore: era troppo difficile. |

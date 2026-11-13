@@ -536,6 +536,7 @@ function drawWorld() {
 
   drawBrina();
   drawPostilla();
+  if (G.seenT > 0 && P.dead <= 0) { ctx.fillStyle = '#d8433a'; ctx.font = 'bold 26px ' + SERIF; ctx.textAlign = 'center'; ctx.globalAlpha = Math.min(1, G.seenT / .2); ctx.fillText('!', P.x + P.w / 2, P.y - 28); ctx.globalAlpha = 1; ctx.textAlign = 'left'; }
   if (P.form && P.dead <= 0) { const k = P.form.t / P.form.max, x = P.x + P.w / 2, y = P.y - 30; ctx.font = 'italic 500 16px ' + SERIF; ctx.textAlign = 'center'; ctx.fillStyle = FORMCOL[P.form.k]; ctx.globalAlpha = k < .25 ? .4 + .6 * Math.sin(t * 20) ** 2 : 1; ctx.fillText(P.form.k, x, y); ctx.strokeStyle = FORMCOL[P.form.k]; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, P.y + P.h / 2 - 4, 27, -Math.PI / 2, -Math.PI / 2 + TAU * k); ctx.stroke(); ctx.globalAlpha = 1; ctx.textAlign = 'left'; }
   drawParts();
 

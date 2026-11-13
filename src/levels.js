@@ -696,13 +696,13 @@ function nr4() {
 function nr5() {
   const L = mkLevel({ name: 'Il pedinamento', date: 'ore 01:40', theme: 'rain', mood: 21 });
   nbuilder(L, 120, 400)
-    .ln('Qualcuno lasciò lo scompartimento in punta di piedi.').spawn().shade(.85, 110).say('Postilla è inchiostro: nell\'ombra non si vede. La torcia del controllore, invece, vede tutto.').hint('shade', 120, -100)
-    .ln('Lo seguii lungo il corridoio, da un\'ombra all\'altra, senza fare rumore.', 80, 0).shade(.08, 100).shade(.5, 100).shade(.92, 100).beam(.08, .92, 1.0, 0).mark(.3)
-    .ln('Il controllore passava con la torcia, avanti e indietro, avanti e indietro.', 80, 0).shade(.08, 100).shade(.5, 100).shade(.92, 100).beam(.08, .92, 1.25, 1).check()
-    .ln('Chi seguivo si fermò davanti al vagone sette e si guardò alle spalle.', 80, -30).shade(.08, 100).shade(.5, 100).shade(.92, 100).beam(.08, .92, 1.4, 2).mark(.7)
-    .ln('Io non c\'ero. Cioè: c\'ero, ma ero dello stesso colore del buio.', 80, 30).shade(.08, 100).shade(.5, 140).shade(.92, 100).beam(.08, .5, 1.5, 0).beam(.5, .92, 1.5, 3.14).check()
-    .ln('Entrò. Uscì dopo un minuto con qualcosa sotto il cappotto.', 80, 0).shade(.08, 100).shade(.36, 90).shade(.64, 90).shade(.92, 100).beam(.08, .92, 1.6, 1).mark(.5)
-    .ln('Lo seguii fino in fondo al treno, dove finiscono i vagoni e comincia la notte.', 80, -20).shade(.08, 100).shade(.36, 110).shade(.64, 110).shade(.94, 100).beam(.08, .36, 1.6, 0).beam(.64, .94, 1.3, 2).check().mark(.5)
+    .ln('Qualcuno lasciò lo scompartimento in punta di piedi.').spawn().shade(.85, 140).say('Postilla è inchiostro: nell\'ombra non si vede. La torcia del controllore, invece, vede tutto.').hint('shade', 120, -100)
+    .ln('Lo seguii lungo il corridoio, da un\'ombra all\'altra, senza fare rumore.', 80, 0).shade(.08, 140).shade(.5, 140).shade(.92, 140).beam(.08, .92, 0.60, 0).mark(.3)
+    .ln('Il controllore passava con la torcia, avanti e indietro, avanti e indietro.', 80, 0).shade(.08, 140).shade(.5, 140).shade(.92, 140).beam(.08, .92, 0.75, 1).check()
+    .ln('Chi seguivo si fermò davanti al vagone sette e si guardò alle spalle.', 80, -30).shade(.08, 140).shade(.5, 140).shade(.92, 140).beam(.08, .92, 0.84, 2).mark(.7)
+    .ln('Io non c\'ero. Cioè: c\'ero, ma ero dello stesso colore del buio.', 80, 30).shade(.08, 140).shade(.5, 140).shade(.92, 140).beam(.08, .92, 0.85, 0).check()
+    .ln('Entrò. Uscì dopo un minuto con qualcosa sotto il cappotto.', 80, 0).shade(.08, 140).shade(.36, 140).shade(.64, 140).shade(.92, 140).beam(.08, .92, 0.96, 1).mark(.5)
+    .ln('Lo seguii fino in fondo al treno, dove finiscono i vagoni e comincia la notte.', 80, -20).shade(.08, 140).shade(.36, 140).shade(.64, 140).shade(.94, 140).beam(.08, .94, 0.9, 2).check().mark(.5)
     .ln('Si voltò. Aveva la mia faccia. Cioè: non ne aveva nessuna, come me.', 80, 0).exit();
   return L;
 }

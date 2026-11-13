@@ -273,7 +273,9 @@ function updItems(dt) {
   }
   for (const w of (L.words || [])) { if (w.cd > 0) { w.cd -= dt; continue; } if (Math.hypot(cx - w.x, cy - w.y) < 34) { P.form = { k: w.k, t: 6.5, max: 6.5 }; w.cd = 2.5; AU.sfx('candle'); puff(w.x, w.y, 14, { s0: 20, s1: 120, col: FORMCOL[w.k], grav: -60 }); } }
   for (const n of (L.npcs || [])) { const d = Math.abs(cx - n.x); if (d < 230 && !n.seen) { n.seen = true; say(n.text); } if (n.seen) n.a = Math.max(0, n.a - dt * .8); }
-  if (L.beams && (!L.boss || L.beamsOn) && P.born <= 0) for (const b of L.beams) { const bx = lerp(b.x0, b.x1, .5 + .5 * Math.sin(G.t * b.sp + b.ph)); if (Math.abs(cx - bx) < b.w / 2 - 8 && !P.hidden) { say('Ti hanno vista.'); die(); return; } }
+  let lit = false;
+  if (L.beams && (!L.boss || L.beamsOn) && P.born <= 0) for (const b of L.beams) { const bx = lerp(b.x0, b.x1, .5 + .5 * Math.sin(G.t * b.sp + b.ph)); if (Math.abs(cx - bx) < b.w / 2 - 14 && !P.hidden) lit = true; }
+  if (L.beams) { G.seenT = lit ? (G.seenT || 0) + dt : Math.max(0, (G.seenT || 0) - dt * 2); if (G.seenT > .45) { G.seenT = 0; say('Ti hanno vista.'); die(); return; } }
   if (L.tunnel) { const T = L.tunnel, was = T.t % 5.8; T.t += dt; const ph = T.t % 5.8; if (was < 3.5 && ph >= 3.5) AU.sfx('whistle'); if (ph >= 4.5 && !P.ground && P.born <= 0 && P.coy <= 0) { say('In galleria si sta bassi.'); die(); return; } }
   for (const w of (L.wolves || [])) {
     const was = w.t % 4.8; w.t += dt; const ph = w.t % 4.8;
