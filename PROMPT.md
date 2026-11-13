@@ -105,7 +105,7 @@ Finale: «E vissero felici e contenti. Forse.» Il viandante chiude il libro dal
 
 ### Cornice
 
-Schermata titolo: la biblioteca, con le copertine dei libri affiancate e Postilla seduta su quello selezionato. Un libro chiuso è scuro, macchiato, e dice cosa serve per aprirlo. Pulsanti per iniziare, continuare, ricominciare; indice dei livelli già raggiunti; registro del lettore. HUD minimale: nome del livello, annotazioni, gomma con ricarica, barra della candela. In pausa compare il registro del lettore. Pulsanti per audio, pausa e schermo intero.
+Schermata titolo: la biblioteca, con le copertine dei libri affiancate e Postilla seduta su quello selezionato. Un libro chiuso è scuro, macchiato, e dice cosa serve per aprirlo. Se in un libro c'è una lettura a metà, dalla copertina sporge un segnalibro a nastro con il numero del livello, lungo quanto la strada fatta. Cambiando libro (frecce, tocco o tasti) Postilla salta ad arco da una copertina all'altra, con scia, atterraggio e schizzo. Pulsanti per iniziare, continuare, ricominciare; indice dei livelli già raggiunti; registro del lettore. HUD minimale: nome del livello, annotazioni, gomma con ricarica, barra della candela. In pausa compare il registro del lettore. Pulsanti per audio, pausa e schermo intero.
 
 ### Qualità
 
@@ -137,3 +137,4 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 12 | Punti e registro del lettore, visibile in pausa e dalla biblioteca, con il totale su tutti i libri. | Richiesta dell'autore. |
 | 13 | Brina ridisegnata: più dettagli, molte animazioni, lanterna e trecce a molla. | Richiesta dell'autore: era poco dettagliata. |
 | 14 | La forma «sasso» pesa meno e si esaurisce dopo aver sfondato i rovi. | In verifica, da sasso il salto successivo era impossibile. |
+| 15 | Segnalibro a nastro sulle copertine e salto animato di Postilla da un libro all'altro nella biblioteca. | Richiesta dell'autore. |

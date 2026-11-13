@@ -1974,7 +1974,8 @@ const unlocked = c => c === 0 || SAVE.books[c - 1].done;
 const LEVEL_NAMES = CHAPTERS.map(c => c.levels.map(f => f().name));
 const TOTAL_MARKS = CHAPTERS.map(c => c.levels.reduce((n, f) => n + f().marks.length, 0));
 
-let BTN = [], SEL = 0;
+let BTN = [], SEL = 0, HOP = { from: 0, to: 0, t: 1, land: 1, last: 0 }, prevNav = 0;
+function setSel(c) { if (c === SEL || c < 0 || c >= CHAPTERS.length || HOP.t < 1) return; HOP.from = SEL; HOP.to = c; HOP.t = 0; SEL = c; AU.sfx('jump'); }
 function button(x, y, w, h, label, fn, primary, paper) {
   BTN.push({ x, y, w, h, fn });
   ctx.fillStyle = paper ? (primary ? INK : 'rgba(60,40,20,.10)') : (primary ? 'rgba(244,232,205,.95)' : 'rgba(244,232,205,.12)');
@@ -2035,9 +2036,9 @@ function drawShelf(stainK) {
   ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
   if (stainK > 0) { ctx.fillStyle = DEEP; blobPath(790, 400, 46 * stainK, 34 * stainK, t, 3, .2); ctx.fill(); for (let i = 0; i < 4; i++) { const k = (t * .3 + i * .25) % 1; ctx.beginPath(); ctx.ellipse(766 + i * 18, 424 + k * 70 * stainK, 3, 6 * (1 - k), 0, 0, TAU); ctx.fill(); } }
 }
-function drawTitlePostilla(x, y, sc) {
+function drawTitlePostilla(x, y, sc, face, air, vy, sq) {
   const sv = { x: P.x, y: P.y, g: P.g, face: P.face, sx: P.sx, sy: P.sy, dead: P.dead, born: P.born, vx: P.vx, vy: P.vy, ground: P.ground };
-  P.x = x - P.w / 2; P.y = y - P.h; P.g = 1; P.face = 1; P.sx = 1; P.sy = 1; P.dead = 0; P.born = 0; P.vx = 0; P.vy = 0; P.ground = true;
+  P.x = x - P.w / 2; P.y = y - P.h; P.g = 1; P.face = face || 1; P.sx = sq ? 1 + sq * .35 : air ? .86 : 1; P.sy = sq ? 1 - sq * .35 : air ? 1.16 : 1; P.dead = 0; P.born = 0; P.vx = air ? 250 : 0; P.vy = vy || 0; P.ground = !air;
   P.blink -= 1 / 60; if (P.blink < -.12) P.blink = rnd(1.5, 4);
   ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); ctx.translate(-x, -y); drawPostilla(); ctx.restore();
   Object.assign(P, sv);
@@ -2050,6 +2051,13 @@ function drawCover(c, x, y, w, h, sel) {
   ctx.fillStyle = open ? C.cover[0] : '#241b16'; ctx.fillRect(-w / 2, -h / 2, w, h);
   ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(-w / 2 + 10, -h / 2, 5, h);
   ctx.strokeStyle = open ? C.cover[1] : 'rgba(200,180,140,.25)'; ctx.lineWidth = sel ? 2.5 : 1.5; ctx.strokeRect(-w / 2 + 22, -h / 2 + 12, w - 34, h - 24);
+  if (open && B.li > 0 && !B.done) { // segnalibro: un nastro che sporge, lungo quanto la strada fatta
+    const n = C.levels.length, len = h * (.25 + .75 * B.li / (n - 1)) + 26, bx = w / 2 - 46, sway = Math.sin(t * 1.8 + c) * 3;
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(bx + 3, -h / 2 - 6, 20, len);
+    ctx.fillStyle = c === 0 ? '#c9342a' : '#2f6f8f'; ctx.beginPath(); ctx.moveTo(bx, -h / 2 - 8); ctx.lineTo(bx + 20, -h / 2 - 8); ctx.lineTo(bx + 20 + sway * .4, -h / 2 + len - 20); ctx.lineTo(bx + 20 + sway, -h / 2 + len); ctx.lineTo(bx + 10 + sway, -h / 2 + len - 10); ctx.lineTo(bx + sway, -h / 2 + len); ctx.lineTo(bx + sway * .4, -h / 2 + len - 20); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(bx + 3, -h / 2 - 8, 3, len - 22);
+    ctx.save(); ctx.translate(bx + 10 + sway * .5, -h / 2 + len - 34); ctx.fillStyle = '#ffe9b0'; ctx.font = '500 14px ' + SERIF; ctx.textAlign = 'center'; ctx.fillText(ROMAN[B.li], 0, 0); ctx.restore();
+  }
   ctx.textAlign = 'center'; ctx.fillStyle = open ? C.cover[1] : 'rgba(200,180,140,.35)';
   ctx.font = '500 15px ' + SERIF; ctx.fillText('LIBRO ' + C.roman, 6, -h / 2 + 40);
   ctx.font = 'italic 500 25px ' + SERIF;
@@ -2076,8 +2084,26 @@ function drawTitle() {
   ctx.textAlign = 'center'; ctx.fillStyle = '#f1e6cc'; ctx.font = '500 58px ' + SERIF; ctx.fillText('MARGINALIA', W / 2, 70);
   ctx.font = F_HAND; ctx.fillStyle = 'rgba(241,230,204,.6)'; ctx.fillText('chi legge un libro, lo cambia', W / 2, 98); ctx.textAlign = 'left';
   const cw = 210, ch = 262, gap = 60, x0 = W / 2 - (CHAPTERS.length * cw + (CHAPTERS.length - 1) * gap) / 2, cy = 128;
-  CHAPTERS.forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => { SEL = c; AU.sfx('page'); } }); });
-  drawTitlePostilla(x0 + SEL * (cw + gap) + cw - 34, cy - 8 + Math.sin(t * 2) * 3, 1.5);
+  CHAPTERS.forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL && HOP.t >= 1); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => setSel(c) }); });
+  // Postilla salta da un libro all'altro
+  const dtT = clamp(t - HOP.last, 0, .05); HOP.last = t;
+  const seat = c => x0 + c * (cw + gap) + cw / 2 - 40, baseY = cy - 2;
+  if (HOP.t < 1) {
+    HOP.t = Math.min(1, HOP.t + dtT / .55); const k = HOP.t, e = easeIO(k), dir = HOP.to > HOP.from ? 1 : -1;
+    const px = lerp(seat(HOP.from), seat(HOP.to), e), py = baseY - Math.sin(k * Math.PI) * 84;
+    if (Math.random() < .5) parts.push({ x: px, y: py - 12, vx: -dir * 30, vy: 20, life: 0, max: .4, size: 3, col: INK, grav: 300, drag: 0, glow: 0 });
+    drawTitlePostilla(px, py, 1.5, dir, true, k < .5 ? -300 : 300);
+    if (HOP.t >= 1) { HOP.land = 0; AU.sfx('land'); puff(px, baseY, 8, { ang: -Math.PI / 2, spread: 1.5, s0: 30, s1: 110, col: INK, z0: 1.5, z1: 3.5 }); }
+  } else {
+    HOP.land = Math.min(1, HOP.land + dtT / .28);
+    drawTitlePostilla(seat(SEL), baseY + (HOP.land >= 1 ? Math.sin(t * 2) * 1.5 - 6 : 0), 1.5, HOP.to >= HOP.from ? 1 : -1, false, 0, HOP.land < 1 ? Math.sin(HOP.land * Math.PI) : 0);
+  }
+  updParts(dtT); drawParts();
+  // frecce per cambiare libro
+  ctx.font = '30px ' + SERIF; ctx.textAlign = 'center';
+  if (SEL > 0) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('‹', x0 - 34, cy + ch / 2 + 8); BTN.push({ x: x0 - 64, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL - 1) }); }
+  if (SEL < CHAPTERS.length - 1) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('›', x0 + CHAPTERS.length * (cw + gap) - gap + 34, cy + ch / 2 + 8); BTN.push({ x: x0 + CHAPTERS.length * (cw + gap) - gap + 4, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL + 1) }); }
+  ctx.textAlign = 'left';
   const B = SAVE.books[SEL], open = unlocked(SEL), cont = B.li > 0 && !B.done;
   if (!open) { ctx.textAlign = 'center'; ctx.font = 'italic 19px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.7)'; ctx.fillText('Questo libro è ancora chiuso.', W / 2, 446); ctx.textAlign = 'left'; }
   else if (cont) {
@@ -2095,7 +2121,7 @@ function drawTitle() {
   }
   button(W - 172, 418, 144, 44, 'Registro', () => { G.reg = true; }, false);
   ctx.textAlign = 'center'; ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)';
-  ctx.fillText(IS_TOUCH ? '◀ ▶ muovi  ·  ▲ salta (due volte)  ·  ✎ sbianchetto' : '← → muovi  ·  SPAZIO salta (due volte)  ·  X sbianchetto  ·  P pausa  ·  M audio', W / 2, 526);
+  ctx.fillText(IS_TOUCH ? '◀ ▶ scegli il libro  ·  in gioco: ▲ salta (due volte), ✎ sbianchetto' : '← → scegli il libro  ·  in gioco: SPAZIO salta (due volte), X sbianchetto, P pausa, M audio', W / 2, 526);
   ctx.textAlign = 'left';
   if (G.reg) { ctx.fillStyle = 'rgba(12,7,4,.86)'; ctx.fillRect(0, 0, W, H); BTN = []; drawRegister(84); button(W / 2 - 100, 440, 200, 44, 'Chiudi', () => { G.reg = false; }, true); }
 }
@@ -2103,7 +2129,7 @@ function updTitle() {
   if (G.turn) return;
   if (hitButtons()) return;
   if (G.reg) { if (inp.startP) G.reg = false; return; }
-  if (keys.ArrowLeft && SEL > 0) { SEL--; keys.ArrowLeft = false; } if (keys.ArrowRight && SEL < CHAPTERS.length - 1) { SEL++; keys.ArrowRight = false; }
+  const nav = (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (nav && nav !== prevNav) setSel(SEL + nav); prevNav = nav;
   if (inp.startP && unlocked(SEL)) { const B = SAVE.books[SEL]; startGame(SEL, B.li > 0 && !B.done ? B.li : 0); }
 }
 
