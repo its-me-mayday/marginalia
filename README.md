@@ -34,6 +34,10 @@ Regole: commit in formato Conventional Commits; a ogni modifica del gioco si agg
 
 In `src/levels.js` aggiungi un oggetto a `CHAPTERS` con la sua lista di funzioni-livello, costruite con `builder()` come quelle esistenti.
 
+## Licenza
+
+Codice e testi: licenza MIT (vedi `LICENSE`).
+
 ## Crediti
 
 Font: EB Garamond (SIL Open Font License 1.1, vedi `fonts/`).
