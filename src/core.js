@@ -220,6 +220,7 @@ const AU = {
       case 'crack': this.noise(.12, .2, 'highpass', 5000, 7000, 2); this.tone(2400, .1, 'square', .03); this.noise(.1, .16, 'highpass', 4200, 6400, 2, this.ctx.currentTime + .22); break;
       case 'swim': this.noise(.16, .1, 'lowpass', 700, 250, 1); this.tone(300, .12, 'sine', .04, null, null, 520); break;
       case 'growl': this.tone(70, .7, 'sawtooth', .12, null, null, 48); this.noise(.6, .1, 'lowpass', 300, 120, 2); break;
+      case 'whistle': this.tone(1480, 1, 'square', .05, null, null, 1380); this.tone(1976, 1, 'sine', .05, null, null, 1860); this.noise(1, .08, 'bandpass', 3000, 2600, 3); break;
       case 'win': [293.66, 440, 587.33, 880].forEach((f, i) => this.tone(f, 2.2, 'sine', .08, this.echo, this.ctx.currentTime + i * .22)); break;
     }
   },
@@ -241,6 +242,7 @@ const AU = {
         if (M.pad) for (const n of ch) this.pad(hz(M.root + n), dur, M.pad, w);
         this.tone(hz(M.root + ch[0] - 12), dur * 1.1, 'sine', M.bass, this.music, w);
       }
+      if (M.walk) { const wn = [ch[0], ch[1], ch[2], ch[1] + (inBar % 3 ? 0 : 2)][inBar % 4] - 12; this.tone(hz(M.root + wn), M.st * 1.5, 'sine', .11, this.music, w); this.tone(hz(M.root + wn + 12), .12, 'triangle', .03, this.music, w); if (inBar % 2) this.noise(.05, .025, 'highpass', 7000, 9000, 1, w); }
       if (M.ost && inBar % 2 === 0) { const g = this.tone(hz(M.root + ch[0] - 12 + (inBar === 6 ? 7 : 0)), M.st * 1.6, 'sawtooth', M.ost, this.music, w); }
       // tema: sette note, ogni quattro battute
       const motifBar = this.bar % 4 === (M.motif || 0);
@@ -278,7 +280,16 @@ const MUSIC = [
   { root: 58, st: .4, prog: 7, dens: .45, pad: .04, bass: .08, style: 'box', dec: 3 },           // Il bosco allagato
   { root: 64, st: .3, prog: 5, dens: .7, pad: .02, bass: .07, style: 'pluck', motif: 1 },        // Le rime
   { root: 55, st: .48, prog: 7, dens: .35, pad: .034, bass: .09, style: 'box', motif: 3 },       // La lanterna
-  { root: 52, st: .22, prog: 6, dens: .85, pad: .025, bass: .1, ost: .03, style: 'pluck', sour: true } // Il Narratore
+  { root: 52, st: .22, prog: 6, dens: .85, pad: .025, bass: .1, ost: .03, style: 'pluck', sour: true }, // Il Narratore
+  // libro terzo: contrabbasso che cammina, piano rado, spazzole
+  { root: 50, st: .36, prog: 0, dens: .3, pad: .02, bass: 0, walk: true, dec: 1.6 },               // La stazione
+  { root: 48, st: .42, prog: 4, dens: .25, pad: .026, bass: 0, walk: true, dec: 2, sour: true },   // La scena del delitto
+  { root: 53, st: .24, prog: 1, dens: .5, pad: .016, bass: 0, walk: true, dec: 1 },                // Sul tetto del treno
+  { root: 50, st: .4, prog: 2, dens: .32, pad: .02, bass: 0, walk: true, dec: 1.8, motif: 3 },     // Gli interrogatori
+  { root: 46, st: .46, prog: 3, dens: .15, pad: .03, bass: 0, walk: true, dec: 2.4, sour: true },  // Il pedinamento
+  { root: 57, st: .3, prog: 1, dens: .6, pad: .018, bass: .06, style: 'box', motif: 1 },           // Il palazzo mentale
+  { root: 49, st: .2, prog: 3, dens: .6, pad: .02, bass: 0, walk: true, ost: .02, dec: .9 },       // Le prove contro Postilla
+  { root: 45, st: .22, prog: 4, dens: .7, pad: .026, bass: 0, walk: true, ost: .03, sour: true, dec: 1 } // Il vagone ristorante
 ];
 
 /* ---------- particelle ---------- */

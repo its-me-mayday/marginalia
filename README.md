@@ -12,6 +12,7 @@ Le piattaforme sono le righe del testo. Ogni libro è un genere, e ogni livello 
 
 - **Libro I — «La casa di Vetrano»**: un diario gotico. Otto livelli e un boss: il diario che mente al buio, le righe che scappano, le piattaforme che esistono solo sul battito, la pagina letta al contrario, le lettere giganti, lo specchio a due versioni.
 - **Libro II — «C'era una volta, forse»**: una fiaba illustrata, che si apre solo a primo libro finito. Sette livelli e un boss: le parole da ricalcare (rana, piuma, sasso), le parole scambiate, il lupo che non va svegliato, il giorno e la notte che si alternano, il bosco allagato, le rime, la lanterna di Brina.
+- **Libro III — «Chi ha strappato l'ultima pagina»**: un giallo su un treno di notte, che si apre a secondo libro finito. Sette livelli e un boss: le ombre dei lampioni, gli omissis, il tetto del treno, gli interrogatori a tre versioni, il pedinamento nell'ombra, il palazzo mentale, la fuga senza sbianchetto.
 
 Gli asterischi a matita nascondono le note del lettore che ha dato origine a tutto. In pausa c'è il registro del lettore, con punti e statistiche di ogni libro. I progressi si salvano nel browser.
 

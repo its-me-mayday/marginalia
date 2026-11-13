@@ -97,6 +97,32 @@ Livelli:
 
 Finale: «E vissero felici e contenti. Forse.» Il viandante chiude il libro dall'interno e si chiede se una storia che finisce come vuole lui sia ancora la storia di qualcun altro.
 
+### Terzo libro: «Chi ha strappato l'ultima pagina»
+
+Si sblocca a secondo libro finito. Un giallo: l'impianto è alla Agatha Christie (un treno di notte, un cerchio chiuso di sospettati, la riunione finale), l'investigatore è alla Sherlock Holmes in versione tipografica. Omaggi, non personaggi altrui.
+
+- **Storia**: la vittima è il finale del libro, strappato via. Indaga il signor Corsivo, alto e deduttivo, con l'assistente dottor Tondo, lento e solido. I sospettati vengono dai primi due libri: il lupo, Brina, l'ospite di Vetrano, il viandante, il Narratore. A metà le prove portano a Postilla, che da investigatrice diventa indagata.
+- **Soluzione**: sono stati tutti. Chi ci ha dormito sopra, chi ha piegato un angolo, chi ha scritto a margine, chi ha corretto: ogni lettura strappa via qualcosa. E la pagina ritrovata è bianca: il finale non era mai stato scritto.
+- **Il Refuso censura**: barre nere di omissis su nomi e prove. Lo sbianchetto le toglie.
+- **Stile**: notte, pioggia, lampioni; testo dattiloscritto chiaro su fondo scuro, un solo colore, il rosso. Postilla, nera su nero, ha un alone chiaro.
+- **Musica**: contrabbasso che cammina, pianoforte rado, spazzole.
+- **Potere nuovo, l'ombra**: Postilla è inchiostro, quindi nelle zone d'ombra non si vede.
+
+Livelli:
+
+1. **La stazione** — le ombre dei lampioni sono piattaforme che dondolano con la luce e ti trasportano.
+2. **La scena del delitto** — righe coperte da omissis che non reggono finché non le scopri; cinque indizi da raccogliere.
+3. **Sul tetto del treno** — il vento spinge indietro i salti; al fischio arriva la galleria e chi è in aria muore.
+4. **Gli interrogatori** — per ogni sospettato tre versioni della risposta, una sopra l'altra: regge solo quella coerente con l'indizio.
+5. **Il pedinamento** — la torcia del controllore spazza il corridoio; ci si sposta da un'ombra all'altra. Ogni fascio riposa su un'ombra a ciascun estremo, così l'attraversamento è sempre possibile.
+6. **Il palazzo mentale** — sfondo bianco da schema: ogni deduzione fa comparire la successiva per pochi secondi.
+7. **Le prove contro Postilla** — le sequestrano lo sbianchetto e fugge, inseguita, potendo solo saltare.
+8. **Tutti nel vagone ristorante** (boss) — l'accusa di Corsivo: nove omissis da scoprire. Nella seconda fase entra la torcia, nella terza il vento della galleria.
+
+### Quarto libro (da costruire): «Manuale del passeggero interstellare smarrito»
+
+Fantascienza comica nello spirito di Douglas Adams, con invenzioni proprie. Il libro è un manuale con voci, avvertenze e note a piè di pagina; il narratore è impassibile e sbaglia quasi tutto. La Biblioteca è un'astronave-archivio che ha sbagliato strada per colpa di MARGINE, navigatore permaloso. Il Refuso **rimanda**: «vedi alla voce…», in cerchio. Potere nuovo, il **rimando**: Postilla entra in un asterisco e sbuca dal suo gemello a piè di pagina. Livelli previsti: Avvertenze, Gravità facoltativa, L'ufficio moduli, Note a piè di pagina, Il motore a coincidenze, Il traduttore letterale, Vedi alla voce, Il Servizio Clienti dell'Universo. Filo: la voce «Finale» rimanda a «Lettore», che rimanda a «Finale».
+
 ### Punti e registro del lettore
 
 - Punti: 100 per annotazione, 50 per parola corretta, 20 per parola rimessa a posto, 200 per livello finito, 1200 per libro finito, 40 per ogni caduta in meno di 15; ogni caduta toglie 10.
@@ -138,3 +164,6 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 13 | Brina ridisegnata: più dettagli, molte animazioni, lanterna e trecce a molla. | Richiesta dell'autore: era poco dettagliata. |
 | 14 | La forma «sasso» pesa meno e si esaurisce dopo aver sfondato i rovi. | In verifica, da sasso il salto successivo era impossibile. |
 | 15 | Segnalibro a nastro sulle copertine e salto animato di Postilla da un libro all'altro nella biblioteca. | Richiesta dell'autore. |
+| 16 | Terzo libro, il giallo «Chi ha strappato l'ultima pagina»: treno, Corsivo e Tondo, Postilla indagata, soluzione «sono stati tutti». | Richiesta dell'autore: noir con sapore di Sherlock Holmes e Agatha Christie. |
+| 17 | Nel pedinamento ogni fascio di torcia riposa su un'ombra ai due estremi. | In verifica, con fasci a metà corridoio l'attraversamento era impossibile. |
+| 18 | Quarto libro progettato come fantascienza comica alla Douglas Adams, al posto della versione seria. | Scelta dell'autore. |

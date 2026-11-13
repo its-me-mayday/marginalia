@@ -52,7 +52,7 @@ function startEnding() {
   B.done = true; B.li = 0; B.max = CHAPTERS[G.chapter].levels.length - 1;
   if (s.full && (!B.best || s.points > B.best.points)) B.best = { points: s.points, marks: s.marks, time: Math.round(s.time), deaths: s.deaths };
   writeSave();
-  startTurn(() => { G.state = 'ending'; G.end = { t: 0, page: 0 }; AU.setMood(G.chapter === 1 ? 9 : 0); parts.length = 0; });
+  startTurn(() => { G.state = 'ending'; G.end = { t: 0, page: 0 }; AU.setMood([0, 9, 17][G.chapter] || 0); parts.length = 0; });
 }
 function toTitle() { startTurn(() => { G.state = 'title'; G.paused = false; SEL = Math.min(G.chapter, CHAPTERS.length - 1); AU.setMood(0); }); }
 
@@ -108,14 +108,16 @@ function drawCover(c, x, y, w, h, sel) {
   ctx.font = 'italic 500 25px ' + SERIF;
   const words = C.title.split(' '), lines = []; let cur = '';
   for (const wd of words) { if (cur && ctx.measureText(cur + ' ' + wd).width > w - 60) { lines.push(cur); cur = wd; } else cur = cur ? cur + ' ' + wd : wd; } lines.push(cur);
-  lines.forEach((l, i) => ctx.fillText(l, 6, -44 + i * 30 - (lines.length - 1) * 10));
+  if (lines.length > 2) ctx.font = 'italic 500 22px ' + SERIF;
+  lines.forEach((l, i) => ctx.fillText(l, 6, (lines.length > 2 ? -56 + i * 25 : -44 + i * 30 - (lines.length - 1) * 10)));
   if (open) {
     ctx.font = 'italic 15px ' + SERIF; ctx.globalAlpha = .9;
     ctx.fillText(B.done ? 'letto fino in fondo' : B.max > 0 ? 'segnalibro: ' + ROMAN[B.li] : 'mai aperto', 6, h / 2 - 48);
     if (B.best) ctx.fillText(B.best.points + ' punti', 6, h / 2 - 28);
     ctx.globalAlpha = .4; ctx.fillStyle = C.cover[1];
     if (c === 0) { ctx.beginPath(); ctx.moveTo(-12, 44); ctx.lineTo(-12, 20); ctx.quadraticCurveTo(6, -4, 24, 20); ctx.lineTo(24, 44); ctx.closePath(); ctx.fill(); }
-    else { ctx.beginPath(); ctx.arc(6, 30, 15, 0, TAU); ctx.fill(); }
+    else if (c === 1) { ctx.beginPath(); ctx.arc(6, 30, 15, 0, TAU); ctx.fill(); }
+    else { ctx.fillRect(-16, 44, 44, 6); }
     ctx.globalAlpha = 1;
   } else {
     ctx.fillStyle = DEEP; blobPath(6, 26, 34, 26, t, 5, .2); ctx.fill();
@@ -208,7 +210,7 @@ function drawRegister(y0) {
 
 /* ---------------- HUD ---------------- */
 function drawHUD() {
-  const L = G.L, t = G.t, dark = THEMES[L.theme].dark || G.bossDark;
+  const L = G.L, t = G.t, dark = THEMES[L.theme].dark || G.bossDark || (THEMES[L.theme].noir && !THEMES[L.theme].lightBg);
   ctx.textBaseline = 'alphabetic';
   ctx.font = 'italic 500 17px ' + SERIF; ctx.fillStyle = dark ? 'rgba(241,230,204,.8)' : 'rgba(40,28,16,.75)'; ctx.textAlign = 'left';
   ctx.fillText(ROMAN[G.li] + '. ' + L.name, 18, 26);
@@ -220,7 +222,8 @@ function drawHUD() {
   ctx.fillStyle = k >= 1 ? '#fffaf0' : 'rgba(255,250,240,.55)'; rr(-15, -8, 30 * k, 16, 4); ctx.fill();
   ctx.fillStyle = '#c96a5a'; rr(-15, -8, 8, 16, 3); ctx.fill();
   ctx.restore();
-  if (k >= 1) { ctx.globalAlpha = .5 + Math.sin(t * 5) * .3; ctx.strokeStyle = '#fffaf0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(ex, ey, 21, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
+  if (L.noErase) { ctx.strokeStyle = '#d8433a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ex - 16, ey - 14); ctx.lineTo(ex + 16, ey + 14); ctx.moveTo(ex + 16, ey - 14); ctx.lineTo(ex - 16, ey + 14); ctx.stroke(); }
+  else if (k >= 1) { ctx.globalAlpha = .5 + Math.sin(t * 5) * .3; ctx.strokeStyle = '#fffaf0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(ex, ey, 21, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
   if (P.light > 0) { const w = 90 * clamp(P.light / 7.5, 0, 1); ctx.fillStyle = 'rgba(30,20,12,.4)'; rr(266, 26, 94, 10, 5); ctx.fill(); ctx.fillStyle = '#ffb347'; rr(268, 28, Math.max(4, w), 6, 3); ctx.fill(); }
   if (L.auto !== undefined && P.x > L.auto) { const P0 = L.autoPeriod || 2.7, kk = clamp(G.autoT / P0, 0, 1); ctx.fillStyle = 'rgba(30,20,40,.3)'; rr(W / 2 - 60, 528, 120, 5, 2); ctx.fill(); ctx.fillStyle = G.autoT < .7 ? '#b0412f' : '#4a4660'; rr(W / 2 - 60, 528, Math.max(3, 120 * kk), 5, 2); ctx.fill(); }
   if (L.mirror) { const lb = L.labels || ['— ciò che è scritto —', '— ciò che è vero —']; ctx.font = 'italic 16px ' + SERIF; ctx.textAlign = 'center'; ctx.fillStyle = G.layer === 1 ? INK : (L.labels ? '#f1e6cc' : '#4a4660'); ctx.fillText(lb[G.layer - 1], W / 2, 520); ctx.textAlign = 'left'; }

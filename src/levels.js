@@ -587,3 +587,198 @@ CHAPTERS.push({
   ],
   shelf: ['Due libri riparati. O riscritti.', 'Tra gli scaffali, il lettore e la sua nota cercano il prossimo.']
 });
+
+/* ================= LIBRO TERZO — Chi ha strappato l'ultima pagina ================= */
+Object.assign(THEMES, {
+  rain:   { p0: '#2c3342', p1: '#11141c', decor: 'rain', noir: true },
+  car:    { p0: '#3b3027', p1: '#16110d', decor: 'car', noir: true },
+  roof:   { p0: '#3a4254', p1: '#0e1117', decor: 'roof', noir: true },
+  mind:   { p0: '#f6f6f2', p1: '#d7dce4', decor: 'mind', noir: true, lightBg: true },
+  accuse: { p0: '#3d1f23', p1: '#12090b', decor: 'rain', noir: true },
+  dining: { p0: '#352a20', p1: '#120d09', decor: 'car', noir: true }
+});
+Object.assign(HINTS, {
+  sway:    ['le ombre dondolano con i lampioni: aspetta che si avvicinino', 'le ombre dondolano con i lampioni: aspetta che si avvicinino'],
+  omissis: ['X — togli l\'omissis', '✎ — togli l\'omissis'],
+  tunnel:  ['al fischio: piedi sul tetto, niente salti', 'al fischio: piedi sul tetto, niente salti'],
+  shade:   ['nell\'ombra Postilla non si vede', 'nell\'ombra Postilla non si vede'],
+  tri:     ['una sola versione regge', 'una sola versione regge']
+});
+function nbuilder(L, x, y) {
+  const b = fbuilder(L, x, y);
+  L.shades = L.shades || []; L.beams = L.beams || [];
+  b.sway = (text, gap, dy, amp, sp, ph) => b.ln(text, gap, dy, { kind: 'sway', amp: amp || 50, sp: sp || 1.5, ph: ph || 0, w: Math.max(120, Math.round(text.length * 9.2 + 30)) });
+  b.om = (good, gap, dy) => b.ln('█'.repeat(Math.max(5, good.length - 2)), gap, dy, { kind: 'swap', good, omissis: true, w: Math.max(120, Math.round(good.length * 9.2 + 30)) });
+  b.shade = (fx, w) => { const p = b.last; L.shades.push({ x: p.x + p.w * fx - w / 2, w, y: p.y }); return b; };
+  b.beam = (fa, fb, sp, ph) => { const p = b.last; L.beams.push({ x0: p.x + p.w * fa, x1: p.x + p.w * fb, sp: sp || 1.1, ph: ph || 0, w: 110, y: p.y }); return b; };
+  // interrogatorio: tre versioni, una sola regge. pos = -1 sopra, 0 in mezzo, 1 sotto
+  b.tri = (truth, lies, pos) => {
+    const offs = [-72, 0, 72], ty = offs[pos + 1], rest = offs.filter(o => o !== ty);
+    b.side(lies[0], 120, rest[0], { kind: 'fake' }); b.side(lies[1], 120, rest[1], { kind: 'fake' });
+    return b.ln(truth, 120, ty);
+  };
+  return b;
+}
+function nr1() {
+  const L = mkLevel({ name: 'La stazione', date: 'ore 23:31', theme: 'rain', mood: 17 });
+  nbuilder(L, 120, 400)
+    .ln('Pioveva sulla stazione di Margine Centrale.').spawn()
+    .ln('Il rapido delle 23:40 aspettava al binario tre.', 100, -20).mark()
+    .ln('Sotto i lampioni le ombre andavano e venivano.', 110, 30).say('Le ombre dondolano con la luce. Reggono, finché restano ombre.').hint('sway', 40, -100)
+    .sway('un\'ombra', 120, -20, 50, 1.4, 0).sway('un\'altra', 120, -30, 50, 1.6, 2)
+    .ln('Qualcuno aveva fretta di partire.', 110, 40).check()
+    .sway('lunga', 120, -40, 55, 1.3, 1).sway('storta', 120, 30, 55, 1.8, 3).sway('sottile', 120, -40, 55, 1.5, 5).mark()
+    .ln('Sul marciapiede, un biglietto strappato a metà.', 110, 60).check().bug('bigiletto', 'biglietto', 60)
+    .ln('Un uomo alto, col bavero alzato, mi guardò passare.', 120, -30).npc(.8, '«Corsivo», si è presentato. «E lei è già nei miei appunti.»')
+    .sway('la sua', 120, -30, 60, 1.2, 0).sway('la mia', 120, 0, 60, 1.9, 2).mark()
+    .ln('Il capotreno fischiò.', 110, 40).check()
+    .sway('l\'ultima', 120, -30, 60, 2.1, 4).mark()
+    .ln('Salii per ultima. Lo ricordo bene. O così ho dichiarato.', 110, 30).exit();
+  return L;
+}
+function nr2() {
+  const L = mkLevel({ name: 'La scena del delitto', date: 'ore 23:58', theme: 'car', mood: 18 });
+  nbuilder(L, 120, 400)
+    .ln('Vagone letto numero sette. La porta era socchiusa.').spawn()
+    .ln('Sul tavolino, un libro aperto in fondo.', 110, -20).say('L\'ultima pagina non c\'era. Qualcuno l\'aveva strappata.')
+    .om('strappata di netto', 120, 0).hint('omissis', -160, -100)
+    .ln('Il dottor Tondo prendeva appunti, lentamente.', 120, 0).check().npc(.8, '«Niente impronte», ha detto Tondo. «Solo inchiostro. Curioso, no?»')
+    .ln('Primo indizio: un pelo grigio sul cuscino.', 120, -30).mark()
+    .om('nessuno ha visto', 110, -40).om('nessuno ha sentito', 100, 40)
+    .ln('Secondo indizio: un filo di lana gialla.', 120, 30).check().mark().wall('OMISSIS', .85)
+    .ln('Terzo indizio: una goccia di cera.', 120, -30).mark().bug('ceera', 'cera', 60)
+    .om('il nome del', 110, -40).om('proprietario', 100, -30)
+    .ln('Quarto indizio: grafite sul margine.', 120, 50).check().mark().stain(.75, 50)
+    .ln('Corsivo si chinò con la lente.', 120, -20).wall('RISERVATO', .5)
+    .om('e sorrise', 110, -40)
+    .ln('Quinto indizio: una goccia d\'inchiostro, ancora fresca.', 120, 40).mark()
+    .ln('Cinque indizi, cinque passeggeri. E io ero la sesta.', 120, -20).exit();
+  return L;
+}
+function nr3() {
+  const L = mkLevel({ name: 'Sul tetto del treno', date: 'ore 00:20', theme: 'roof', mood: 19, wind: -70, tunnel: { t: 0 } });
+  nbuilder(L, 120, 380)
+    .ln('Il rapido correva nella pioggia, e io sul tetto.').spawn().say('Al fischio arriva la galleria: piedi sul tetto, niente salti.').hint('tunnel', 60, -100)
+    .ln('Il vento spingeva indietro ogni frase.', 90, 0).mark()
+    .ln('Vagone ristorante,', 90, -20).ln('vagone letto,', 90, 20).bug('lteto', 'letto', 60)
+    .ln('Da quassù si vedeva chi cambiava scompartimento.', 90, 0).check()
+    .ln('Una mantellina gialla.', 90, -30).ln('Un bavero alzato.', 90, 30).mark()
+    .ln('Un\'ombra a quattro zampe.', 90, 0).stain(.5, 46)
+    .ln('Poi il fischio, e il buio della galleria.', 90, 0).check()
+    .ln('Nel buio qualcuno camminava', 90, -30).ln('sopra di me.', 90, -30).mark()
+    .ln('O ero io', 90, 30).ln('sopra di lui.', 90, 30).bug('loui', 'lui', 50)
+    .ln('Quando tornò la luce, il tetto era vuoto.', 90, 0).check().mark()
+    .ln('Scesi dal lucernario del vagone sette.', 90, 0).exit();
+  return L;
+}
+function nr4() {
+  const L = mkLevel({ name: 'Gli interrogatori', date: 'ore 01:05', theme: 'car', mood: 20 });
+  nbuilder(L, 120, 400)
+    .ln('Corsivo interrogò i passeggeri uno alla volta.').spawn().say('Tre versioni per ogni risposta. Regge solo quella che combacia con gli indizi.')
+    .ln('Il lupo aveva sonno, e un pelo grigio sul cuscino.', 110, 0).hint('tri', 60, -110)
+    .tri('«Dormivo nel vagone letto.»', ['«Ero al ristorante.»', '«Non ho mai preso un treno.»'], 0)
+    .ln('Corsivo annotò: «Dice il vero. Ma dormiva sopra il libro.»', 120, 0).check().mark()
+    .ln('Brina aveva perso un filo dalla mantellina gialla.', 120, 0)
+    .tri('«Sono entrata a guardare le figure.»', ['«Io sono vestita di blu.»', '«Non sono mai stata lì.»'], -1)
+    .ln('Annotò: «Ha sfogliato. E ha piegato un angolo.»', 120, 72).check().mark()
+    .ln('L\'ospite di Vetrano profumava di cera.', 120, 0)
+    .tri('«Cercavo come finiva la mia storia.»', ['«Viaggio senza candele.»', '«Io non ho una storia.»'], 1)
+    .ln('Annotò: «Ha letto la fine prima dell\'inizio.»', 120, -72).check()
+    .ln('Il viandante aveva le dita grigie di grafite.', 120, 0)
+    .tri('«Ho scritto a margine. Tante volte.»', ['«La matita non è mia.»', '«Non tocco mai i libri.»'], -1)
+    .ln('Annotò: «Ha aggiunto. Che è un altro modo di togliere.»', 120, 72).check().mark()
+    .ln('Il Narratore sorrideva.', 120, 0)
+    .tri('«L\'ho raccontata diversa ogni sera.»', ['«L\'ho sempre letta uguale.»', '«Non la conosco.»'], 0)
+    .ln('Poi Corsivo si voltò verso di me.', 120, 0).check().mark()
+    .ln('«E lei, signorina? La goccia d\'inchiostro è sua.»', 120, -20).exit();
+  return L;
+}
+function nr5() {
+  const L = mkLevel({ name: 'Il pedinamento', date: 'ore 01:40', theme: 'rain', mood: 21 });
+  nbuilder(L, 120, 400)
+    .ln('Qualcuno lasciò lo scompartimento in punta di piedi.').spawn().shade(.85, 110).say('Postilla è inchiostro: nell\'ombra non si vede. La torcia del controllore, invece, vede tutto.').hint('shade', 120, -100)
+    .ln('Lo seguii lungo il corridoio, da un\'ombra all\'altra, senza fare rumore.', 80, 0).shade(.08, 100).shade(.5, 100).shade(.92, 100).beam(.08, .92, 1.0, 0).mark(.3)
+    .ln('Il controllore passava con la torcia, avanti e indietro, avanti e indietro.', 80, 0).shade(.08, 100).shade(.5, 100).shade(.92, 100).beam(.08, .92, 1.25, 1).check()
+    .ln('Chi seguivo si fermò davanti al vagone sette e si guardò alle spalle.', 80, -30).shade(.08, 100).shade(.5, 100).shade(.92, 100).beam(.08, .92, 1.4, 2).mark(.7)
+    .ln('Io non c\'ero. Cioè: c\'ero, ma ero dello stesso colore del buio.', 80, 30).shade(.08, 100).shade(.5, 140).shade(.92, 100).beam(.08, .5, 1.5, 0).beam(.5, .92, 1.5, 3.14).check()
+    .ln('Entrò. Uscì dopo un minuto con qualcosa sotto il cappotto.', 80, 0).shade(.08, 100).shade(.36, 90).shade(.64, 90).shade(.92, 100).beam(.08, .92, 1.6, 1).mark(.5)
+    .ln('Lo seguii fino in fondo al treno, dove finiscono i vagoni e comincia la notte.', 80, -20).shade(.08, 100).shade(.36, 110).shade(.64, 110).shade(.94, 100).beam(.08, .36, 1.6, 0).beam(.64, .94, 1.3, 2).check().mark(.5)
+    .ln('Si voltò. Aveva la mia faccia. Cioè: non ne aveva nessuna, come me.', 80, 0).exit();
+  return L;
+}
+function nr6() {
+  const L = mkLevel({ name: 'Il palazzo mentale', date: 'ore 02:15', theme: 'mind', mood: 22 });
+  nbuilder(L, 120, 440)
+    .ln('Corsivo chiuse gli occhi. «Ricostruiamo.»').spawn().say('Ogni deduzione poggia sulla precedente. E non resta in piedi a lungo.')
+    .ln('Un pelo grigio:', 110, -20).rev('a')
+    .rh('il lupo dormiva lì.', 'a', 110, -50, 'b').rh('Ma chi dorme non strappa.', 'b', 100, -50).mark()
+    .ln('Un filo giallo:', 110, -30).check().rev('c')
+    .rh('la bambina ha sfogliato.', 'c', 110, -50, 'd').rh('Ma chi sfoglia non ruba.', 'd', 100, -50, 'e').rh('Piega soltanto.', 'e', 100, 40).mark()
+    .ln('Una goccia di cera:', 110, -30).check().rev('f')
+    .rh('l\'ospite ha letto la fine.', 'f', 110, -50, 'g').rh('Ma leggere non è reato.', 'g', 100, -50)
+    .sway('forse', 120, -30, 50, 1.5, 0).sway('quasi', 120, -30, 50, 1.9, 2).mark()
+    .ln('Grafite sul margine:', 110, 40).check().rev('h')
+    .rh('il viandante ha scritto.', 'h', 110, -50, 'i').rh('E chi scrive a margine', 'i', 100, -50, 'j').rh('cambia il libro di tutti.', 'j', 100, 40).mark()
+    .ln('«Restava una goccia d\'inchiostro.»', 110, -30).check()
+    .ln('«E l\'inchiostro, signori, cammina.»', 120, -30).exit();
+  return L;
+}
+function nr7() {
+  const L = mkLevel({ name: 'Le prove contro Postilla', date: 'ore 02:50', theme: 'accuse', mood: 23, chase: true, noErase: true });
+  nbuilder(L, 120, 400)
+    .ln('«Lei cancella», disse Corsivo. «È il suo mestiere.»').spawn().say('Ti hanno sequestrato lo sbianchetto. Corri.')
+    .ln('«Dove passa lei, il testo cambia.»', 100, -20).mark()
+    .ln('«Ha corretto un diario gotico.»', 100, -30).bug('gotcio', 'gotico', 60)
+    .ln('«Ha riscritto una fiaba.»', 100, 30)
+    .ln('«E adesso manca una pagina.»', 100, 30).check().stain(.55, 46)
+    .ln('Non avevo un alibi.', 100, -40).ln('Non avevo lo sbianchetto.', 100, -40).mark()
+    .ln('Avevo solo le gambe.', 100, 40).bug('gmabe', 'gambe', 70)
+    .ln('Corsi per tutto il treno,', 100, 30).check()
+    .ln('vagone dopo vagone,', 100, -30).ln('accusa dopo accusa,', 100, -30).stain(.5, 40).ln('finché il treno finì.', 100, 40).mark()
+    .ln('«È stata lei?», chiese Tondo.', 100, 30).check().bug('letti', 'lei', 60)
+    .ln('Mi fermai.', 100, -30).ln('Perché non lo sapevo.', 100, -30).mark()
+    .ln('«Portateli tutti nel vagone ristorante», disse Corsivo.', 100, 50).exit();
+  return L;
+}
+const NR_TARGETS = [
+  ['Il lupo è ████████', 'Il lupo ci ha dormito sopra', 235, 322],
+  ['Brina è ████████', 'Brina ha piegato un angolo', 725, 322],
+  ['L\'ospite è ████████', 'L\'ospite cercava la sua fine', 480, 236],
+  ['Il viandante è ████████', 'Il viandante ha scritto a margine', 480, 432],
+  ['Il Narratore è ████████', 'Il Narratore la cambiava ogni sera', 235, 322],
+  ['Il Refuso è ████████', 'Il Refuso l\'ha coperta', 725, 322],
+  ['Postilla è ████████', 'Postilla l\'ha corretta', 480, 236],
+  ['Colpevole: ████████', 'Colpevoli: tutti', 150, 432],
+  ['L\'ultima pagina era ████████', 'L\'ultima pagina era bianca', 810, 432]
+];
+function nr8() {
+  const L = mkLevel({ name: 'Tutti nel vagone ristorante', date: '', theme: 'dining', mood: 24, boss: true, fixed: true, noirBoss: true, targets: NR_TARGETS,
+    bossSay: ['«Signori, il colpevole è in questo vagone.»', '«Controllore, faccia luce.»', '«Entriamo in galleria. Che peccato.»'] });
+  const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
+  Pl(60, 470, 840, 'Uno di voi ha strappato l\'ultima pagina. E io so chi. O almeno, so da dove cominciare.');
+  Pl(150, 360, 170, 'forse lei,'); Pl(640, 360, 170, 'forse lui,'); Pl(395, 270, 170, 'forse io.');
+  L.shades = [{ x: 150, w: 170, y: 470 }, { x: 640, w: 170, y: 470 }]; L.beams = [{ x0: 80, x1: 880, sp: .9, ph: 0, w: 120, y: 470 }];
+  L.spawn = { x: 110, y: 440 };
+  return L;
+}
+const NOTES3 = [
+  ['L\'ho comprato in stazione, a vent\'anni.', 'Mancava già l\'ultima pagina.', 'Ho chiesto il rimborso. Hanno riso.', 'L\'ho letto lo stesso. Tre volte.', 'La quarta ho preso la matita.'],
+  ['Sospetto del lupo.', 'No: di Brina.', 'No: di tutti.', 'E se il colpevole fosse chi legge?', 'Cioè io.'],
+  ['Letto in treno, appunto.', 'In galleria non si vede niente.', 'Ho perso il segno due volte.', 'Forse la pagina l\'ho persa io.'],
+  ['Tutti dicono mezza verità.', 'Anch\'io, quando annoto.', 'Sottolineo solo ciò che mi dà ragione.', 'Un lettore non è un testimone attendibile.'],
+  ['Seguire una storia è pedinarla.', 'Lei lo sa, e cambia strada.', 'Ho smesso di fidarmi delle mie note.', 'Questa compresa.'],
+  ['Ho provato a dedurre il finale.', 'Ne ho scritti undici.', 'Nessuno era quello giusto.', 'Forse non ce n\'è uno giusto.'],
+  ['Le prove portano alla mia matita.', 'Non mi difendo.', 'Ho corretto perché volevo bene al libro.', 'Non è un alibi. È il movente.'],
+  []
+];
+CHAPTERS.push({
+  id: 3, roman: 'III', title: 'Chi ha strappato l\'ultima pagina', levels: [nr1, nr2, nr3, nr4, nr5, nr6, nr7, nr8], notes: NOTES3,
+  secret: '✶  Ultima nota a margine: «La pagina bianca l\'ho lasciata io. Per te.»', cover: ['#1b2130', '#d8433a'],
+  ending: [
+    { left: true, mark: true, dur: 8.5, lines: [['Il rapido arrivò in orario, con sette passeggeri.', .4], ['Nessuno fu arrestato.', 1.8], ['L\'ultima pagina fu rimessa al suo posto. Bianca.', 3.2]] },
+    { dur: 4.2, big: true, lines: [['Tutti.', .3]] },
+    { dur: 8, lines: [['Chi ci dorme sopra, chi piega un angolo,', .3], ['chi scrive a margine, chi corregge:', 2.2], ['ogni lettura ne strappa un pezzo.', 4]] },
+    { dur: 9, lines: [['«E il finale?», chiese Tondo.', .3], ['«Non c\'è mai stato», disse Corsivo.', 2.4], ['«Ecco perché continuano a scriverlo.»', 4.4, VIOLET]] }
+  ],
+  shelf: ['Tre libri riparati. O riscritti. O soltanto letti.', 'Sullo scaffale più alto, un manuale si è messo a lampeggiare.']
+});
