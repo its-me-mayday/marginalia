@@ -199,3 +199,4 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 22 | Nel traduttore letterale le piattaforme di lancio sono corte; in «Vedi alla voce» i rimandi stanno in alto e ci si salta dentro. | In verifica: il lancio da lontano non arrivava, e i rimandi a terra non si potevano evitare. |
 | 23 | I tocchi brevissimi dei tasti non vanno più persi. | Emerso provando i prologhi. |
 | 24 | Modalità prova: apre tutti i libri e i livelli dal registro. | Per poter provare ogni livello senza rifare i precedenti. |
+| 25 | Nei livelli scuri (noir, spazio) le parole-nemico sono chiare su fondo rosso e le macchie hanno un bordo viola. | Segnalazione dell'autore: non si vedevano e si confondevano con lo sfondo. |

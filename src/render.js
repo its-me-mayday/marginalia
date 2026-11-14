@@ -193,6 +193,7 @@ function drawStain(s, ghost) {
   const t = G.t, cx = s.x + s.w / 2, cy = s.y + s.h / 2 + 2;
   ctx.globalAlpha = ghost ? .13 : 1;
   ctx.fillStyle = DEEP; blobPath(cx, cy, s.w / 2, s.h / 2 + 3, t, s.x * .01, .14); ctx.fill();
+  if (!ghost && THEMES[G.L.theme].noir && !THEMES[G.L.theme].lightBg) { ctx.strokeStyle = '#b98cff'; ctx.lineWidth = 2; ctx.stroke(); }
   if (!ghost) {
     const g = ctx.createRadialGradient(cx - s.w * .15, cy - 3, 1, cx, cy, s.w * .5);
     g.addColorStop(0, 'rgba(110,60,170,.55)'); g.addColorStop(1, 'rgba(60,30,100,0)');
@@ -239,13 +240,15 @@ function drawBug(b) {
   if (b.dead) return;
   ctx.font = 'bold 19px ' + SERIF; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
   const x0 = b.x - b.w / 2 + 5;
-  ctx.strokeStyle = DEEP; ctx.lineWidth = 1.6; ctx.beginPath();
+  const dk = THEMES[G.L.theme].noir && !THEMES[G.L.theme].lightBg;
+  if (dk) { ctx.fillStyle = 'rgba(216,67,58,.28)'; rr(b.x - b.w / 2 - 4, b.y - 6, b.w + 8, 26, 10); ctx.fill(); ctx.strokeStyle = '#ff7b6e'; ctx.lineWidth = 1.5; ctx.stroke(); }
+  ctx.strokeStyle = dk ? '#ff7b6e' : DEEP; ctx.lineWidth = 1.6; ctx.beginPath();
   for (let i = 0; i < 4; i++) { const lx = x0 + 6 + i * (b.w - 22) / 3, sw = Math.sin(t * 16 + i * 1.8) * 4; ctx.moveTo(lx, b.y + 14); ctx.lineTo(lx + sw, b.y + 22); }
   ctx.stroke();
   let x = x0;
   for (let i = 0; i < b.bad.length; i++) {
     const ch = b.bad[i], w = ctx.measureText(ch).width;
-    ctx.fillStyle = i % 2 ? '#2a1244' : DEEP;
+    ctx.fillStyle = dk ? (i % 2 ? '#ffd9d2' : '#ff9a8f') : (i % 2 ? '#2a1244' : DEEP);
     ctx.save(); ctx.translate(x, b.y + 15 + Math.sin(t * 9 + i * 1.3) * 2.2); ctx.rotate(Math.sin(t * 7 + i * 2) * .13); ctx.fillText(ch, 0, 0); ctx.restore();
     x += w * Math.min(1, (b.w - 10) / (b.bad.length * 9.6));
   }
