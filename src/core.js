@@ -42,7 +42,8 @@ const F_HAND = 'italic 500 19px ' + SERIF;
 const INK = '#17120e', GRAPHITE = '#7d7872', VIOLET = '#3b1c5e', DEEP = '#07040c';
 
 /* ---------- input ---------- */
-const keys = {};
+const keys = {}, kd = {}; // kd: tasti premuti dall'ultimo fotogramma, per non perdere i tocchi brevissimi
+const K = c => keys[c] || kd[c];
 const touch = { left: false, right: false, jump: false, erase: false };
 const inp = { left: false, right: false, jump: false, jumpP: false, erase: false, eraseP: false, startP: false, pauseP: false };
 let prevJ = false, prevE = false, prevS = false, prevPz = false;
@@ -50,7 +51,7 @@ let uiTap = null; // {x,y} in coordinate logiche, consumato dalla UI
 
 window.addEventListener('keydown', e => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
-  if (!e.repeat) { keys[e.code] = true; AU.unlock(); }
+  if (!e.repeat) { keys[e.code] = true; kd[e.code] = true; AU.unlock(); }
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; for (const k in touch) touch[k] = false; });
@@ -91,12 +92,13 @@ function pollInput() {
       if (b(9)) gs = true;
     }
   } catch (e) { /* gamepad non disponibile */ }
-  inp.left = !!(keys.ArrowLeft || keys.KeyA || touch.left || gl);
-  inp.right = !!(keys.ArrowRight || keys.KeyD || touch.right || gr);
-  const j = !!(keys.Space || keys.ArrowUp || keys.KeyW || keys.KeyZ || touch.jump || gj);
-  const er = !!(keys.KeyX || keys.ShiftLeft || keys.ShiftRight || keys.KeyK || touch.erase || ge);
-  const st = !!(keys.Enter || keys.Space || gj || gs);
-  const pz = !!(keys.KeyP || keys.Escape || gs);
+  inp.left = !!(K('ArrowLeft') || K('KeyA') || touch.left || gl);
+  inp.right = !!(K('ArrowRight') || K('KeyD') || touch.right || gr);
+  const j = !!(K('Space') || K('ArrowUp') || K('KeyW') || K('KeyZ') || touch.jump || gj);
+  const er = !!(K('KeyX') || K('ShiftLeft') || K('ShiftRight') || K('KeyK') || touch.erase || ge);
+  const st = !!(K('Enter') || K('Space') || gj || gs);
+  const pz = !!(K('KeyP') || K('Escape') || gs);
+  for (const c in kd) delete kd[c];
   // i fronti restano "agganciati" finché un passo di simulazione non li consuma
   inp.jumpP = inp.jumpP || (j && !prevJ); inp.jump = j; prevJ = j;
   inp.eraseP = inp.eraseP || (er && !prevE); inp.erase = er; prevE = er;
@@ -289,7 +291,16 @@ const MUSIC = [
   { root: 46, st: .46, prog: 3, dens: .15, pad: .03, bass: 0, walk: true, dec: 2.4, sour: true },  // Il pedinamento
   { root: 57, st: .3, prog: 1, dens: .6, pad: .018, bass: .06, style: 'box', motif: 1 },           // Il palazzo mentale
   { root: 49, st: .2, prog: 3, dens: .6, pad: .02, bass: 0, walk: true, ost: .02, dec: .9 },       // Le prove contro Postilla
-  { root: 45, st: .22, prog: 4, dens: .7, pad: .026, bass: 0, walk: true, ost: .03, sour: true, dec: 1 } // Il vagone ristorante
+  { root: 45, st: .22, prog: 4, dens: .7, pad: .026, bass: 0, walk: true, ost: .03, sour: true, dec: 1 }, // Il vagone ristorante
+  // libro quarto: sintetizzatori da sala d'attesa, allegri e un po' storti
+  { root: 60, st: .24, prog: 8, dens: .8, pad: .02, bass: .07, style: 'pluck', ost: .012 },           // Avvertenze
+  { root: 55, st: .5, prog: 5, dens: .35, pad: .04, bass: .08, style: 'box', dec: 3 },               // Gravità facoltativa
+  { root: 62, st: .26, prog: 6, dens: .85, pad: .016, bass: .07, style: 'pluck', sour: true },        // L'ufficio moduli
+  { root: 58, st: .3, prog: 8, dens: .6, pad: .02, bass: .07, style: 'box', motif: 2 },              // Note a piè di pagina
+  { root: 63, st: .22, prog: 7, dens: .8, pad: .02, bass: .08, style: 'pluck', ost: .016, sour: true },// Il motore a coincidenze
+  { root: 60, st: .27, prog: 5, dens: .75, pad: .018, bass: .07, style: 'box', motif: 0 },           // Il traduttore letterale
+  { root: 53, st: .4, prog: 6, dens: .4, pad: .034, bass: .08, style: 'box', dec: 2.4 },             // Vedi alla voce
+  { root: 57, st: .2, prog: 8, dens: .9, pad: .02, bass: .09, style: 'pluck', ost: .03 }             // Il Servizio Clienti
 ];
 
 /* ---------- particelle ---------- */

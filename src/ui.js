@@ -3,11 +3,11 @@
    ============================================================ */
 const SAVE_KEY = 'marginalia.v2';
 const newBook = () => ({ li: 0, max: 0, done: false, best: null });
-let SAVE = { books: CHAPTERS.map(newBook) };
+let SAVE = { books: CHAPTERS.map(newBook), pro: false };
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-    if (s && s.books) s.books.forEach((b, i) => { if (SAVE.books[i]) Object.assign(SAVE.books[i], b); });
+    if (s && s.books) { s.books.forEach((b, i) => { if (SAVE.books[i]) Object.assign(SAVE.books[i], b); }); SAVE.pro = !!s.pro; }
     else { // salvataggio della prima versione
       const o = JSON.parse(localStorage.getItem('marginalia.v1') || 'null');
       if (o && typeof o.li === 'number') Object.assign(SAVE.books[0], { li: o.li, max: o.max || 0, done: !!o.done });
@@ -40,7 +40,61 @@ function startTurn(fn) { G.turn = { t: 0, dur: 1.15, mid: false, fn }; AU.sfx('p
 function startGame(c, i) {
   if (!unlocked(c)) return;
   G.stats = { deaths: 0, time: 0, marks: 0, total: 0, points: 0, fixed: 0, full: false };
-  startTurn(() => { G.chapter = c; G.state = 'play'; G.paused = false; loadLevel(i); const B = SAVE.books[c]; B.li = i; B.max = Math.max(B.max, i); writeSave(); });
+  const go = () => { G.chapter = c; G.state = 'play'; G.paused = false; loadLevel(i); const B = SAVE.books[c]; B.li = i; B.max = Math.max(B.max, i); writeSave(); };
+  // dal primo livello: prima il prologo del libro, nel registro del suo genere
+  if (i === 0) startTurn(() => { G.chapter = c; AU.setMood(BOOK_MOOD[c] || 0); startIntro(CHAPTERS[c].intro, CHAPTERS[c].register, () => startTurn(go), CHAPTERS[c]); });
+  else startTurn(go);
+}
+const BOOK_MOOD = [0, 9, 17, 25];
+function startIntro(pages, style, then, C) { G.state = 'intro'; G.intro = { pages, style, then, t: 0, page: 0, C }; }
+function introReveal(pg, style) { let t = .3; const out = []; for (const ln of pg) { out.push(t); t += style === 'noir' ? ln.length / 34 + .35 : 1.5; } return [out, t + (style === 'noir' ? 0 : -.3)]; }
+function drawIntro() {
+  const I = G.intro, t = I.t, pg = I.pages[I.page], st = I.style, n = pg.length; BTN = [];
+  const [T0, tEnd] = introReveal(pg, st);
+  ctx.textBaseline = 'alphabetic';
+  if (st === 'lib') {
+    drawShelf(0); ctx.fillStyle = 'rgba(12,7,4,.74)'; ctx.fillRect(0, 0, W, H); ctx.textAlign = 'center';
+    pg.forEach((ln, i) => fadeText(ln, W / 2, 270 - (n - 1) * 28 + i * 56, t, T0[i], 'italic 31px ' + SERIF, '#f1e6cc'));
+  } else if (st === 'goth') {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#efe3c8'); g.addColorStop(1, '#d6c092'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(160,60,50,.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(150, 0); ctx.lineTo(150, H); ctx.moveTo(155, 0); ctx.lineTo(155, H); ctx.stroke();
+    const fl = .5 + Math.sin(G.t * 11) * .03 + Math.sin(G.t * 7.3) * .03, vg = ctx.createRadialGradient(W / 2, 270, 120, W / 2, 270, 560); vg.addColorStop(0, 'rgba(30,14,4,0)'); vg.addColorStop(1, 'rgba(30,14,4,' + fl + ')'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center'; ctx.font = F_HAND; ctx.fillStyle = GRAPHITE; ctx.fillText('diario — villa Vetrano', W / 2, 92);
+    pg.forEach((ln, i) => fadeText(ln, W / 2, 280 - (n - 1) * 27 + i * 54, t, T0[i], 'italic 30px ' + SERIF, INK));
+  } else if (st === 'fairy') {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#fffaf0'); g.addColorStop(1, '#e4f1c8'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,196,60,.35)'; ctx.beginPath(); ctx.arc(790, 100, 62 + Math.sin(G.t * 2) * 4, 0, TAU); ctx.fill(); ctx.fillStyle = '#ffc93c'; ctx.beginPath(); ctx.arc(790, 100, 40, 0, TAU); ctx.fill();
+    ['rgba(170,210,130,.6)', 'rgba(120,185,105,.65)'].forEach((c, k) => { ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, H); for (let x = 0; x <= W; x += 16) ctx.lineTo(x, 420 + k * 46 + Math.sin(x * .006 * (1.3 + k) + k * 2 + G.t * .1) * 34); ctx.lineTo(W, H); ctx.fill(); });
+    ctx.textAlign = 'center';
+    pg.forEach((ln, i) => fadeText(ln, W / 2, 230 - (n - 1) * 27 + i * 54, t, T0[i], (i === 0 && I.page === 0 ? '500 38px ' : '500 29px ') + SERIF, i === 0 && I.page === 0 ? '#b8433a' : '#2a2018'));
+  } else if (st === 'noir') {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2c3342'); g.addColorStop(1, '#0d1017'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(200,215,235,.22)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let i = 0; i < 80; i++) { const x = ((i * 53.7 - G.t * 160) % (W + 80) + W + 80) % (W + 80) - 40, y = ((i * 97.1 + G.t * 720) % (H + 60)) - 30; ctx.moveTo(x, y); ctx.lineTo(x - 7, y + 22); } ctx.stroke();
+    ctx.textAlign = 'left'; ctx.font = 'bold 14px "Courier New", Courier, monospace'; ctx.fillStyle = '#d8433a'; ctx.fillText('RAPIDO DELLE 23:40 — VERBALE N. ' + (I.page + 1), 150, 130);
+    ctx.font = 'bold 21px "Courier New", Courier, monospace'; ctx.fillStyle = '#ece6d8';
+    pg.forEach((ln, i) => { const k = Math.floor((t - T0[i]) * 34); if (k <= 0) return; const s2 = ln.slice(0, k); ctx.fillText(s2, 150, 220 + i * 46); if (k < ln.length || (i === n - 1 && Math.sin(G.t * 8) > 0)) ctx.fillRect(150 + ctx.measureText(s2).width + 3, 202 + i * 46, 11, 22); });
+  } else {
+    ctx.fillStyle = '#fff6e0'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#e2672a'; ctx.fillRect(0, 0, W, 66); ctx.fillStyle = '#3f7f8c'; ctx.fillRect(0, 66, W, 6);
+    ctx.textAlign = 'left'; ctx.font = 'bold 19px ' + SERIF; ctx.fillStyle = '#fff3d6'; ctx.fillText('MANUALE DEL PASSEGGERO INTERSTELLARE SMARRITO', 60, 42);
+    ctx.strokeStyle = 'rgba(63,127,140,.3)'; ctx.lineWidth = 2; ctx.setLineDash([6, 8]); ctx.beginPath(); ctx.arc(780, 380, 96, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = 'rgba(226,103,42,.5)'; ctx.beginPath(); ctx.arc(780 + Math.cos(G.t * .6) * 96, 380 + Math.sin(G.t * .6) * 96, 12, 0, TAU); ctx.fill();
+    ctx.font = 'italic 13px ' + SERIF; ctx.fillStyle = 'rgba(63,127,140,.7)'; ctx.fillText('fig. 0 — voi siete qui (circa)', 700, 498);
+    pg.forEach((ln, i) => fadeText(ln, 80, 170 + i * 56, t, T0[i], (i === 0 ? 'bold 30px ' : '500 26px ') + SERIF, i === 0 ? '#e2672a' : '#1c4a55'));
+    ctx.save(); ctx.translate(200, 452); ctx.rotate(-.1); ctx.strokeStyle = 'rgba(192,57,43,.7)'; ctx.lineWidth = 3; ctx.strokeRect(-98, -22, 196, 44); ctx.font = 'bold 19px ' + SERIF; ctx.fillStyle = 'rgba(192,57,43,.75)'; ctx.textAlign = 'center'; ctx.fillText('È TUTTO PREVISTO', 0, 7); ctx.restore();
+  }
+  const dark = st === 'lib' || st === 'noir';
+  ctx.textAlign = 'center'; ctx.font = F_HAND; ctx.fillStyle = dark ? 'rgba(241,230,204,.6)' : GRAPHITE;
+  if (t > tEnd) { ctx.globalAlpha = .5 + Math.sin(G.t * 3) * .25; ctx.fillText(IS_TOUCH ? 'tocca per continuare' : 'SPAZIO per continuare', W / 2, 506); ctx.globalAlpha = 1; }
+  ctx.fillStyle = dark ? 'rgba(241,230,204,.45)' : 'rgba(60,40,20,.45)'; ctx.textAlign = 'right'; ctx.fillText('salta ›', W - 26, 30); ctx.textAlign = 'left';
+  BTN.push({ x: W - 120, y: 0, w: 120, h: 50, fn: () => { I.page = I.pages.length - 1; I.t = 1e3; I.skip = true; } });
+}
+function updIntro(dt) {
+  const I = G.intro; I.t += dt;
+  if (G.turn) return;
+  hitButtons();
+  const tEnd = introReveal(I.pages[I.page], I.style)[1];
+  const press = (inp.startP || uiTap) && I.t > .35; if (press) uiTap = null;
+  if (I.skip || (press && I.t > tEnd) || I.t > tEnd + 7) { if (I.page < I.pages.length - 1 && !I.skip) { I.page++; I.t = 0; AU.sfx('page'); } else { I.skip = false; const f = I.then; I.then = null; if (f) f(); } }
+  else if (press) I.t = tEnd + .01;
 }
 function nextLevel() {
   const n = G.li + 1; G.stats.points += 200;
@@ -52,7 +106,7 @@ function startEnding() {
   B.done = true; B.li = 0; B.max = CHAPTERS[G.chapter].levels.length - 1;
   if (s.full && (!B.best || s.points > B.best.points)) B.best = { points: s.points, marks: s.marks, time: Math.round(s.time), deaths: s.deaths };
   writeSave();
-  startTurn(() => { G.state = 'ending'; G.end = { t: 0, page: 0 }; AU.setMood([0, 9, 17][G.chapter] || 0); parts.length = 0; });
+  startTurn(() => { G.state = 'ending'; G.end = { t: 0, page: 0 }; AU.setMood(BOOK_MOOD[G.chapter] || 0); parts.length = 0; });
 }
 function toTitle() { startTurn(() => { G.state = 'title'; G.paused = false; SEL = Math.min(G.chapter, CHAPTERS.length - 1); AU.setMood(0); }); }
 
@@ -130,7 +184,7 @@ function drawTitle() {
   drawShelf(0);
   ctx.textAlign = 'center'; ctx.fillStyle = '#f1e6cc'; ctx.font = '500 58px ' + SERIF; ctx.fillText('MARGINALIA', W / 2, 70);
   ctx.font = F_HAND; ctx.fillStyle = 'rgba(241,230,204,.6)'; ctx.fillText('chi legge un libro, lo cambia', W / 2, 98); ctx.textAlign = 'left';
-  const cw = 210, ch = 262, gap = 60, x0 = W / 2 - (CHAPTERS.length * cw + (CHAPTERS.length - 1) * gap) / 2, cy = 128;
+  const cw = CHAPTERS.length > 3 ? 184 : 210, ch = 262, gap = CHAPTERS.length > 3 ? 34 : 60, x0 = W / 2 - (CHAPTERS.length * cw + (CHAPTERS.length - 1) * gap) / 2, cy = 128;
   CHAPTERS.forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL && HOP.t >= 1); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => setSel(c) }); });
   // Postilla salta da un libro all'altro
   const dtT = clamp(t - HOP.last, 0, .05); HOP.last = t;
@@ -167,6 +221,7 @@ function drawTitle() {
     }
   }
   button(W - 172, 418, 144, 44, 'Registro', () => { G.reg = true; }, false);
+  button(28, 418, 144, 44, 'Prologo', () => startTurn(() => startIntro(PROLOGUE, 'lib', () => startTurn(() => { G.state = 'title'; }))), false);
   ctx.textAlign = 'center'; ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)';
   ctx.fillText(IS_TOUCH ? '◀ ▶ scegli il libro  ·  in gioco: ▲ salta (due volte), ✎ sbianchetto' : '← → scegli il libro  ·  in gioco: SPAZIO salta (due volte), X sbianchetto, P pausa, M audio', W / 2, 526);
   ctx.textAlign = 'left';
@@ -331,6 +386,7 @@ function step(dt) {
   }
   if (keys.KeyM && !step.m) { AU.setMute(!AU.muted); syncMute(); } step.m = keys.KeyM;
   if (G.state === 'title') { G.t += dt; updTitle(); }
+  else if (G.state === 'intro') { G.t += dt; updIntro(dt); }
   else if (G.state === 'ending') { G.t += dt; updEnding(dt); }
   else if (G.state === 'play') {
     if (inp.pauseP) G.paused = !G.paused;
@@ -342,6 +398,7 @@ function draw() {
   ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
   ctx.globalAlpha = 1; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   if (G.state === 'title') drawTitle();
+  else if (G.state === 'intro') drawIntro();
   else if (G.state === 'ending') drawEnding();
   else drawWorld();
   if (!GPAT) GPAT = ctx.createPattern(GRAIN, 'repeat');
@@ -362,6 +419,8 @@ function syncMute() { const b = document.getElementById('bMute'); if (b) b.class
 function boot() {
   loadSave(); buildTextures(); fit(); bindPad();
   for (let c = CHAPTERS.length - 1; c >= 0; c--) if (unlocked(c) && !SAVE.books[c].done) SEL = c;
+  HOP.from = HOP.to = SEL;
+  if (!SAVE.pro) { startIntro(PROLOGUE, 'lib', () => { SAVE.pro = true; writeSave(); startTurn(() => { G.state = 'title'; }); }); }
   const bm = document.getElementById('bMute'), bp = document.getElementById('bPause'), bf = document.getElementById('bFull');
   bm.addEventListener('click', () => { AU.unlock(); AU.setMute(!AU.muted); syncMute(); bm.blur(); });
   bp.addEventListener('click', () => { AU.unlock(); if (G.state === 'play' && !G.turn) G.paused = !G.paused; bp.blur(); });

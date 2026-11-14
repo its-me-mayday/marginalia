@@ -119,9 +119,34 @@ Livelli:
 7. **Le prove contro Postilla** — le sequestrano lo sbianchetto e fugge, inseguita, potendo solo saltare.
 8. **Tutti nel vagone ristorante** (boss) — l'accusa di Corsivo: nove omissis da scoprire. Nella seconda fase entra la torcia, nella terza il vento della galleria.
 
-### Quarto libro (da costruire): «Manuale del passeggero interstellare smarrito»
+### Quarto libro: «Manuale del passeggero interstellare smarrito»
 
-Fantascienza comica nello spirito di Douglas Adams, con invenzioni proprie. Il libro è un manuale con voci, avvertenze e note a piè di pagina; il narratore è impassibile e sbaglia quasi tutto. La Biblioteca è un'astronave-archivio che ha sbagliato strada per colpa di MARGINE, navigatore permaloso. Il Refuso **rimanda**: «vedi alla voce…», in cerchio. Potere nuovo, il **rimando**: Postilla entra in un asterisco e sbuca dal suo gemello a piè di pagina. Livelli previsti: Avvertenze, Gravità facoltativa, L'ufficio moduli, Note a piè di pagina, Il motore a coincidenze, Il traduttore letterale, Vedi alla voce, Il Servizio Clienti dell'Universo. Filo: la voce «Finale» rimanda a «Lettore», che rimanda a «Finale».
+Si sblocca a terzo libro finito. Fantascienza comica nello spirito di Douglas Adams, con invenzioni proprie: assurdo, burocrazia, un narratore impassibile che sbaglia quasi tutto.
+
+- **Il libro è un manuale**: voci enciclopediche, avvertenze e note a piè di pagina. Motto: «È TUTTO PREVISTO».
+- **Storia**: la Biblioteca dei Margini è un'astronave-archivio che ha sbagliato strada per colpa di MARGINE, navigatore permaloso. A ogni caduta di Postilla commenta: «Ricalcolo.»
+- **Il Refuso rimanda**: «vedi alla voce…», in cerchio. Quarto verbo dopo macchia, scambia, cancella.
+- **Stile**: colori da manuale anni '70 (crema, arancio, turchese), diagrammi inutili «non in scala»; nello spazio, testo da terminale su blu notte con un pianeta arancione.
+- **Musica**: sintetizzatori allegri e un po' storti, da sala d'attesa.
+- **Potere nuovo, il rimando**: Postilla entra in un asterisco e sbuca dalla sua nota.
+- **Filo**: la voce «Finale» dice «vedi alla voce Lettore», che dice «vedi alla voce Finale». Il viandante è a bordo come autostoppista. Le note del lettore, per la prima volta, non correggono niente: aggiunge solo «vedi tu» e passa il libro a qualcun altro.
+
+Livelli:
+
+1. **Avvertenze** — un elenco di divieti che vanno infranti tutti; primi asterischi-portale.
+2. **Gravità facoltativa** — zone a gravità ridotta: salti lunghissimi e lentissimi.
+3. **L'ufficio moduli** — quattro timbri da raccogliere; sportelli che aprono e chiudono a tempo; lo sportello finale apre solo a pratica completa.
+4. **Note a piè di pagina** — si rimbalza via asterisco tra il testo, in alto, e le note, in fondo.
+5. **Il motore a coincidenze** — ogni riga diventa a turno un divano (si rimbalza) e una nuvola (non regge), con preavviso.
+6. **Il traduttore letterale** — i modi di dire succedono davvero: «fare un salto» ti lancia, «prendere il volo» ti fa planare, «cadere dalle nuvole» fa comparire nuvole, «restare di sasso» ti fa sasso, «andare a rotoli», «in un batter d'occhio», «perdere il filo».
+7. **Vedi alla voce** — ogni nodo ha tre rimandi in alto: due sono circolari e ti riportano indietro, è buono solo quello che non rimanda a niente.
+8. **Il Servizio Clienti dell'Universo** (boss) — un reclamo in tre fasi; nella seconda la gravità è sospesa, nella terza le risposte automatiche arrivano a raffica.
+
+### Prologhi
+
+- **All'apertura del gioco**, la prima volta, un prologo in quattro schermate presenta la Biblioteca dei Margini, il Refuso e Postilla. Si può rivedere dal pulsante «Prologo» e saltare in qualsiasi momento.
+- **Ogni libro**, quando lo si comincia dal primo livello, si apre con il suo prologo: racconta la storia e, dal secondo in poi, i legami con i libri precedenti.
+- **Il registro segue il genere**, nel testo e nell'aspetto: il gotico è un diario in corsivo su carta seppia a lume di candela, in seconda persona solenne; la fiaba è in tondo su carta bianca con colline e sole, e comincia con «C'era una volta»; il noir è un verbale battuto a macchina sotto la pioggia, in prima persona asciutta, lettera per lettera; il manuale è una prefazione a punti, burocratica e impassibile, con timbro e diagramma.
 
 ### Punti e registro del lettore
 
@@ -168,3 +193,7 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 17 | Nel pedinamento ogni fascio di torcia riposa su un'ombra ai due estremi. | In verifica, con fasci a metà corridoio l'attraversamento era impossibile. |
 | 18 | Quarto libro progettato come fantascienza comica alla Douglas Adams, al posto della versione seria. | Scelta dell'autore. |
 | 19 | Pedinamento semplificato: torce più lente, ombre più larghe, un solo fascio per tratto, e mezzo secondo di tolleranza prima di essere scoperti. | Richiesta dell'autore: era troppo difficile. |
+| 20 | Quarto libro costruito: «Manuale del passeggero interstellare smarrito». | Come da progetto. |
+| 21 | Prologo del gioco e prologo di ogni libro, ciascuno nel registro del proprio genere e con i legami ai libri precedenti. | Richiesta dell'autore. |
+| 22 | Nel traduttore letterale le piattaforme di lancio sono corte; in «Vedi alla voce» i rimandi stanno in alto e ci si salta dentro. | In verifica: il lancio da lontano non arrivava, e i rimandi a terra non si potevano evitare. |
+| 23 | I tocchi brevissimi dei tasti non vanno più persi. | Emerso provando i prologhi. |

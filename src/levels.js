@@ -782,3 +782,228 @@ CHAPTERS.push({
   ],
   shelf: ['Tre libri riparati. O riscritti. O soltanto letti.', 'Sullo scaffale più alto, un manuale si è messo a lampeggiare.']
 });
+
+/* ================= LIBRO QUARTO — Manuale del passeggero interstellare smarrito ================= */
+Object.assign(THEMES, {
+  manual: { p0: '#fff6e0', p1: '#f7deb0', decor: 'manual', man: true },
+  office: { p0: '#f4ecd9', p1: '#dccba6', decor: 'office', man: true },
+  space:  { p0: '#182243', p1: '#080c1c', decor: 'space', noir: true, man: true },
+  desk:   { p0: '#fde9c9', p1: '#f2b76a', decor: 'office', man: true }
+});
+Object.assign(HINTS, {
+  port:  ['un asterisco rimanda alla sua nota: entraci', 'un asterisco rimanda alla sua nota: entraci'],
+  low:   ['qui la gravità è facoltativa: si salta lontanissimo', 'qui la gravità è facoltativa: si salta lontanissimo'],
+  stamp: ['raccogli i timbri: senza, lo sportello finale non apre', 'raccogli i timbri: senza, lo sportello finale non apre'],
+  coin:  ['riga, divano, nuvola: sul divano si rimbalza, la nuvola non regge', 'riga, divano, nuvola: sul divano si rimbalza, la nuvola non regge'],
+  voce:  ['tre rimandi, in alto: salta in quello che non rimanda', 'tre rimandi, in alto: salta in quello che non rimanda']
+});
+function mbuilder(L, x, y) {
+  const b = nbuilder(L, x, y); let lx = null;
+  L.pa = []; L.pb = []; L.stamps = []; L.lows = [];
+  b.pa = (id, fx, two, stars, up) => { const p = b.last; L.pa.push({ id, x: p.x + p.w * fx, y: p.y - (up || 26), two: !!two, stars: stars || 1, plat: p }); return b; };
+  b.pb = (id, fx) => { const p = b.last; L.pb.push({ id, x: p.x + p.w * fx, y: p.y - 26, plat: p }); return b; };
+  b.stamp = (fx) => { const p = b.last; L.stamps.push({ x: p.x + p.w * (fx === undefined ? .5 : fx), y: p.y - 34, got: false }); return b; };
+  b.gate = (fx) => { const p = b.last; L.blocks.push({ x: p.x + p.w * fx - 23, y: p.y - 300, w: 46, h: 300, gate: true, off: 0 }); return b; };
+  b.door = (fx, per, ph) => { const p = b.last; L.blocks.push({ x: p.x + p.w * fx - 20, y: p.y - 300, w: 40, h: 300, door: true, per: per || 3, ph: ph || 0, off: 0 }); return b; };
+  b.lowStart = () => { lx = b.last.x + b.last.w - 30; return b; };
+  b.lowEnd = () => { L.lows.push({ x: lx, w: b.last.x + 40 - lx }); return b; };
+  b.coin = (text, gap, dy, ci) => b.ln(text, gap, dy, { kind: 'coin', ci, orig: text, w: 150 });
+  return b;
+}
+function mn1() {
+  const L = mkLevel({ name: 'Avvertenze', date: 'pag. iii', theme: 'manual', mood: 25 });
+  mbuilder(L, 120, 300)
+    .ln('AVVERTENZE. Leggere con attenzione prima di smarrirsi.').spawn()
+    .ln('Punto primo: non saltare.', 100, -20).mark()
+    .ln('Punto secondo: soprattutto non due volte.', 190, -60).mark()
+    .ln('Punto terzo: non toccare gli asterischi.', 110, 40).pa('a', .9).say('Un asterisco rimanda alla sua nota a piè di pagina. Entraci.').hint('port', 40, -100)
+    .ln('* Toccare gli asterischi è l\'unico modo di proseguire.', 520, 190).pb('a', .08).check()
+    .ln('Punto quarto: il vuoto non è compreso nel prezzo.', 110, -20).stain(.6, 50).mark()
+    .ln('Punto quinto: in caso di panico, consultare la nota.', 110, -30).pa('b', .92)
+    .ln('** Il panico è compreso nel prezzo.', 540, -200).pb('b', .1).check().mark()
+    .ln('Punto sesto: il navigatore ha sempre ragione.', 110, 30).bug('navigatroe', 'navigatore', 60)
+    .ln('Punto settimo: tranne quando ricalcola.', 110, -30).say('MARGINE, il navigatore: «Ricalcolo.»').pa('c', .9)
+    .ln('*** Ricalcola sempre.', 500, 160).pb('c', .12).check().mark()
+    .ln('Buon viaggio. È tutto previsto.', 120, -20).exit();
+  return L;
+}
+function mn2() {
+  const L = mkLevel({ name: 'Gravità facoltativa', date: 'voce G', theme: 'space', mood: 26 });
+  mbuilder(L, 120, 400)
+    .ln('Voce: GRAVITÀ. Abitudine locale, poco diffusa.').spawn()
+    .ln('A bordo è inclusa nel biglietto.', 100, -20).mark()
+    .ln('Fuori bordo è facoltativa.', 110, 0).lowStart().say('Dove la gravità è facoltativa si salta lontano. Molto lontano.').hint('low', -40, -100)
+    .ln('Si decolla', 360, -40).ln('e si atterra quando capita.', 400, 30).mark()
+    .ln('Si consiglia di non avere fretta.', 360, -120).lowEnd().check()
+    .ln('Voce: PESO. Vedi alla voce GRAVITÀ.', 110, 30).bug('psoe', 'peso', 60)
+    .ln('Voce: SU. Direzione sopravvalutata.', 110, -20).mark(.3).lowStart()
+    .ln('su,', 160, -230).ln('più su,', 160, -230).ln('troppo su.', 160, -230).mark()
+    .ln('Voce: CADUTA. Come la salita, ma più sincera.', 420, 380).lowEnd().check()
+    .ln('Voce: VUOTO. Vedi sotto.', 110, -20).lowStart()
+    .ln('Sotto non c\'è niente. È questo, il vuoto.', 380, 40).mark().bug('nietne', 'niente', 50)
+    .ln('Chi legge questa voce sta già galleggiando.', 390, -60).lowEnd().exit();
+  return L;
+}
+function mn3() {
+  const L = mkLevel({ name: 'L\'ufficio moduli', date: 'sportelli A–C', theme: 'office', mood: 27 });
+  mbuilder(L, 120, 400)
+    .ln('Ufficio Smarrimenti Interstellari. Prendere il numero.').spawn().say('Servono quattro timbri. Gli sportelli aprono quando vogliono loro.')
+    .ln('Sportello A: aperto dalle nove alle nove.', 100, 0).door(.75, 3.4, 0).hint('stamp', 20, -100)
+    .ln('Modulo 27-B: richiesta di essere altrove.', 110, -30).stamp(.5).mark(.88)
+    .ln('Da compilare in triplice copia, di cui una smarrita.', 110, 30).check().bug('tirplice', 'triplice', 60)
+    .ln('Sportello B: torno subito.', 110, -20).door(.7, 3, .5)
+    .ln('Timbro di chi ha messo il timbro.', 110, -30).stamp(.5).mark()
+    .ln('Per il terzo timbro, rivolgersi alla nota.', 110, 30).pa('a', .9)
+    .ln('* La nota è in pausa pranzo. Il timbro è qui.', 520, 180).pb('a', .08).stamp(.6).check()
+    .ln('Sportello C: chiuso per inventario del chiuso.', 110, -30).door(.7, 2.8, .2).mark()
+    .ln('Quarto timbro: in fondo a destra, come tutto.', 110, -30).stamp(.6).stain(.25, 44).mark(.92)
+    .ln('Sportello Finale. Si accettano solo pratiche complete.', 120, 40).check().gate(.7).mark()
+    .ln('Pratica accolta. Destinazione sconosciuta, ma ufficialmente.', 120, -20).exit();
+  return L;
+}
+function mn4() {
+  const L = mkLevel({ name: 'Note a piè di pagina', date: 'in fondo', theme: 'manual', mood: 28 });
+  mbuilder(L, 120, 220)
+    .ln('Il testo principale di questa pagina è breve.').spawn().pa('a', .92).say('Qui si legge soprattutto in fondo alla pagina.')
+    .ln('* Le note, invece, non finiscono mai.', 420, 250).pb('a', .08)
+    .ln('** Questa nota commenta la precedente.', 110, -20).mark().bug('ntoa', 'nota', 60)
+    .ln('*** Questa si dissocia.', 110, 20).pa('b', .88)
+    .ln('Si torna brevemente al testo.', 430, -270).pb('b', .1).check()
+    .ln('Che però ha poco da dire.', 110, -30).mark().stain(.6, 44)
+    .ln('Quindi di nuovo sotto.', 110, 30).mark(.3).pa('c', .88)
+    .ln('* In fondo alla pagina c\'è più spazio per i dubbi.', 430, 270).pb('c', .08).check()
+    .ln('** E per le macchie.', 110, -20).stain(.55, 50)
+    .ln('*** L\'autore si scusa per la nota precedente.', 110, 20).mark().bug('socusa', 'scusa', 60)
+    .ln('**** L\'editore si scusa per l\'autore.', 110, -20).pa('d', .9)
+    .ln('Il testo principale riprende da dove era rimasto:', 430, -280).pb('d', .08).check().mark()
+    .ln('da nessuna parte.', 110, -30).exit();
+  return L;
+}
+function mn5() {
+  const L = mkLevel({ name: 'Il motore a coincidenze', date: 'voce M', theme: 'space', mood: 29 });
+  mbuilder(L, 120, 400)
+    .ln('Voce: MOTORE A COINCIDENZE. Trasforma le cose in altre cose.').spawn().say('Ogni riga diventa a turno un divano e una nuvola. Sul divano si rimbalza.').hint('coin', 60, -100)
+    .ln('Di solito in cose meno utili.', 100, -20).mark()
+    .coin('una riga', 110, 0, 0).coin('un\'altra', 110, -30, 1)
+    .ln('Statisticamente: un divano.', 110, 30).check().mark()
+    .coin('forse', 110, -30, 2).coin('quasi', 110, 0, 0).coin('ecco', 110, 30, 1).mark()
+    .ln('Oppure una nuvola, che è un divano senza convinzione.', 110, 30).check().bug('nvuola', 'nuvola', 60)
+    .coin('uno', 110, -20, 1).coin('due', 110, -20, 2)
+    .ln('Si sconsiglia di sedersi sulle nuvole.', 110, 40).mark()
+    .coin('salta', 110, 0, 0)
+    .ln('Con un buon divano si arriva in alto.', 120, -150).check().mark()
+    .coin('ancora', 110, 30, 2).coin('quasi', 110, 30, 0).coin('fatto', 110, 30, 1)
+    .ln('Il motore si spegne da solo. Di solito nel momento peggiore.', 110, 30).exit();
+  return L;
+}
+function mn6() {
+  const L = mkLevel({ name: 'Il traduttore letterale', date: 'voce T', theme: 'manual', mood: 30 });
+  mbuilder(L, 120, 420)
+    .ln('Il traduttore di bordo prende tutto alla lettera.').spawn().say('Attenzione ai modi di dire: qui succedono davvero.')
+    .ln('«Fare un salto.»', 110, -20, { launch: true, w: 150 })
+    .ln('Fatto. Ed era alto.', 90, -220).mark()
+    .ln('«Prendere il volo.»', 110, 30, { form: 'piuma' })
+    .ln('Preso.', 430, 90).check().mark()
+    .ln('«Cadere dalle nuvole.»', 110, -20).rev('a')
+    .rh('nuvola', 'a', 110, -30, 'b').rh('nuvola', 'b', 100, -30).mark()
+    .ln('«Restare di sasso.»', 110, 40, { form: 'sasso' }).check().rovi(.85)
+    .ln('Rimasta.', 110, 0).bug('rmiasta', 'rimasta', 50)
+    .ln('«Andare a rotoli.»', 110, -30).ln('rotolo', 110, -30, { kind: 'rewind' }).ln('rotolo', 100, -30, { kind: 'rewind' }).mark()
+    .ln('«In un batter d\'occhio.»', 110, 40).check().pa('z', .85)
+    .ln('Eccoci.', 520, -160).pb('z', .2)
+    .ln('«Toccare il cielo.»', 110, 30, { launch: true, w: 170 })
+    .ln('Toccato. Era freddo.', 90, -220).mark()
+    .ln('«Perdere il filo.»', 110, 60).sway('il filo', 120, -20, 60, 1.7, 0).sway('perso', 120, -20, 60, 2.1, 2)
+    .ln('Il traduttore chiede scusa. Letteralmente: chiede «scusa?».', 120, 40).exit();
+  return L;
+}
+function mn7() {
+  const L = mkLevel({ name: 'Vedi alla voce', date: 'da A a A', theme: 'space', mood: 31 });
+  const b = mbuilder(L, 120, 400);
+  b.ln('Voce: USCITA. Vedi alla voce PORTA.').spawn().say('Il Refuso rimanda. È buono solo il rimando che non rimanda a niente.').hint('voce', 40, -100);
+  // ogni nodo: tre rimandi; quello giusto porta avanti, gli altri riportano all'inizio del nodo
+  const node = (text, good, next, i) => {
+    b.ln(text, 520, i % 2 ? 150 : -150); const p = b.last; b.pb('n' + i, .04).check();
+    [.25, .55, .85].forEach((fx, k) => { if (k === good) b.pa('n' + (i + 1), fx, false, k + 1, 100); else b.pa('back' + i, fx, false, k + 1, 100); });
+    b.pb('back' + i, .1);
+    return p;
+  };
+  b.pa('n0', .9);
+  node('PORTA: vedi USCITA.*   CORRIDOIO: in fondo a sinistra.**   USCITA: vedi PORTA.***', 1, 0, 0); b.mark(.4);
+  node('SINISTRA: la mano che non è la destra.*   DESTRA: vedi SINISTRA.**   MANO: vedi DESTRA.***', 0, 0, 1); b.mark(.7);
+  node('FINE: vedi INIZIO.*   INIZIO: vedi FINE.**   MEZZO: è qui.***', 2, 0, 2); b.mark(.4);
+  node('LETTORE: vedi FINALE.*   FINALE: vedi LETTORE.**   POSTILLA: una nota a margine. Cammina.***', 2, 0, 3); b.mark(.4);
+  b.ln('Voce: VOCE. Questa non rimanda a niente. Si può uscire.', 520, -150).pb('n4', .06).check().mark();
+  b.ln('Il viandante aspettava col pollice alzato.', 120, -20).npc(.7, '«Io non ho il biglietto», ha detto. «Ma nemmeno il libro ha il finale.»').exit();
+  return L;
+}
+const MN_TARGETS = [
+  ['La sua pratica è in lavorazoine', 'La sua pratica è stata letta', 235, 322],
+  ['Il reclamo va presentato a se stessi', 'Il reclamo è accolto', 725, 322],
+  ['Vedi alla voce Reclamo', 'Reclamo: ha ragione lei', 480, 236],
+  ['La gravità è sospesa per sciopero', 'La gravità riprende servizio', 480, 432],
+  ['Attenda in linea per sempre', 'La linea è libera', 235, 322],
+  ['Lo sportello è chiuso per sempre', 'Lo sportello è aperto', 725, 322],
+  ['Finale: vedi alla voce Lettore', 'Finale: da scrivere', 480, 236],
+  ['Lettore: vedi alla voce Finale', 'Lettore: a bordo', 150, 432],
+  ['Destinazione: errore', 'Destinazione: avanti', 810, 432]
+];
+function mn8() {
+  const L = mkLevel({ name: 'Il Servizio Clienti dell\'Universo', date: '', theme: 'desk', mood: 32, boss: true, fixed: true, manBoss: true, targets: MN_TARGETS,
+    bossSay: ['«Buongiorno. Il suo reclamo è importante per noi.»', '«Per sua comodità abbiamo sospeso la gravità.»', '«Resti in linea. Qualcuno, un giorno, risponderà.»'] });
+  const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
+  Pl(60, 470, 840, 'Servizio Clienti dell\'Universo. Tempo di attesa stimato: tutto. Le chiediamo pazienza.');
+  Pl(150, 360, 170, 'sportello 1'); Pl(640, 360, 170, 'sportello 2'); Pl(395, 270, 170, 'sportello ∞');
+  L.spawn = { x: 110, y: 440 };
+  return L;
+}
+const NOTES4 = [
+  ['Trovato su una panchina. Senza copertina.', 'Dice che è tutto previsto.', 'Lo dice anche l\'oroscopo.', 'Lo leggo comunque.', 'Ho toccato l\'asterisco.'],
+  ['Mai riso tanto per una definizione.', '«Abitudine locale». La rubo.', 'Mia figlia chiede perché rido da solo.', 'Gliel\'ho letto ad alta voce.', 'Ora ride da sola anche lei.'],
+  ['Questo capitolo è il mio ufficio.', 'Lo sportello B esiste davvero.', 'Ci ho passato un martedì intero.', 'Il timbro me l\'hanno messo sul braccio.', 'Non era quello giusto.'],
+  ['Le note sono più lunghe del testo.', 'Come le mie.', 'Forse ho sempre scritto note a libri altrui', 'perché non sapevo scriverne uno mio.', 'Nota a questa nota: è vero.'],
+  ['Un divano, statisticamente.', 'Ho smesso di cercare il senso.', 'Era su un divano.', 'Le coincidenze non esistono. Vedi sopra.', 'Mi sto divertendo. Non capitava da tre libri.'],
+  ['Preso alla lettera, tutto fa ridere.', 'Anche «correggere un finale».', 'Ho provato a «voltare pagina».', 'Si è voltata.', 'Dall\'altra parte c\'ero io.'],
+  ['Finale: vedi Lettore.', 'Lettore: vedi Finale.', 'Per una volta non ho corretto niente.', 'Ho solo aggiunto: «vedi tu».', 'E ho passato il libro a qualcun altro.'],
+  []
+];
+CHAPTERS.push({
+  id: 4, roman: 'IV', title: 'Manuale del passeggero interstellare smarrito', levels: [mn1, mn2, mn3, mn4, mn5, mn6, mn7, mn8], notes: NOTES4,
+  secret: '✶  Ultima nota a margine: «Grazie del passaggio.»', cover: ['#e2672a', '#fff3d6'],
+  ending: [
+    { left: true, mark: true, dur: 8.5, lines: [['La voce «Finale» diceva: vedi alla voce «Lettore».', .4], ['La voce «Lettore» diceva: vedi alla voce «Finale».', 1.8], ['Postilla aggiunse, a matita: vedi tu.', 3.2]] },
+    { dur: 4.2, big: true, lines: [['È tutto previsto.', .3]] },
+    { dur: 8, lines: [['L\'astronave non tornò indietro.', .3], ['«Ricalcolo», disse MARGINE, quasi con affetto.', 2.2], ['Il viandante alzò il pollice.', 4]] },
+    { dur: 9, lines: [['Quattro libri, e nessuno finisce come finiva.', .3], ['Forse leggere è questo:', 2.4], ['salire a bordo senza sapere dove si va.', 3.6, VIOLET]] }
+  ],
+  shelf: ['Quattro libri letti. La biblioteca, a quanto pare, è in viaggio.', 'E sugli scaffali ce ne sono ancora parecchi.']
+});
+
+/* ================= PROLOGHI: uno per il gioco, uno per ogni libro, ciascuno nel registro del suo genere ================= */
+const PROLOGUE = [
+  ['Esiste una biblioteca dove finiscono i libri', 'che qualcuno ha amato troppo.', 'La chiamano Biblioteca dei Margini.'],
+  ['Qui ogni libro porta i segni di chi l\'ha letto:', 'orecchie, sottolineature, note a matita.', 'E qualche errore.'],
+  ['Uno di quegli errori ha imparato a moltiplicarsi.', 'Lo chiamano il Refuso.', 'Macchia. Scambia. Cancella. Rimanda.'],
+  ['Una di quelle note ha imparato a camminare.', 'Si chiama Postilla.', 'Entra nei libri per ripararli. O così crede.']
+];
+CHAPTERS[0].register = 'goth'; CHAPTERS[0].intro = [
+  ['Lettore che apri queste pagine,', 'sappi che non furono scritte per te.'],
+  ['Sono il diario di un uomo che accettò un invito', 'in una villa che nessuna carta riporta,', 'e che ogni sera si riprometteva di partire all\'alba.'],
+  ['Vi troverai nebbia, candele, un ospite troppo cortese.', 'E una macchia d\'inchiostro che ieri non c\'era.', 'È da lì che Postilla deve cominciare.']
+];
+CHAPTERS[1].register = 'fairy'; CHAPTERS[1].intro = [
+  ['C\'era una volta — o forse c\'è ancora —', 'una bambina con una lanterna.', 'Doveva solo attraversare un bosco.'],
+  ['Nelle fiabe è sempre «solo».', 'Poi le parole cominciano a scambiarsi di posto,', 'e il lupo si mette la cuffia della nonna.'],
+  ['Postilla arriva da una villa, dove ha rimesso a posto un finale.', 'Da allora qualcuno la segue tra gli scaffali:', 'ha una matita in tasca, e questa fiaba la sa a memoria.']
+];
+CHAPTERS[2].register = 'noir'; CHAPTERS[2].intro = [
+  ['Pioveva.', 'In questa città piove sempre, quando qualcuno', 'ha qualcosa da nascondere.'],
+  ['Il rapido delle 23:40. Sette passeggeri.', 'Un libro senza l\'ultima pagina.', 'Il genere di caso che non si chiude: si archivia.'],
+  ['Li conoscevo tutti. Un ospite uscito da una villa.', 'Una bambina e un lupo usciti da una fiaba.', 'Un tizio con la matita che non sta mai al suo posto.'],
+  ['E una nota a margine che cancella per mestiere.', 'Cioè io.', 'Avrei dovuto capirlo subito, che era una brutta serata.']
+];
+CHAPTERS[3].register = 'man'; CHAPTERS[3].intro = [
+  ['PREFAZIONE', 'Congratulazioni per esservi smarriti.', 'Questo manuale contiene tutto ciò che occorre sapere,', 'tranne dove siete.'],
+  ['RIASSUNTO DELLE PUNTATE PRECEDENTI', '(obbligatorio per legge)', '1. Una villa: riparata.   2. Una fiaba: riparata, forse.', '3. Un treno: colpevoli, tutti.'],
+  ['NOTA TECNICA', 'La Biblioteca in cui tutto ciò è avvenuto è un\'astronave.', 'Ha sbagliato strada. Il navigatore sta ricalcolando.', 'È tutto previsto.']
+];
