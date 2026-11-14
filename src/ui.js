@@ -7,7 +7,7 @@ let SAVE = { books: CHAPTERS.map(newBook), pro: false };
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-    if (s && s.books) { s.books.forEach((b, i) => { if (SAVE.books[i]) Object.assign(SAVE.books[i], b); }); SAVE.pro = !!s.pro; }
+    if (s && s.books) { s.books.forEach((b, i) => { if (SAVE.books[i]) Object.assign(SAVE.books[i], b); }); SAVE.pro = !!s.pro; SAVE.all = !!s.all; }
     else { // salvataggio della prima versione
       const o = JSON.parse(localStorage.getItem('marginalia.v1') || 'null');
       if (o && typeof o.li === 'number') Object.assign(SAVE.books[0], { li: o.li, max: o.max || 0, done: !!o.done });
@@ -15,7 +15,7 @@ function loadSave() {
   } catch (e) { }
 }
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); } catch (e) { } }
-const unlocked = c => c === 0 || SAVE.books[c - 1].done;
+const unlocked = c => c === 0 || SAVE.all || SAVE.books[c - 1].done;
 const LEVEL_NAMES = CHAPTERS.map(c => c.levels.map(f => f().name));
 const TOTAL_MARKS = CHAPTERS.map(c => c.levels.reduce((n, f) => n + f().marks.length, 0));
 
@@ -211,10 +211,10 @@ function drawTitle() {
     button(W / 2 - 270, 418, 300, 44, 'Continua — ' + ROMAN[B.li] + '. ' + LEVEL_NAMES[SEL][B.li], () => startGame(SEL, B.li), true);
     button(W / 2 + 46, 418, 224, 44, 'Ricomincia da capo', () => startGame(SEL, 0), false);
   } else button(W / 2 - 130, 418, 260, 44, B.done ? 'Rileggi dall\'inizio' : 'Inizia a leggere', () => startGame(SEL, 0), true);
-  if (open && B.max > 0) {
+  if (open && (B.max > 0 || SAVE.all)) {
     const n = CHAPTERS[SEL].levels.length, bw = 40, xx = W / 2 - (n * (bw + 6) - 6) / 2;
     for (let i = 0; i < n; i++) {
-      const x = xx + i * (bw + 6), op = i <= B.max;
+      const x = xx + i * (bw + 6), op = i <= B.max || SAVE.all;
       ctx.fillStyle = op ? 'rgba(244,232,205,.16)' : 'rgba(244,232,205,.05)'; rr(x, 472, bw, 28, 5); ctx.fill();
       ctx.fillStyle = op ? '#f1e6cc' : 'rgba(241,230,204,.25)'; ctx.font = '15px ' + SERIF; ctx.textAlign = 'center'; ctx.fillText(ROMAN[i], x + bw / 2, 491); ctx.textAlign = 'left';
       if (op) BTN.push({ x, y: 472, w: bw, h: 28, fn: () => startGame(SEL, i) });
@@ -225,7 +225,7 @@ function drawTitle() {
   ctx.textAlign = 'center'; ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)';
   ctx.fillText(IS_TOUCH ? '◀ ▶ scegli il libro  ·  in gioco: ▲ salta (due volte), ✎ sbianchetto' : '← → scegli il libro  ·  in gioco: SPAZIO salta (due volte), X sbianchetto, P pausa, M audio', W / 2, 526);
   ctx.textAlign = 'left';
-  if (G.reg) { ctx.fillStyle = 'rgba(12,7,4,.86)'; ctx.fillRect(0, 0, W, H); BTN = []; drawRegister(84); button(W / 2 - 100, 440, 200, 44, 'Chiudi', () => { G.reg = false; }, true); }
+  if (G.reg) { ctx.fillStyle = 'rgba(12,7,4,.86)'; ctx.fillRect(0, 0, W, H); BTN = []; drawRegister(84); button(W / 2 - 250, 440, 200, 44, 'Chiudi', () => { G.reg = false; }, true); button(W / 2 - 30, 440, 300, 44, SAVE.all ? 'Modalità prova: attiva' : 'Modalità prova: apri tutto', () => { SAVE.all = !SAVE.all; writeSave(); }, false); }
 }
 function updTitle() {
   if (G.turn) return;

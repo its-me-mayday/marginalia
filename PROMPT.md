@@ -153,6 +153,7 @@ Livelli:
 - Punti: 100 per annotazione, 50 per parola corretta, 20 per parola rimessa a posto, 200 per livello finito, 1200 per libro finito, 40 per ogni caduta in meno di 15; ogni caduta toglie 10.
 - Il **registro del lettore** si vede in pausa e dalla biblioteca: la lettura in corso, la lettura migliore di ogni libro (punti, annotazioni, tempo, cadute) e il totale. Entra nel registro solo una lettura fatta dal primo all'ultimo livello.
 - I punti correnti sono sempre visibili nell'HUD.
+- **Modalità prova**: dal registro, in biblioteca, un pulsante apre tutti i libri e tutti i livelli senza doverli finire in ordine. Serve a provare e a far provare; si disattiva dallo stesso pulsante.
 
 ### Cornice
 
@@ -197,3 +198,4 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 21 | Prologo del gioco e prologo di ogni libro, ciascuno nel registro del proprio genere e con i legami ai libri precedenti. | Richiesta dell'autore. |
 | 22 | Nel traduttore letterale le piattaforme di lancio sono corte; in «Vedi alla voce» i rimandi stanno in alto e ci si salta dentro. | In verifica: il lancio da lontano non arrivava, e i rimandi a terra non si potevano evitare. |
 | 23 | I tocchi brevissimi dei tasti non vanno più persi. | Emerso provando i prologhi. |
+| 24 | Modalità prova: apre tutti i libri e i livelli dal registro. | Per poter provare ogni livello senza rifare i precedenti. |
