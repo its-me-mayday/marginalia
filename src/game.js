@@ -45,7 +45,7 @@ function respawn(first) {
   P.x = c.x - P.w / 2; P.y = c.inv ? c.y : c.y - P.h; P.vx = P.vy = 0; P.g = c.inv ? -1 : 1;
   P.dead = 0; P.born = .6; P.air = 0; P.ground = false; P.cut = false; P.sx = .3; P.sy = .3; P.trail.length = 0; P.standOn = null;
   if (!first) P.cd = Math.min(P.cd, .2);
-  G.layer = c.layer || 1;
+  P.gm = 1; G.layer = c.layer || 1; G.gflip = !!c.inv && !L.zones.length;
   G.chaseX = c.x - 620; if (c.first) G.chaseOn = false;
   G.proj = []; G.dyn = []; G.stormT = 1.2; G.autoT = 2.7;
   for (const p of L.plats) { p.x = p.x0; p.frz = 0; p.rw = 0; p.gone = 0; p.fleeing = false; p.live = 0; }
@@ -132,6 +132,7 @@ function updPlayer(dt) {
   // pagine capovolte: gravità invertita
   let g = 1; const pcx = P.x + P.w / 2;
   for (const z of L.zones) if (pcx > z.x && pcx < z.x + z.w) { g = -1; break; }
+  if (G.gflip) g = -g;
   if (g !== P.g) { P.g = g; P.air = 0; P.ground = false; AU.sfx('flip'); puff(pcx, P.y + P.h / 2, 14, { s0: 30, s1: 140, grav: -300 * g, col: GRAPHITE }); }
 
   const dir = (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
@@ -141,7 +142,7 @@ function updPlayer(dt) {
   P.coy -= dt; P.buf -= dt; P.cd -= dt; if (P.light > 0) P.light -= dt;
   if (P.form) { P.form.t -= dt; if (P.form.t <= 0) P.form = null; }
   const fk = P.form ? P.form.k : '', wet = !!L.water;
-  let low = !!L.lowAll; for (const z of (L.lows || [])) if (pcx > z.x && pcx < z.x + z.w) low = true;
+  let gmul = L.gAll || 1; if (L.lowAll) gmul = .3; for (const z of (L.lows || [])) if (pcx > z.x && pcx < z.x + z.w) gmul = .3; if (L.planets) gmul = P.gm || 1;
   if (inp.jumpP) P.buf = .13;
   if (P.buf > 0) {
     const fx = P.x + P.w / 2, fy = P.g > 0 ? P.y + P.h : P.y;
@@ -155,12 +156,12 @@ function updPlayer(dt) {
     }
   }
   if (!inp.jump && !P.cut && P.vy * P.g < -140) { P.vy *= .5; P.cut = true; }
-  P.vy = clamp(P.vy + GRAV * (low ? .3 : 1) * (wet ? .22 : 1) * (fk === 'sasso' ? 1.15 : 1) * P.g * dt, -950, 950);
+  P.vy = clamp(P.vy + GRAV * gmul * (wet ? .22 : 1) * (fk === 'sasso' ? 1.15 : 1) * P.g * dt, -950, 950);
   if (wet) P.vy = clamp(P.vy, -260, 170);
   if (fk === 'piuma' && P.vy * P.g > 105) P.vy = 105 * P.g;
 
   // asse X
-  P.x += (P.vx + (L.wind && !P.ground ? L.wind : 0)) * dt;
+  P.x += (P.vx + (L.wind && !P.ground ? L.wind : 0) + (L.pull || 0)) * dt;
   P.hidden = false; for (const sh of (L.shades || [])) if (pcx > sh.x && pcx < sh.x + sh.w) P.hidden = true;
   for (const b of L.blocks) {
     if (!blockSolid(b) || !overlap(P, b)) continue;
@@ -190,12 +191,15 @@ function updPlayer(dt) {
     }
     if (stand && stand !== P.standOn && stand.text !== undefined && !stand.tile) onLand(stand);
   }
-  P.standOn = stand;
+  P.standOn = stand; if (stand && L.planets) P.gm = stand.gm || 1;
 
   // limiti del foglio
   if (wet) { if (P.y < 46) { P.y = 46; if (P.vy < 0) P.vy = 0; } if (!L.fixed && P.y + P.h > 514) { die(); return; } }
   if (L.fixed) P.x = clamp(P.x, 4, W - P.w - 4); else P.x = clamp(P.x, L.b.x0 + 20, L.b.x1 - 40);
-  if (P.y > L.b.y1 + 80 || P.y < L.b.y0 - 80) { die(); return; }
+  // si muore solo cadendo nel verso della gravità; nell'altro verso il bordo della pagina fa da soffitto
+  if (P.g > 0 && P.y < L.b.y0 - 80) { P.y = L.b.y0 - 80; if (P.vy < 0) P.vy = 0; }
+  if (P.g < 0 && P.y > L.b.y1 + 80) { P.y = L.b.y1 + 80; if (P.vy > 0) P.vy = 0; }
+  if ((P.g > 0 && P.y > L.b.y1 + 80) || (P.g < 0 && P.y < L.b.y0 - 80)) { die(); return; }
 
   // macchie del Refuso
   if (P.born <= 0) {
@@ -220,6 +224,7 @@ function onLand(p) {
   if (p.glitch && !p.glitched) { p.glitched = true; p.glitchT = .45; }
   if (p.kind === 'rewind' && p.rw <= 0 && p.gone <= 0) p.rw = .6;
   if (p.tempo) G.beatPeriod = p.tempo;
+  if (p.flipG) { G.gflip = !G.gflip; G.flash = .25; G.shake = 5; }
   if (p.launch) { P.vy = -1010 * P.g; P.ground = false; P.coy = 0; P.cut = true; P.air = 0; P.sx = .6; P.sy = 1.5; AU.sfx('jump2'); G.shake = 5; puff(P.x + P.w / 2, P.y + P.h, 16, { ang: Math.PI / 2, spread: 1, s0: 60, s1: 260, col: '#e2672a' }); }
   if (p.form) { P.form = { k: p.form, t: 6.5, max: 6.5 }; AU.sfx('candle'); }
   if (p.kind === 'coin' && coinState(p) === 1) { P.vy = -800 * P.g; P.ground = false; P.coy = 0; P.cut = true; P.air = 0; P.sx = .7; P.sy = 1.4; AU.sfx('stomp'); }
@@ -311,7 +316,7 @@ function updChase(dt) {
   if (P.dead > 0) return;
   const fast = G.L.fast && P.x > G.L.fast;
   if (fast && !G.L.fastSaid) { G.L.fastSaid = true; say('Ha sentito il mio nome. Ora corre.'); }
-  G.chaseX += (fast ? 160 : 142) * dt; G.chaseX = Math.max(G.chaseX, P.x - 730);
+  G.chaseX += (G.L.chaseSpeed || (fast ? 160 : 142)) * dt; G.chaseX = Math.max(G.chaseX, P.x - 730);
   if (P.x < G.chaseX + 4 && P.born <= 0) die();
   if (Math.random() < .5) puff(G.chaseX + rnd(-10, 14), G.cam.y + rnd(H), 1, { s0: 20, s1: 90, ang: 0, spread: 1, col: DEEP, grav: 0, z0: 2, z1: 5 });
 }
@@ -325,7 +330,7 @@ function nextTarget() {
   const T = BT[b.hp]; b.tgt = { bad: T[0], good: T[1], x: T[2], y: T[3], t: 0 };
   b.phase = Math.floor(b.hp / 3) + 1;
   if (G.L.fairyBoss) { G.L.water = b.phase === 2; G.bossDark = b.phase === 3; }
-  if (G.L.manBoss) { G.L.lowAll = b.phase === 2; }
+  if (G.L.manBoss) { G.L.lowAll = b.phase === 2; if (b.phase !== 3) G.L.pull = 0; }
   if (G.L.noirBoss) { G.L.beamsOn = b.phase === 2; G.L.wind = b.phase === 3 ? -120 : 0; }
 }
 function bossSources() { return G.boss.phase < 3 ? [{ x: 480, y: 104 }] : [{ x: 150, y: 104 }, { x: 810, y: 104 }]; }
@@ -339,6 +344,7 @@ function updBoss(dt) {
     return;
   }
   if (b.said < b.phase && b.intro < 1.6) { b.said = b.phase; say(G.L.bossSay[b.phase - 1]); }
+  if (G.L.manBoss && b.phase === 3) G.L.pull = (Math.floor(b.t / 3.2) % 2 ? 1 : -1) * 120;
   if (b.intro > 0) { b.intro -= dt; return; }
   if (P.dead > 0) return;
   if (b.tgt) b.tgt.t += dt;
@@ -367,7 +373,7 @@ function bossErase(cx, cy) {
   G.fly.push({ text: t.good, x: t.x, y: t.y, t: 0, kind: 'restore' });
   puff(t.x, t.y, 30, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 });
   const old = b.phase;
-  if (b.hp >= G.L.targets.length) { b.tgt = null; b.dead = .001; G.L.lowAll = false; G.L.water = false; G.bossDark = false; G.L.beamsOn = false; G.L.wind = 0; G.proj = []; G.dyn = []; AU.sfx('win'); G.flash = 1; return; }
+  if (b.hp >= G.L.targets.length) { b.tgt = null; b.dead = .001; G.L.lowAll = false; G.L.pull = 0; G.L.water = false; G.bossDark = false; G.L.beamsOn = false; G.L.wind = 0; G.proj = []; G.dyn = []; AU.sfx('win'); G.flash = 1; return; }
   nextTarget();
   if (b.phase !== old) { G.proj = []; G.dyn = []; b.intro = 2; b.shoot = 1.4; b.stainT = 2.4; G.flash = .6; G.cp = { x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110, y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470, inv: false, layer: 1 }; }
 }

@@ -121,26 +121,24 @@ Livelli:
 
 ### Quarto libro: «Manuale del passeggero interstellare smarrito»
 
-Si sblocca a terzo libro finito. Fantascienza comica nello spirito di Douglas Adams, con invenzioni proprie: assurdo, burocrazia, un narratore impassibile che sbaglia quasi tutto.
+Si sblocca a terzo libro finito. Fantascienza vera, ambientata tutta nello spazio, con l'umorismo nello spirito di Douglas Adams (invenzioni proprie) affidato alle battute: il manuale impassibile, il navigatore permaloso, l'autostoppista. **L'idea centrale è la gravità**: ogni livello la cambia in un modo diverso.
 
-- **Il libro è un manuale**: voci enciclopediche, avvertenze e note a piè di pagina. Motto: «È TUTTO PREVISTO».
-- **Storia**: la Biblioteca dei Margini è un'astronave-archivio che ha sbagliato strada per colpa di MARGINE, navigatore permaloso. A ogni caduta di Postilla commenta: «Ricalcolo.»
-- **Il Refuso rimanda**: «vedi alla voce…», in cerchio. Quarto verbo dopo macchia, scambia, cancella.
-- **Stile**: colori da manuale anni '70 (crema, arancio, turchese), diagrammi inutili «non in scala»; nello spazio, testo da terminale su blu notte con un pianeta arancione.
-- **Musica**: sintetizzatori allegri e un po' storti, da sala d'attesa.
-- **Potere nuovo, il rimando**: Postilla entra in un asterisco e sbuca dalla sua nota.
-- **Filo**: la voce «Finale» dice «vedi alla voce Lettore», che dice «vedi alla voce Finale». Il viandante è a bordo come autostoppista. Le note del lettore, per la prima volta, non correggono niente: aggiunge solo «vedi tu» e passa il libro a qualcun altro.
+- **Storia**: la Biblioteca dei Margini è un'astronave-archivio che ha sbagliato strada per colpa di MARGINE, il navigatore. A ogni caduta di Postilla commenta: «Ricalcolo.»
+- **Stile**: spazio blu notte con stelle in parallasse, testo da terminale chiaro, accenti arancio. Ogni livello ha il suo fondale: interni della nave con oblò, scafo esterno a pannelli, pianetini, asteroidi, buco nero col disco luminoso.
+- **Musica**: sintetizzatori allegri e un po' storti.
+- **Filo**: il viandante è a bordo come autostoppista; la voce «Finale» rimanda a «Lettore» e viceversa; le note del lettore, per la prima volta, non correggono niente.
+- **Regola di leggibilità**: nei livelli scuri parole-nemico e macchie devono staccarsi dal fondo (targhetta rossa chiara, bordo viola). Niente nemici su piattaforme corte in gravità ridotta: un salto lì ti spara via.
 
 Livelli:
 
-1. **Avvertenze** — un elenco di divieti che vanno infranti tutti; primi asterischi-portale.
-2. **Gravità facoltativa** — zone a gravità ridotta: salti lunghissimi e lentissimi.
-3. **L'ufficio moduli** — quattro timbri da raccogliere; sportelli che aprono e chiudono a tempo; lo sportello finale apre solo a pratica completa.
-4. **Note a piè di pagina** — si rimbalza via asterisco tra il testo, in alto, e le note, in fondo.
-5. **Il motore a coincidenze** — ogni riga diventa a turno un divano (si rimbalza) e una nuvola (non regge), con preavviso.
-6. **Il traduttore letterale** — i modi di dire succedono davvero: «fare un salto» ti lancia, «prendere il volo» ti fa planare, «cadere dalle nuvole» fa comparire nuvole, «restare di sasso» ti fa sasso, «andare a rotoli», «in un batter d'occhio», «perdere il filo».
-7. **Vedi alla voce** — ogni nodo ha tre rimandi in alto: due sono circolari e ti riportano indietro, è buono solo quello che non rimanda a niente.
-8. **Il Servizio Clienti dell'Universo** (boss) — un reclamo in tre fasi; nella seconda la gravità è sospesa, nella terza le risposte automatiche arrivano a raffica.
+1. **Decollo** — dentro la nave; la gravità viene ridotta a tratti: si imparano i salti lunghi e lenti.
+2. **Passeggiata spaziale** — fuori dallo scafo, gravità ridotta per tutto il livello; pannelli e antenne che oscillano piano; se manchi la presa vai alla deriva.
+3. **Piccoli pianeti** — ogni riga poggia su un pianetino con la sua gravità scritta sopra (0,1 g, 1 g, 3 g). Conta la gravità del pianeta da cui salti: dai leggeri si vola, dai pesanti si saltella.
+4. **Campo di asteroidi** — gravità 0,6; asteroidi-piattaforma che vanno e vengono, meteore che attraversano su e giù.
+5. **Sottosopra** — piastre arancioni che invertono la gravità di tutta la nave: si cammina sul soffitto e si torna giù.
+6. **Il buco nero** — tutto viene tirato all'indietro mentre si corre in avanti, e una cancellatura insegue.
+7. **Teletrasporto** — asterischi arancioni come varchi tra due navi, una delle quali a gravità ridotta.
+8. **MARGINE** (boss) — il navigatore in persona. Prima fase normale, nella seconda la gravità è ridotta, nella terza tira di lato e cambia verso ogni pochi secondi.
 
 ### Prologhi
 
@@ -200,3 +198,5 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 23 | I tocchi brevissimi dei tasti non vanno più persi. | Emerso provando i prologhi. |
 | 24 | Modalità prova: apre tutti i libri e i livelli dal registro. | Per poter provare ogni livello senza rifare i precedenti. |
 | 25 | Nei livelli scuri (noir, spazio) le parole-nemico sono chiare su fondo rosso e le macchie hanno un bordo viola. | Segnalazione dell'autore: non si vedevano e si confondevano con lo sfondo. |
+| 26 | Quarto libro rifatto da capo: tutto nello spazio, con la gravità come idea centrale; via ufficio moduli, note a piè di pagina, coincidenze, traduttore letterale e «vedi alla voce». | Giudizio dell'autore: «penoso tranne la gravità», e non c'entrava con la fantascienza. |
+| 27 | Il bordo superiore della pagina fa da soffitto invece di uccidere: si muore solo cadendo nel verso della gravità. | Nei pianeti leggeri i salti alti uscivano dalla pagina. |
