@@ -1,52 +1,85 @@
 # Marginalia
 
-Platform narrativo per browser. Postilla, una nota a margine fatta d'inchiostro, entra nei libri per ripararli dal Refuso.
+[![CI](https://github.com/its-me-mayday/marginalia/actions/workflows/ci.yml/badge.svg)](https://github.com/its-me-mayday/marginalia/actions/workflows/ci.yml)
+![versione](https://img.shields.io/github/package-json/v/its-me-mayday/marginalia)
+![licenza](https://img.shields.io/badge/licenza-MIT-blue)
 
-- **Gioca online:** https://its-me-mayday.github.io/marginalia/
-- **In locale:** apri `index.html` (file unico, autonomo: nessun server, nessuna dipendenza esterna).
-- **Comandi:** ← → muovi · SPAZIO salta (due volte) · X sbianchetto · P pausa · M audio. Su telefono compaiono i tasti touch.
+**Un platform narrativo per browser in cui le piattaforme sono le righe dei libri.**
 
-## Il gioco
+Esiste una biblioteca dove finiscono i libri che qualcuno ha amato troppo. Lì un errore di stampa, il **Refuso**, ha imparato a moltiplicarsi, e una nota a margine scritta a matita, **Postilla**, ha imparato a camminare. Postilla entra nei libri per ripararli. O così crede.
 
-Le piattaforme sono le righe del testo. Ogni libro è un genere, e ogni livello ha una meccanica propria.
+▶ **[Gioca online](https://its-me-mayday.github.io/marginalia/)**, oppure scarica `index.html` e aprilo: è un file unico, senza server e senza dipendenze.
 
-- **Libro I — «La casa di Vetrano»**: un diario gotico. Otto livelli e un boss: il diario che mente al buio, le righe che scappano, le piattaforme che esistono solo sul battito, la pagina letta al contrario, le lettere giganti, lo specchio a due versioni.
-- **Libro II — «C'era una volta, forse»**: una fiaba illustrata, che si apre solo a primo libro finito. Sette livelli e un boss: le parole da ricalcare (rana, piuma, sasso), le parole scambiate, il lupo che non va svegliato, il giorno e la notte che si alternano, il bosco allagato, le rime, la lanterna di Brina.
-- **Libro III — «Chi ha strappato l'ultima pagina»**: un giallo su un treno di notte, che si apre a secondo libro finito. Sette livelli e un boss: le ombre dei lampioni, gli omissis, il tetto del treno, gli interrogatori a tre versioni, il pedinamento nell'ombra, il palazzo mentale, la fuga senza sbianchetto.
-- **Libro IV — «Manuale del passeggero interstellare smarrito»**: fantascienza comica nello spazio, che si apre a terzo libro finito. Sette livelli e un boss, tutti giocati sulla gravità: ridotta, diversa per ogni pianetino, invertita, risucchiata da un buco nero.
+## I libri
 
-Finiti i quattro libri si apre l'**epilogo**, «Il margine»: l'incontro con il lettore e una scelta che decide il finale.
+Ogni libro è un genere diverso, con la sua grafica, la sua musica, le sue meccaniche e un boss con una regola propria. Si aprono in ordine.
 
-All'avvio un prologo presenta la biblioteca, e ogni libro si apre con il suo, scritto nel registro del genere.
+| | Libro | Genere | Idea centrale | Boss |
+|---|---|---|---|---|
+| I | **La casa di Vetrano** | gotico, diario | il narratore mente: righe false, righe nascoste, battito sotto il pavimento, la pagina al contrario, lo specchio | colpisci solo sul battito |
+| II | **C'era una volta, forse** | fiaba illustrata | il ricalco: tocca «rana», «piuma», «sasso» e ne prendi le qualità; parole scambiate, il lupo, il bosco allagato | il Narratore rimescola le parole |
+| III | **Chi ha strappato l'ultima pagina** | giallo su un treno | ombre, omissis, interrogatori, pedinamento, e Postilla indagata | porta le prove a Corsivo |
+| IV | **Manuale del passeggero interstellare smarrito** | fantascienza comica | la gravità: ridotta, diversa per ogni pianetino, capovolta, risucchiata da un buco nero | metà delle frasi sono sul soffitto |
+| ∞ | **Il margine** | epilogo | l'incontro con il lettore, e una scelta che decide il finale | — |
 
-Gli asterischi a matita nascondono le note del lettore che ha dato origine a tutto. In pausa c'è il registro del lettore, con punti e statistiche di ogni libro. I progressi si salvano nel browser.
+Gli asterischi a matita nascondono le note del lettore che ha dato origine a tutto: chi le trova tutte legge una nota in più alla fine di ogni libro. Il registro del lettore, in pausa e in biblioteca, tiene punti e statistiche di ogni libro. I progressi si salvano nel browser.
 
-## Come è nato
+## Comandi
 
-Il gioco è stato generato da un prompt, riportato per intero e tenuto aggiornato in [`PROMPT.md`](PROMPT.md) insieme al registro delle modifiche.
+| | Tastiera | Telefono | Gamepad |
+|---|---|---|---|
+| muoversi | ← → oppure A D | ◀ ▶ | levetta o croce |
+| saltare (anche due volte) | Spazio, ↑, W, Z | ▲ | A |
+| sbianchetto | X, Shift, K | ✎ | X / B / RB |
+| pausa e registro | P, Esc | ❙❙ | Start |
+| audio | M | ♪ | |
+
+In biblioteca, **Registro → Modalità prova** apre tutti i libri e i livelli senza doverli finire in ordine.
 
 ## Sviluppo
 
-Il sorgente è in `src/`; `node build.js` rigenera `index.html` unendo i file e incorporando il font.
+Serve Node 20 o più recente.
 
-| File | Contenuto |
+```bash
+npm ci
+npx playwright install chromium   # browser per i test, una volta sola
+npm run build                     # genera index.html da src/
+npm run check                     # formattazione, build, lint e test
+```
+
+| Comando | Cosa fa |
 |---|---|
-| `src/core.js` | canvas, input (tastiera, touch, gamepad), audio procedurale, particelle |
-| `src/levels.js` | libri, livelli, testi, annotazioni, finali |
-| `src/game.js` | fisica, Postilla, nemici, boss |
-| `src/render.js` | disegno del mondo |
-| `src/ui.js` | biblioteca, HUD, registro, transizioni, finali, salvataggio |
+| `npm run build` | costruisce `index.html` (codice, stile e font in un solo file) |
+| `npm run format` | formatta il codice con Prettier |
+| `npm run lint` | ESLint sui sorgenti e controllo del bundle completo |
+| `npm test` | 56 test automatici in Chromium |
+| `npm run check` | tutto quanto sopra; la CI esegue lo stesso comando |
 
-Regole: commit in formato Conventional Commits; a ogni modifica del gioco si aggiorna anche `PROMPT.md`.
+### Struttura
 
-### Aggiungere una storia
+```
+src/
+  core.js      canvas, input, audio generato, particelle
+  levels.js    i libri e i livelli (solo dati)
+  game.js      fisica, Postilla, nemici, sbianchetto, boss
+  render.js    disegno del mondo
+  ui.js        biblioteca, registro, prologhi, finali, salvataggio, ciclo principale
+tests/         test Node + Playwright e giocatori automatici
+docs/          architettura
+index.html     il gioco pubblicato (generato, non si modifica a mano)
+```
 
-In `src/levels.js` aggiungi un oggetto a `CHAPTERS` con la sua lista di funzioni-livello, costruite con `builder()` come quelle esistenti.
+### Test
 
-## Licenza
+I test non si limitano a controllare che il codice parta. Un **giocatore automatico** attraversa ogni livello usando solo i comandi (sinistra, destra, salto, sbianchetto), così ogni livello è verificato completabile. Le regole di ogni boss sono provate in entrambi i versi. Sono coperti anche prologo, salvataggio e ricaricamento, salvataggi vecchi o rovinati, sblocchi, epilogo con le sue due scelte, e il disegno di ogni schermata, anche su telefono. Dettagli in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#test).
 
-Codice e testi: licenza MIT (vedi `LICENSE`).
+## Documentazione
 
-## Crediti
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): motore, formato dei livelli, tipi di piattaforma, boss, audio, salvataggi, test, come aggiungere un libro.
+- [PROMPT.md](PROMPT.md): il prompt completo che descrive il gioco, tenuto sempre allineato, e il registro di ogni modifica con il suo perché. Il gioco è nato da qui.
+- [CHANGELOG.md](CHANGELOG.md): tutte le versioni, dalla 0.1.0.
+- [CONTRIBUTING.md](CONTRIBUTING.md): ciclo di lavoro, commit, rilasci.
 
-Font: EB Garamond (SIL Open Font License 1.1, vedi `fonts/`).
+## Licenza e crediti
+
+Codice e testi sotto licenza [MIT](LICENSE). Font: EB Garamond, SIL Open Font License 1.1 (vedi `fonts/`). Musica ed effetti sonori sono generati dal codice.

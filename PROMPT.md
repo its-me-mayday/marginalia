@@ -16,6 +16,8 @@ Costruisci un platform 2D narrativo per browser, da pubblicare su un sito web st
 - Comandi: tastiera (← → o A D, SPAZIO per saltare, X per lo sbianchetto, P pausa, M audio), gamepad, e tasti touch a schermo su telefono (in orizzontale sovrapposti, in verticale sotto il gioco).
 - Salvataggio dei progressi in `localStorage` (livello raggiunto, indice dei livelli sbloccati), sempre dentro try/catch.
 - Le storie sono moduli: `CHAPTERS` in `levels.js` è una lista, e ogni storia ha la propria lista di funzioni-livello costruite con lo stesso `builder()`.
+- Il codice è formattato con Prettier e controllato con ESLint, anche sul bundle completo (nessun simbolo non definito o inutilizzato). Il numero di versione viene da `package.json`, iniettato dal build e mostrato in biblioteca.
+- Test automatici con Node e Playwright: validazione dei dati di ogni livello, un giocatore automatico che completa ogni livello normale usando solo i comandi, le regole di ogni boss in positivo e in negativo, i flussi della cornice (prologo, salvataggio, sblocchi, modalità prova, epilogo) e il disegno di ogni schermata. La CI li esegue a ogni push.
 
 ### Concept
 
@@ -186,8 +188,10 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 ### Regole del repository
 
 - Commit in formato Conventional Commits, senza righe di co-autore.
-- `PROMPT.md` va aggiornato a ogni modifica del gioco.
-- `index.html` alla radice è il gioco pubblicato: va rigenerato con `node build.js` prima di ogni commit che tocca `src/`.
+- Ogni modifica del gioco aggiorna tre cose: `PROMPT.md` (il prompt e il registro qui sotto), `CHANGELOG.md` (sezione «Non rilasciato»), e i test se cambia una regola.
+- Versioni semantiche: nuovo libro o meccanica = minore, correzione = patch. Ogni rilascio ha il suo tag `vX.Y.Z`.
+- `index.html` alla radice è il gioco pubblicato: va rigenerato con `npm run build` prima di ogni commit che tocca `src/`. Prima di ogni commit: `npm run check` (formattazione, build, lint, test).
+- Dettagli in `CONTRIBUTING.md`; il funzionamento del motore e il formato dei livelli in `docs/ARCHITECTURE.md`.
 
 ---
 
@@ -225,3 +229,4 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 28 | Ogni boss ha una regola propria: battito, parole rimescolate, prove da consegnare, frasi sul soffitto. | I quattro boss erano tutti uguali. |
 | 29 | Epilogo «Il margine», sbloccato dai quattro libri: l'incontro con il lettore e una scelta con due finali. | Il gioco non aveva una conclusione. |
 | 30 | I titoli lunghi sulle copertine si rimpiccioliscono per stare in tre righe. | Il titolo del quarto libro sbordava. |
+| 31 | Versione 1.0.0: codice ripulito da ciò che restava del vecchio quarto libro, formattazione e lint, test automatici completi, CI, changelog, versioni con tag, documentazione dell'architettura. | Richiesta dell'autore: codice di qualità ingegneristica, testato e tracciato. |
