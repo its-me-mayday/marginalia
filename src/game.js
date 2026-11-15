@@ -2,447 +2,1263 @@
    MARGINALIA — mondo di gioco: Postilla, fisica, nemici, boss
    ============================================================ */
 const FORMCOL = { piuma: '#7fb6d9', rana: '#5aa84a', sasso: '#8a8478' };
-const GRAV = 1800, JUMP = 620, JUMP2 = 560, RUN = 250;
+const GRAV = 1800;
+const JUMP = 620;
+const JUMP2 = 560;
+const RUN = 250;
 
 const G = {
-  state: 'title', chapter: 0, li: 0, L: null, t: 0, cam: { x: 0, y: 0 }, layer: 1, shake: 0,
-  cap: null, clue: null, coinAcc: 0, seenT: 0, stormT: 0, autoT: 0, beatAcc: 0, beatPeriod: 1.7, lastHalf: -1, beatPh: 0, pulse: 0, cp: null,
-  chaseX: 0, chaseOn: false, proj: [], dyn: [], rings: [], fly: [], boss: null,
-  stats: { deaths: 0, time: 0, marks: 0, total: 0, points: 0, fixed: 0 }, hist: [], bossDark: false, cardT: 0, turn: null, flash: 0, paused: false, end: null
+  state: 'title',
+  chapter: 0,
+  li: 0,
+  L: null,
+  t: 0,
+  cam: { x: 0, y: 0 },
+  layer: 1,
+  shake: 0,
+  cap: null,
+  clue: null,
+  seenT: 0,
+  stormT: 0,
+  autoT: 0,
+  beatAcc: 0,
+  beatPeriod: 1.7,
+  lastHalf: -1,
+  beatPh: 0,
+  pulse: 0,
+  cp: null,
+  chaseX: 0,
+  chaseOn: false,
+  proj: [],
+  dyn: [],
+  rings: [],
+  fly: [],
+  boss: null,
+  stats: { deaths: 0, time: 0, marks: 0, total: 0, points: 0, fixed: 0 },
+  hist: [],
+  bossDark: false,
+  cardT: 0,
+  turn: null,
+  flash: 0,
+  paused: false,
+  end: null,
 };
-const P = { x: 0, y: 0, w: 20, h: 30, vx: 0, vy: 0, g: 1, ground: false, coy: 0, buf: 0, air: 0, face: 1, dead: 0, born: 0, sx: 1, sy: 1, cd: 0, light: 0, run: 0, blink: 0, cut: false, standOn: null, trail: [], idle: 0 };
+const P = {
+  x: 0,
+  y: 0,
+  w: 20,
+  h: 30,
+  vx: 0,
+  vy: 0,
+  g: 1,
+  ground: false,
+  coy: 0,
+  buf: 0,
+  air: 0,
+  face: 1,
+  dead: 0,
+  born: 0,
+  sx: 1,
+  sy: 1,
+  cd: 0,
+  light: 0,
+  run: 0,
+  blink: 0,
+  cut: false,
+  standOn: null,
+  trail: [],
+  idle: 0,
+};
 
-function say(text) { G.cap = { text, t: 0, dur: 3.2 + text.length * .055 }; AU.sfx('whisper'); }
+function say(text) {
+  G.cap = { text, t: 0, dur: 3.2 + text.length * 0.055 };
+  AU.sfx('whisper');
+}
 
+/**
+ * Carica il livello `i` del libro corrente (G.chapter): costruisce i dati, calcola i limiti
+ * della pagina, azzera lo stato di livello e mette Postilla al punto di partenza.
+ */
 function loadLevel(i) {
   const ch = CHAPTERS[G.chapter];
   G.li = i;
-  const L = G.L = ch.levels[i]();
-  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-  for (const p of L.plats) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x + p.w); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); p.frz = 0; p.rw = 0; p.gone = 0; p.tw = 0; p.fleeing = false; p.live = 0; }
-  for (const b of L.blocks) { x0 = Math.min(x0, b.x); x1 = Math.max(x1, b.x + b.w); if (b.tile) { y0 = Math.min(y0, b.y); y1 = Math.max(y1, b.y + b.h); } }
-  if (L.flatY) { y0 = 330; y1 = 300; }
-  L.b = L.fixed ? { x0: 0, x1: W, y0: 0, y1: H } : { x0: x0 - 260, x1: x1 + 320, y0: Math.min(0, y0 - 330), y1: Math.max(H, y1 + 230) };
-  L.ports = []; for (const a of (L.pa || [])) { const d = (L.pb || []).find(q => q.id === a.id); if (!d) continue; L.ports.push({ x: a.x, y: a.y, tx: d.x, ty: d.y + 26, stars: a.stars, plat: a.plat, to: d.plat }); if (a.two) L.ports.push({ x: d.x, y: d.y, tx: a.x, ty: a.y + 26, stars: a.stars, plat: d.plat, to: a.plat }); }
-  for (const st of (L.stamps || [])) st.got = false; G.coinAcc = 0; P.portCd = 0;
-  for (const b of L.bugs) { b.dead = 0; b.t = rnd(9); }
+  const L = (G.L = ch.levels[i]());
+  let x0 = 1e9,
+    x1 = -1e9,
+    y0 = 1e9,
+    y1 = -1e9;
+  for (const p of L.plats) {
+    x0 = Math.min(x0, p.x);
+    x1 = Math.max(x1, p.x + p.w);
+    y0 = Math.min(y0, p.y);
+    y1 = Math.max(y1, p.y);
+    p.frz = 0;
+    p.rw = 0;
+    p.gone = 0;
+    p.tw = 0;
+    p.fleeing = false;
+    p.live = 0;
+  }
+  for (const b of L.blocks) {
+    x0 = Math.min(x0, b.x);
+    x1 = Math.max(x1, b.x + b.w);
+    if (b.tile) {
+      y0 = Math.min(y0, b.y);
+      y1 = Math.max(y1, b.y + b.h);
+    }
+  }
+  if (L.flatY) {
+    y0 = 330;
+    y1 = 300;
+  }
+  L.b = L.fixed
+    ? { x0: 0, x1: W, y0: 0, y1: H }
+    : { x0: x0 - 260, x1: x1 + 320, y0: Math.min(0, y0 - 330), y1: Math.max(H, y1 + 230) };
+  P.portCd = 0;
+  L.ports = [];
+  for (const a of L.pa || []) {
+    const d = (L.pb || []).find(q => q.id === a.id);
+    if (!d) continue;
+    L.ports.push({ x: a.x, y: a.y, tx: d.x, ty: d.y + 26, stars: a.stars, plat: a.plat, to: d.plat });
+    if (a.two) L.ports.push({ x: d.x, y: d.y, tx: a.x, ty: a.y + 26, stars: a.stars, plat: d.plat, to: a.plat });
+  }
+  for (const b of L.bugs) {
+    b.dead = 0;
+    b.t = rnd(9);
+  }
   for (const m of L.marks) m.got = false;
   for (const c of L.checks) c.got = false;
   G.layer = 1;
   G.cp = { x: L.spawn.x + 10, y: L.spawn.y + 30, inv: false, layer: 1, first: true };
-  G.beatPeriod = L.beat || 1.7; G.beatAcc = 0; G.lastHalf = -1; G.beatPh = 0;
-  G.proj = []; G.dyn = []; G.rings = []; G.fly = []; parts.length = 0;
-  G.stats.total += L.marks.length; if (i === 0) G.stats.full = true;
-  G.chaseOn = false; G.cardT = 0; G.cap = null; G.note = null; G.boss = null; G.flash = 0;
-  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.dlg = null; G.dlgDone = false; G.epiChoice = null; G.epiEnd = 0; G.hist = []; G.bossDark = false;
+  G.beatPeriod = L.beat || 1.7;
+  G.beatAcc = 0;
+  G.lastHalf = -1;
+  G.beatPh = 0;
+  G.proj = [];
+  G.dyn = [];
+  G.rings = [];
+  G.fly = [];
+  parts.length = 0;
+  G.stats.total += L.marks.length;
+  if (i === 0) G.stats.full = true;
+  G.chaseOn = false;
+  G.cardT = 0;
+  G.cap = null;
+  G.note = null;
+  G.boss = null;
+  G.flash = 0;
+  P.light = 0;
+  P.cd = 0;
+  P.form = null;
+  G.clue = null;
+  P.clue = false;
+  G.dlg = null;
+  G.dlgDone = false;
+  G.epiChoice = null;
+  G.epiEnd = 0;
+  G.hist = [];
+  G.bossDark = false;
   if (L.boss) initBoss();
   AU.setMood(L.mood);
   respawn(true);
 }
 
+/** Rimette Postilla all'ultimo capoverso raggiunto e riporta il livello allo stato iniziale delle sue parti mobili. */
 function respawn(first) {
-  const L = G.L, c = G.cp;
-  P.x = c.x - P.w / 2; P.y = c.inv ? c.y : c.y - P.h; P.vx = P.vy = 0; P.g = c.inv ? -1 : 1;
-  P.dead = 0; P.born = .6; P.air = 0; P.ground = false; P.cut = false; P.sx = .3; P.sy = .3; P.trail.length = 0; P.standOn = null;
-  if (!first) P.cd = Math.min(P.cd, .2);
-  P.gm = 1; G.layer = c.layer || 1; G.gflip = !!c.inv && !L.zones.length;
-  G.chaseX = c.x - 620; if (c.first) G.chaseOn = false;
-  G.proj = []; G.dyn = []; G.stormT = 1.2; G.autoT = 2.7;
-  for (const p of L.plats) { p.x = p.x0; p.frz = 0; p.rw = 0; p.gone = 0; p.fleeing = false; p.live = 0; }
+  const L = G.L,
+    c = G.cp;
+  P.x = c.x - P.w / 2;
+  P.y = c.inv ? c.y : c.y - P.h;
+  P.vx = P.vy = 0;
+  P.g = c.inv ? -1 : 1;
+  P.dead = 0;
+  P.born = 0.6;
+  P.air = 0;
+  P.ground = false;
+  P.cut = false;
+  P.sx = 0.3;
+  P.sy = 0.3;
+  P.trail.length = 0;
+  P.standOn = null;
+  if (!first) P.cd = Math.min(P.cd, 0.2);
+  P.gm = 1;
+  G.layer = c.layer || 1;
+  G.gflip = !!c.inv && !L.zones.length;
+  G.chaseX = c.x - 620;
+  if (c.first) G.chaseOn = false;
+  G.proj = [];
+  G.dyn = [];
+  G.stormT = 1.2;
+  G.autoT = 2.7;
+  for (const p of L.plats) {
+    p.x = p.x0;
+    p.frz = 0;
+    p.rw = 0;
+    p.gone = 0;
+    p.fleeing = false;
+    p.live = 0;
+  }
   G.br = null;
   if (L.tunnel) L.tunnel.t = 0;
-  P.form = null; G.hist = []; for (const w of (L.words || [])) w.cd = 0; for (const w of (L.wolves || [])) w.t = 0; G.autoT = L.autoPeriod || 2.7;
+  P.form = null;
+  G.hist = [];
+  for (const w of L.words || []) w.cd = 0;
+  for (const w of L.wolves || []) w.t = 0;
+  G.autoT = L.autoPeriod || 2.7;
   for (const k of L.candles) k.cd = 0;
   for (const b of L.blocks) b.off = 0;
   P.clue = false;
-  if (G.boss && !first) { G.boss.hp = (G.boss.phase - 1) * 3; for (const p of L.plats) if (p.kind === 'swap' && p.bad) { p.fixed = false; p.text = p.bad; p.tw = 0; } G.boss.intro = 1.1; G.boss.shoot = 1.6; G.boss.stainT = 2.6; nextTarget(); }
+  if (G.boss && !first) {
+    G.boss.hp = (G.boss.phase - 1) * 3;
+    for (const p of L.plats)
+      if (p.kind === 'swap' && p.bad) {
+        p.fixed = false;
+        p.text = p.bad;
+        p.tw = 0;
+      }
+    G.boss.intro = 1.1;
+    G.boss.shoot = 1.6;
+    G.boss.stainT = 2.6;
+    nextTarget();
+  }
   camera(0, true);
 }
 
 function die() {
   if (P.dead > 0) return;
-  if (G.chapter === 3 && Math.random() < .5) say(pick(['MARGINE: «Ricalcolo.»', 'MARGINE: «Ricalcolo. Di nuovo.»', 'MARGINE: «Alla prima occasione, faccia inversione.»', 'MARGINE: «Ha raggiunto una destinazione. Non la sua.»']));
-  P.dead = .8; G.stats.deaths++; G.stats.points = Math.max(0, G.stats.points - 10); G.shake = 9; AU.sfx('die');
-  puff(P.x + P.w / 2, P.y + P.h / 2, 40, { s0: 60, s1: 300, z0: 2, z1: 6, l0: .4, l1: 1, grav: 700 });
+  if (G.chapter === 3 && Math.random() < 0.5)
+    say(
+      pick([
+        'MARGINE: «Ricalcolo.»',
+        'MARGINE: «Ricalcolo. Di nuovo.»',
+        'MARGINE: «Alla prima occasione, faccia inversione.»',
+        'MARGINE: «Ha raggiunto una destinazione. Non la sua.»',
+      ])
+    );
+  P.dead = 0.8;
+  G.stats.deaths++;
+  G.stats.points = Math.max(0, G.stats.points - 10);
+  G.shake = 9;
+  AU.sfx('die');
+  puff(P.x + P.w / 2, P.y + P.h / 2, 40, { s0: 60, s1: 300, z0: 2, z1: 6, l0: 0.4, l1: 1, grav: 700 });
 }
 
+/** Una riga-piattaforma regge in questo istante? Dipende dal suo tipo (battito, scambio, rima, specchio…). */
 function solid(p) {
   if (p.kind === 'fake') return false;
   if (p.kind === 'beat') return beatOn(p);
   if (p.kind === 'rewind' && p.gone > 0) return false;
   if (p.kind === 'swap') return !!p.fixed;
-  if (p.kind === 'coin') return coinState(p) !== 2;
   if (p.kind === 'rhyme') return p.live > 0;
   if (p.layer && p.layer !== G.layer) return false;
   return true;
 }
 // ogni riga-battito vive un po' più del suo mezzo ciclo: piccola tolleranza per chi salta
-function beatOn(p) { const f = ((G.beatAcc % 2) + 2) % 2; return p.phase === 0 ? (f < 1.22) : (f >= 1 || f < .22); }
-function coinState(p) { return (p.ci + Math.floor(G.coinAcc)) % 3; }
-function doorOpen(b) { return ((G.t / b.per + b.ph) % 1) > .5; }
+function beatOn(p) {
+  const f = ((G.beatAcc % 2) + 2) % 2;
+  return p.phase === 0 ? f < 1.22 : f >= 1 || f < 0.22;
+}
 function blockSolid(b) {
   if (b.off > 0) return false;
-  if (b.gate) return G.L.stamps.some(s => !s.got);
-  if (b.door) return !doorOpen(b);
   if (b.layer && b.layer !== G.layer) return false;
   return true;
 }
-function onScreen(o, pad) { pad = pad || 80; return o.x + (o.w || 0) > G.cam.x - pad && o.x < G.cam.x + W + pad; }
+function onScreen(o, pad) {
+  pad = pad || 80;
+  return o.x + (o.w || 0) > G.cam.x - pad && o.x < G.cam.x + W + pad;
+}
 
 /* ---------------- piattaforme vive ---------------- */
 function updPlats(dt) {
-  const L = G.L, pc = P.x + P.w / 2, feet = P.y + P.h;
+  const L = G.L,
+    pc = P.x + P.w / 2,
+    feet = P.y + P.h;
   for (const p of L.plats) {
     if (p.kind === 'flee') {
-      if (p.frz > 0) { p.frz -= dt; continue; }
+      if (p.frz > 0) {
+        p.frz -= dt;
+        continue;
+      }
       if (P.standOn === p || P.dead > 0) continue;
-      const c = p.x + p.w / 2, d = Math.abs(pc - c), trig = p.w / 2 + 150;
+      const c = p.x + p.w / 2,
+        d = Math.abs(pc - c),
+        trig = p.w / 2 + 150;
       if (d < trig && Math.abs(feet - p.y) < 230) {
         const nx = clamp(p.x + sgn(c - pc) * 330 * dt, p.x0 - p.range, p.x0 + p.range);
         if (nx !== p.x) {
-          if (!p.fleeing) { p.fleeing = true; AU.sfx('flee'); }
+          if (!p.fleeing) {
+            p.fleeing = true;
+            AU.sfx('flee');
+          }
           p.x = nx;
-          if (Math.random() < .3) puff(p.x + rnd(p.w), p.y + 18, 1, { s0: 10, s1: 40, grav: 60, col: 'rgba(60,40,20,.5)', z0: 1, z1: 2.4 });
+          if (Math.random() < 0.3)
+            puff(p.x + rnd(p.w), p.y + 18, 1, { s0: 10, s1: 40, grav: 60, col: 'rgba(60,40,20,.5)', z0: 1, z1: 2.4 });
         } else p.fleeing = false;
       } else {
         p.fleeing = false;
-        if (d > trig + 90) { const dx = p.x0 - p.x; if (Math.abs(dx) > .5) p.x += sgn(dx) * Math.min(Math.abs(dx), 120 * dt); }
+        if (d > trig + 90) {
+          const dx = p.x0 - p.x;
+          if (Math.abs(dx) > 0.5) p.x += sgn(dx) * Math.min(Math.abs(dx), 120 * dt);
+        }
       }
     } else if (p.kind === 'ferry') {
       // riga curiosa: viene a prenderti e ti riporta a casa sua
-      const on = P.standOn === p; let tx = p.x0;
-      if (!on && P.dead <= 0 && Math.abs(pc - (p.x0 + p.w / 2)) < p.range + p.w / 2 + 340 && Math.abs(feet - p.y) < 260) tx = p.x0 - p.dirn * p.range;
-      const sp = (on ? 135 : 220) * dt, dx = clamp(tx - p.x, -sp, sp);
-      p.x += dx; if (on) P.x += dx; p.moving = Math.abs(dx) > .001;
-    } else if (p.kind === 'sway') { const nx = p.x0 + Math.sin(G.t * p.sp + p.ph) * p.amp, dx = nx - p.x; p.x = nx; if (P.standOn === p) P.x += dx;
-    } else if (p.kind === 'rhyme') { if (p.live > 0 && P.standOn !== p) p.live -= dt;
+      const on = P.standOn === p;
+      let tx = p.x0;
+      if (!on && P.dead <= 0 && Math.abs(pc - (p.x0 + p.w / 2)) < p.range + p.w / 2 + 340 && Math.abs(feet - p.y) < 260)
+        tx = p.x0 - p.dirn * p.range;
+      const sp = (on ? 135 : 220) * dt,
+        dx = clamp(tx - p.x, -sp, sp);
+      p.x += dx;
+      if (on) P.x += dx;
+      p.moving = Math.abs(dx) > 0.001;
+    } else if (p.kind === 'sway') {
+      const nx = p.x0 + Math.sin(G.t * p.sp + p.ph) * p.amp,
+        dx = nx - p.x;
+      p.x = nx;
+      if (P.standOn === p) P.x += dx;
+    } else if (p.kind === 'rhyme') {
+      if (p.live > 0 && P.standOn !== p) p.live -= dt;
     } else if (p.kind === 'rewind') {
-      if (p.rw > 0) { p.rw -= dt; if (p.rw <= 0) { p.gone = 2.6; puff(p.x + p.w / 2, p.y + 10, 10, { jx: p.w / 2, s0: 10, s1: 60, grav: 0, col: 'rgba(30,20,10,.5)' }); AU.sfx('page'); } }
-      else if (p.gone > 0) p.gone -= dt;
+      if (p.rw > 0) {
+        p.rw -= dt;
+        if (p.rw <= 0) {
+          p.gone = 2.6;
+          puff(p.x + p.w / 2, p.y + 10, 10, { jx: p.w / 2, s0: 10, s1: 60, grav: 0, col: 'rgba(30,20,10,.5)' });
+          AU.sfx('page');
+        }
+      } else if (p.gone > 0) p.gone -= dt;
     }
   }
-  for (const b of L.blocks) if (b.off > 0) { b.off -= dt; if (b.off <= 0 && overlap(P, b)) b.off = .2; }
+  for (const b of L.blocks)
+    if (b.off > 0) {
+      b.off -= dt;
+      if (b.off <= 0 && overlap(P, b)) b.off = 0.2;
+    }
 }
 
 /* ---------------- Postilla ---------------- */
+/** Fisica e comandi di Postilla per un passo di simulazione: gravità locale, salto, collisioni, pericoli, sbianchetto. */
 function updPlayer(dt) {
   const L = G.L;
-  if (P.dead > 0) { P.dead -= dt; if (P.dead <= 0) respawn(); return; }
+  if (P.dead > 0) {
+    P.dead -= dt;
+    if (P.dead <= 0) respawn();
+    return;
+  }
   if (P.born > 0) P.born -= dt;
 
   // pagine capovolte: gravità invertita
-  let g = 1; const pcx = P.x + P.w / 2;
-  for (const z of L.zones) if (pcx > z.x && pcx < z.x + z.w) { g = -1; break; }
+  let g = 1;
+  const pcx = P.x + P.w / 2;
+  for (const z of L.zones)
+    if (pcx > z.x && pcx < z.x + z.w) {
+      g = -1;
+      break;
+    }
   if (G.gflip) g = -g;
-  if (g !== P.g) { P.g = g; P.air = 0; P.ground = false; AU.sfx('flip'); puff(pcx, P.y + P.h / 2, 14, { s0: 30, s1: 140, grav: -300 * g, col: GRAPHITE }); }
+  if (g !== P.g) {
+    P.g = g;
+    P.air = 0;
+    P.ground = false;
+    AU.sfx('flip');
+    puff(pcx, P.y + P.h / 2, 14, { s0: 30, s1: 140, grav: -300 * g, col: GRAPHITE });
+  }
 
   const dir = (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
-  if (dir) { P.vx = clamp(P.vx + dir * (P.ground ? 2700 : 2000) * dt, -RUN, RUN); P.face = dir; P.idle = 0; }
-  else { const f = (P.ground ? 2500 : 900) * dt; P.vx = Math.abs(P.vx) <= f ? 0 : P.vx - sgn(P.vx) * f; P.idle += dt; }
+  if (dir) {
+    P.vx = clamp(P.vx + dir * (P.ground ? 2700 : 2000) * dt, -RUN, RUN);
+    P.face = dir;
+    P.idle = 0;
+  } else {
+    const f = (P.ground ? 2500 : 900) * dt;
+    P.vx = Math.abs(P.vx) <= f ? 0 : P.vx - sgn(P.vx) * f;
+    P.idle += dt;
+  }
 
-  P.coy -= dt; P.buf -= dt; P.cd -= dt; if (P.light > 0) P.light -= dt;
-  if (P.form) { P.form.t -= dt; if (P.form.t <= 0) P.form = null; }
-  const fk = P.form ? P.form.k : '', wet = !!L.water;
-  let gmul = L.gAll || 1; if (L.lowAll) gmul = .3; for (const z of (L.lows || [])) if (pcx > z.x && pcx < z.x + z.w) gmul = .3; if (L.planets) gmul = P.gm || 1;
-  if (inp.jumpP) P.buf = .13;
+  P.coy -= dt;
+  P.buf -= dt;
+  P.cd -= dt;
+  if (P.light > 0) P.light -= dt;
+  if (P.form) {
+    P.form.t -= dt;
+    if (P.form.t <= 0) P.form = null;
+  }
+  const fk = P.form ? P.form.k : '',
+    wet = !!L.water;
+  let gmul = L.gAll || 1;
+  if (L.lowAll) gmul = 0.3;
+  for (const z of L.lows || []) if (pcx > z.x && pcx < z.x + z.w) gmul = 0.3;
+  if (L.planets) gmul = P.gm || 1;
+  if (inp.jumpP) P.buf = 0.13;
   if (P.buf > 0) {
-    const fx = P.x + P.w / 2, fy = P.g > 0 ? P.y + P.h : P.y;
-    if (wet && !P.ground) { P.vy = -250; P.buf = 0; P.cut = true; P.sx = .8; P.sy = 1.2; AU.sfx('swim'); puff(fx, fy, 4, { s0: 10, s1: 50, grav: -120, col: 'rgba(255,255,255,.7)', z0: 1.5, z1: 3 }); }
-    else if (P.ground || P.coy > 0) {
-      P.vy = -JUMP * (fk === 'rana' ? 1.42 : 1) * (wet ? .6 : 1) * P.g; P.ground = false; P.coy = 0; P.buf = 0; P.cut = false; P.sx = .7; P.sy = 1.34; AU.sfx('jump');
-      puff(fx, fy, 7, { ang: -Math.PI / 2 * P.g, spread: 1.2, s0: 30, s1: 120, z0: 1.5, z1: 3.5, grav: 500 * P.g });
+    const fx = P.x + P.w / 2,
+      fy = P.g > 0 ? P.y + P.h : P.y;
+    if (wet && !P.ground) {
+      P.vy = -250;
+      P.buf = 0;
+      P.cut = true;
+      P.sx = 0.8;
+      P.sy = 1.2;
+      AU.sfx('swim');
+      puff(fx, fy, 4, { s0: 10, s1: 50, grav: -120, col: 'rgba(255,255,255,.7)', z0: 1.5, z1: 3 });
+    } else if (P.ground || P.coy > 0) {
+      P.vy = -JUMP * (fk === 'rana' ? 1.42 : 1) * (wet ? 0.6 : 1) * P.g;
+      P.ground = false;
+      P.coy = 0;
+      P.buf = 0;
+      P.cut = false;
+      P.sx = 0.7;
+      P.sy = 1.34;
+      AU.sfx('jump');
+      puff(fx, fy, 7, { ang: (-Math.PI / 2) * P.g, spread: 1.2, s0: 30, s1: 120, z0: 1.5, z1: 3.5, grav: 500 * P.g });
     } else if (P.air < 1 && fk !== 'sasso') {
-      P.air++; P.vy = -JUMP2 * P.g; P.buf = 0; P.cut = false; P.sx = .68; P.sy = 1.36; AU.sfx('jump2');
-      for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; parts.push({ x: fx + Math.cos(a) * 10, y: fy + Math.sin(a) * 4, vx: Math.cos(a) * 90, vy: Math.sin(a) * 30 + 40 * P.g, life: 0, max: .4, size: 2.4, col: GRAPHITE, grav: 0, drag: 3, glow: 0 }); }
+      P.air++;
+      P.vy = -JUMP2 * P.g;
+      P.buf = 0;
+      P.cut = false;
+      P.sx = 0.68;
+      P.sy = 1.36;
+      AU.sfx('jump2');
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * TAU;
+        parts.push({
+          x: fx + Math.cos(a) * 10,
+          y: fy + Math.sin(a) * 4,
+          vx: Math.cos(a) * 90,
+          vy: Math.sin(a) * 30 + 40 * P.g,
+          life: 0,
+          max: 0.4,
+          size: 2.4,
+          col: GRAPHITE,
+          grav: 0,
+          drag: 3,
+          glow: 0,
+        });
+      }
     }
   }
-  if (!inp.jump && !P.cut && P.vy * P.g < -140) { P.vy *= .5; P.cut = true; }
-  P.vy = clamp(P.vy + GRAV * gmul * (wet ? .22 : 1) * (fk === 'sasso' ? 1.15 : 1) * P.g * dt, -950, 950);
+  if (!inp.jump && !P.cut && P.vy * P.g < -140) {
+    P.vy *= 0.5;
+    P.cut = true;
+  }
+  P.vy = clamp(P.vy + GRAV * gmul * (wet ? 0.22 : 1) * (fk === 'sasso' ? 1.15 : 1) * P.g * dt, -950, 950);
   if (wet) P.vy = clamp(P.vy, -260, 170);
   if (fk === 'piuma' && P.vy * P.g > 105) P.vy = 105 * P.g;
 
   // asse X
   P.x += (P.vx + (L.wind && !P.ground ? L.wind : 0) + (L.pull || 0)) * dt;
-  P.hidden = false; for (const sh of (L.shades || [])) if (pcx > sh.x && pcx < sh.x + sh.w) P.hidden = true;
+  P.hidden = false;
+  for (const sh of L.shades || []) if (pcx > sh.x && pcx < sh.x + sh.w) P.hidden = true;
   for (const b of L.blocks) {
     if (!blockSolid(b) || !overlap(P, b)) continue;
-    if (b.twig && fk === 'sasso') { b.off = 1e9; P.form.t = Math.min(P.form.t, 1); AU.sfx('hit'); G.shake = 6; puff(b.x + b.w / 2, P.y, 30, { jy: 110, s0: 40, s1: 240, col: '#5b3a1e' }); continue; }
-    if (P.vx > 0) P.x = b.x - P.w; else if (P.vx < 0) P.x = b.x + b.w;
-    else P.x = (P.x + P.w / 2 < b.x + b.w / 2) ? b.x - P.w : b.x + b.w;
+    if (b.twig && fk === 'sasso') {
+      b.off = 1e9;
+      P.form.t = Math.min(P.form.t, 1);
+      AU.sfx('hit');
+      G.shake = 6;
+      puff(b.x + b.w / 2, P.y, 30, { jy: 110, s0: 40, s1: 240, col: '#5b3a1e' });
+      continue;
+    }
+    if (P.vx > 0) P.x = b.x - P.w;
+    else if (P.vx < 0) P.x = b.x + b.w;
+    else P.x = P.x + P.w / 2 < b.x + b.w / 2 ? b.x - P.w : b.x + b.w;
     P.vx = 0;
   }
   // asse Y
-  const py = P.y, was = P.ground; P.y += P.vy * dt; P.ground = false; let stand = null;
+  const py = P.y,
+    was = P.ground;
+  P.y += P.vy * dt;
+  P.ground = false;
+  let stand = null;
   for (const b of L.blocks) {
     if (!blockSolid(b) || !overlap(P, b)) continue;
-    if (P.vy > 0) { P.y = b.y - P.h; if (P.g > 0) { P.ground = true; stand = b; } }
-    else { P.y = b.y + b.h; if (P.g < 0) { P.ground = true; stand = b; } }
+    if (P.vy > 0) {
+      P.y = b.y - P.h;
+      if (P.g > 0) {
+        P.ground = true;
+        stand = b;
+      }
+    } else {
+      P.y = b.y + b.h;
+      if (P.g < 0) {
+        P.ground = true;
+        stand = b;
+      }
+    }
     P.vy = 0;
   }
   for (const p of L.plats) {
     if (!solid(p) || P.x + P.w <= p.x + 2 || P.x >= p.x + p.w - 2) continue;
-    if (P.g > 0) { if (P.vy >= 0 && py + P.h <= p.y + 1 && P.y + P.h >= p.y) { P.y = p.y - P.h; P.vy = 0; P.ground = true; stand = p; } }
-    else if (P.vy <= 0 && py >= p.y + p.h - 1 && P.y <= p.y + p.h) { P.y = p.y + p.h; P.vy = 0; P.ground = true; stand = p; }
+    if (P.g > 0) {
+      if (P.vy >= 0 && py + P.h <= p.y + 1 && P.y + P.h >= p.y) {
+        P.y = p.y - P.h;
+        P.vy = 0;
+        P.ground = true;
+        stand = p;
+      }
+    } else if (P.vy <= 0 && py >= p.y + p.h - 1 && P.y <= p.y + p.h) {
+      P.y = p.y + p.h;
+      P.vy = 0;
+      P.ground = true;
+      stand = p;
+    }
   }
   if (P.ground) {
-    P.coy = .1; P.air = 0;
+    P.coy = 0.1;
+    P.air = 0;
     if (!was) {
-      P.sx = 1.32; P.sy = .68; AU.sfx('land');
-      puff(P.x + P.w / 2, P.g > 0 ? P.y + P.h : P.y, 6, { ang: -Math.PI / 2 * P.g, spread: 1.4, s0: 30, s1: 110, z0: 1.2, z1: 3, grav: 600 * P.g });
+      P.sx = 1.32;
+      P.sy = 0.68;
+      AU.sfx('land');
+      puff(P.x + P.w / 2, P.g > 0 ? P.y + P.h : P.y, 6, {
+        ang: (-Math.PI / 2) * P.g,
+        spread: 1.4,
+        s0: 30,
+        s1: 110,
+        z0: 1.2,
+        z1: 3,
+        grav: 600 * P.g,
+      });
     }
     if (stand && stand !== P.standOn && stand.text !== undefined && !stand.tile) onLand(stand);
   }
-  P.standOn = stand; if (stand && L.planets) P.gm = stand.gm || 1;
+  P.standOn = stand;
+  if (stand && L.planets) P.gm = stand.gm || 1;
 
   // limiti del foglio
-  if (wet) { if (P.y < 46) { P.y = 46; if (P.vy < 0) P.vy = 0; } if (!L.fixed && P.y + P.h > 514) { die(); return; } }
-  if (L.fixed) P.x = clamp(P.x, 4, W - P.w - 4); else P.x = clamp(P.x, L.b.x0 + 20, L.b.x1 - 40);
+  if (wet) {
+    if (P.y < 46) {
+      P.y = 46;
+      if (P.vy < 0) P.vy = 0;
+    }
+    if (!L.fixed && P.y + P.h > 514) {
+      die();
+      return;
+    }
+  }
+  if (L.fixed) P.x = clamp(P.x, 4, W - P.w - 4);
+  else P.x = clamp(P.x, L.b.x0 + 20, L.b.x1 - 40);
   // si muore solo cadendo nel verso della gravità; nell'altro verso il bordo della pagina fa da soffitto
-  if (P.g > 0 && P.y < L.b.y0 - 80) { P.y = L.b.y0 - 80; if (P.vy < 0) P.vy = 0; }
-  if (P.g < 0 && P.y > L.b.y1 + 80) { P.y = L.b.y1 + 80; if (P.vy > 0) P.vy = 0; }
-  if ((P.g > 0 && P.y > L.b.y1 + 80) || (P.g < 0 && P.y < L.b.y0 - 80)) { die(); return; }
+  if (P.g > 0 && P.y < L.b.y0 - 80) {
+    P.y = L.b.y0 - 80;
+    if (P.vy < 0) P.vy = 0;
+  }
+  if (P.g < 0 && P.y > L.b.y1 + 80) {
+    P.y = L.b.y1 + 80;
+    if (P.vy > 0) P.vy = 0;
+  }
+  if ((P.g > 0 && P.y > L.b.y1 + 80) || (P.g < 0 && P.y < L.b.y0 - 80)) {
+    die();
+    return;
+  }
 
   // macchie del Refuso
   if (P.born <= 0) {
-    for (const s of L.stains) { if (s.layer && s.layer !== G.layer) continue; if (s.beat !== undefined && s.beat !== G.beatPh) continue; if (overlap(P, s.jelly ? { x: s.x + 14, y: s.y + 14, w: s.w - 28, h: s.h - 28 } : { x: s.x + 8, y: s.y + 5, w: s.w - 16, h: s.h })) { die(); return; } }
-    for (const s of G.dyn) if (s.t > .95 && s.t < 2.7 && overlap(P, { x: s.x + 8, y: s.y + 5, w: s.w - 16, h: s.h })) { die(); return; }
+    for (const s of L.stains) {
+      if (s.layer && s.layer !== G.layer) continue;
+      if (s.beat !== undefined && s.beat !== G.beatPh) continue;
+      if (
+        overlap(
+          P,
+          s.jelly
+            ? { x: s.x + 14, y: s.y + 14, w: s.w - 28, h: s.h - 28 }
+            : { x: s.x + 8, y: s.y + 5, w: s.w - 16, h: s.h }
+        )
+      ) {
+        die();
+        return;
+      }
+    }
+    for (const s of G.dyn)
+      if (s.t > 0.95 && s.t < 2.7 && overlap(P, { x: s.x + 8, y: s.y + 5, w: s.w - 16, h: s.h })) {
+        die();
+        return;
+      }
   }
 
-  if (inp.eraseP) { if (P.cd <= 0) erase(); else AU.sfx('nope'); }
+  if (inp.eraseP) {
+    if (P.cd <= 0) erase();
+    else AU.sfx('nope');
+  }
 
   // animazione
-  P.sx = lerp(P.sx, 1, Math.min(1, dt * 11)); P.sy = lerp(P.sy, 1, Math.min(1, dt * 11));
-  const r0 = Math.floor(P.run / Math.PI); P.run += Math.abs(P.vx) * dt * .075;
+  P.sx = lerp(P.sx, 1, Math.min(1, dt * 11));
+  P.sy = lerp(P.sy, 1, Math.min(1, dt * 11));
+  const r0 = Math.floor(P.run / Math.PI);
+  P.run += Math.abs(P.vx) * dt * 0.075;
   if (P.ground && Math.floor(P.run / Math.PI) !== r0) AU.sfx('step');
-  P.blink -= dt; if (P.blink < -.12) P.blink = rnd(1.5, 4.5);
-  P.trail.push({ x: P.x + P.w / 2, y: P.y + P.h / 2 }); if (P.trail.length > 14) P.trail.shift();
-  if (P.ground && Math.abs(P.vx) > 200 && Math.random() < .25) puff(P.x + P.w / 2 - P.face * 8, P.g > 0 ? P.y + P.h : P.y, 1, { s0: 5, s1: 40, z0: 1, z1: 2.6, grav: 200 * P.g });
-  if (P.idle > 1.2 && Math.random() < .012) puff(P.x + P.w / 2 + rnd(-6, 6), P.y + P.h / 2, 1, { s0: 0, s1: 8, z0: 1.4, z1: 2.4, grav: 500 * P.g, l0: .5, l1: .9 });
+  P.blink -= dt;
+  if (P.blink < -0.12) P.blink = rnd(1.5, 4.5);
+  P.trail.push({ x: P.x + P.w / 2, y: P.y + P.h / 2 });
+  if (P.trail.length > 14) P.trail.shift();
+  if (P.ground && Math.abs(P.vx) > 200 && Math.random() < 0.25)
+    puff(P.x + P.w / 2 - P.face * 8, P.g > 0 ? P.y + P.h : P.y, 1, { s0: 5, s1: 40, z0: 1, z1: 2.6, grav: 200 * P.g });
+  if (P.idle > 1.2 && Math.random() < 0.012)
+    puff(P.x + P.w / 2 + rnd(-6, 6), P.y + P.h / 2, 1, {
+      s0: 0,
+      s1: 8,
+      z0: 1.4,
+      z1: 2.4,
+      grav: 500 * P.g,
+      l0: 0.5,
+      l1: 0.9,
+    });
 }
 
 function onLand(p) {
-  if (p.say && !p.said) { p.said = true; say(p.say); }
-  if (p.glitch && !p.glitched) { p.glitched = true; p.glitchT = .45; }
-  if (p.kind === 'rewind' && p.rw <= 0 && p.gone <= 0) p.rw = .6;
+  if (p.say && !p.said) {
+    p.said = true;
+    say(p.say);
+  }
+  if (p.glitch && !p.glitched) {
+    p.glitched = true;
+    p.glitchT = 0.45;
+  }
+  if (p.kind === 'rewind' && p.rw <= 0 && p.gone <= 0) p.rw = 0.6;
   if (p.tempo) G.beatPeriod = p.tempo;
-  if (p.flipG) { G.gflip = !G.gflip; G.flash = .25; G.shake = 5; }
-  if (p.launch) { P.vy = -1010 * P.g; P.ground = false; P.coy = 0; P.cut = true; P.air = 0; P.sx = .6; P.sy = 1.5; AU.sfx('jump2'); G.shake = 5; puff(P.x + P.w / 2, P.y + P.h, 16, { ang: Math.PI / 2, spread: 1, s0: 60, s1: 260, col: '#e2672a' }); }
-  if (p.form) { P.form = { k: p.form, t: 6.5, max: 6.5 }; AU.sfx('candle'); }
-  if (p.kind === 'coin' && coinState(p) === 1) { P.vy = -800 * P.g; P.ground = false; P.coy = 0; P.cut = true; P.air = 0; P.sx = .7; P.sy = 1.4; AU.sfx('stomp'); }
-  if (p.reveals) for (const q of G.L.plats) if (q.kind === 'rhyme' && q.key === p.reveals) { if (q.live <= 0) { AU.sfx('mark'); puff(q.x + q.w / 2, q.y + 8, 12, { jx: q.w / 2, s0: 10, s1: 60, grav: -40, col: '#c9a23a' }); } q.live = 4.4; }
+  if (p.flipG) {
+    G.gflip = !G.gflip;
+    G.flash = 0.25;
+    G.shake = 5;
+  }
+  if (p.reveals)
+    for (const q of G.L.plats)
+      if (q.kind === 'rhyme' && q.key === p.reveals) {
+        if (q.live <= 0) {
+          AU.sfx('mark');
+          puff(q.x + q.w / 2, q.y + 8, 12, { jx: q.w / 2, s0: 10, s1: 60, grav: -40, col: '#c9a23a' });
+        }
+        q.live = 4.4;
+      }
 }
 
 /* ---------------- lo sbianchetto ---------------- */
+/**
+ * Lo sbianchetto. Il suo effetto dipende dal livello: cancella pareti e parole corrotte, gela le righe
+ * che fuggono, rimette a posto le parole scambiate, cambia versione nello specchio, colpisce il boss.
+ */
 function erase() {
-  const L = G.L, cx = P.x + P.w / 2, cy = P.y + P.h / 2;
-  if (L.noErase) { AU.sfx('nope'); G.shake = 3; return; }
-  if (L.refuso) { const R = L.refuso; if (R.alive && G.dlgDone && !G.epiChoice && Math.hypot(cx - R.x, cy - R.y) < 160) { R.alive = false; G.epiChoice = 'erase'; G.epiEnd = 2.4; AU.sfx('erase'); G.flash = .8; G.rings.push({ x: R.x, y: R.y, t: 0, big: true }); puff(R.x, R.y, 40, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 }); return; } if (!G.dlgDone) { AU.sfx('nope'); return; } }
+  const L = G.L,
+    cx = P.x + P.w / 2,
+    cy = P.y + P.h / 2;
+  if (L.noErase) {
+    AU.sfx('nope');
+    G.shake = 3;
+    return;
+  }
+  if (L.refuso) {
+    const R = L.refuso;
+    if (R.alive && G.dlgDone && !G.epiChoice && Math.hypot(cx - R.x, cy - R.y) < 160) {
+      R.alive = false;
+      G.epiChoice = 'erase';
+      G.epiEnd = 2.4;
+      AU.sfx('erase');
+      G.flash = 0.8;
+      G.rings.push({ x: R.x, y: R.y, t: 0, big: true });
+      puff(R.x, R.y, 40, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 });
+      return;
+    }
+    if (!G.dlgDone) {
+      AU.sfx('nope');
+      return;
+    }
+  }
   if (L.mirror) {
     const nl = G.layer === 1 ? 2 : 1;
-    for (const b of L.blocks) if (b.layer === nl && overlap(P, b)) { AU.sfx('nope'); return; }
-    G.layer = nl; G.flash = .4; P.cd = .32; AU.sfx('flip');
+    for (const b of L.blocks)
+      if (b.layer === nl && overlap(P, b)) {
+        AU.sfx('nope');
+        return;
+      }
+    G.layer = nl;
+    G.flash = 0.4;
+    P.cd = 0.32;
+    AU.sfx('flip');
     G.rings.push({ x: cx, y: cy, t: 0, big: true });
     return;
   }
   P.cd = L.boss ? 1.0 : 1.7;
-  AU.sfx('erase'); G.rings.push({ x: cx, y: cy, t: 0 });
-  puff(cx, cy, 26, { s0: 80, s1: 320, z0: 2, z1: 5, col: '#fffaf0', grav: 100, l0: .3, l1: .7, drag: 2 });
+  AU.sfx('erase');
+  G.rings.push({ x: cx, y: cy, t: 0 });
+  puff(cx, cy, 26, { s0: 80, s1: 320, z0: 2, z1: 5, col: '#fffaf0', grav: 100, l0: 0.3, l1: 0.7, drag: 2 });
   for (const b of L.blocks) {
     if (!b.corrupt) continue;
-    const nx = clamp(cx, b.x, b.x + b.w), ny = clamp(cy, b.y, b.y + b.h);
-    if (Math.hypot(cx - nx, cy - ny) < 200) { b.off = 3; puff(b.x + b.w / 2, ny, 24, { jy: 90, jx: 14, s0: 20, s1: 160, col: '#fffaf0', grav: 60 }); }
+    const nx = clamp(cx, b.x, b.x + b.w),
+      ny = clamp(cy, b.y, b.y + b.h);
+    if (Math.hypot(cx - nx, cy - ny) < 200) {
+      b.off = 3;
+      puff(b.x + b.w / 2, ny, 24, { jy: 90, jx: 14, s0: 20, s1: 160, col: '#fffaf0', grav: 60 });
+    }
   }
   for (const b of L.bugs) if (!b.dead && Math.hypot(cx - b.x, cy - (b.y + 11)) < 175) killBug(b);
-  for (const p of L.plats) if (p.kind === 'swap' && !p.fixed && Math.hypot(cx - clamp(cx, p.x, p.x + p.w), cy - p.y) < 250) { p.fixed = true; G.fly.push({ text: p.text, x: p.x + p.w / 2, y: p.y - 6, t: 0, kind: 'fix' }); p.text = p.good; p.tw = 0; G.stats.points += 20; puff(p.x + p.w / 2, p.y + 8, 16, { jx: p.w / 2, s0: 20, s1: 120, col: '#fffaf0', grav: 40 }); }
-  for (const p of L.plats) if (p.kind === 'flee' && onScreen(p, 0)) { p.frz = 3.6; p.fleeing = false; }
-  G.proj = G.proj.filter(q => { if (Math.hypot(cx - q.x, cy - q.y) < 185) { puff(q.x, q.y, 10, { col: '#fffaf0', grav: 0, s0: 20, s1: 120 }); return false; } return true; });
+  for (const p of L.plats)
+    if (p.kind === 'swap' && !p.fixed && Math.hypot(cx - clamp(cx, p.x, p.x + p.w), cy - p.y) < 250) {
+      p.fixed = true;
+      G.fly.push({ text: p.text, x: p.x + p.w / 2, y: p.y - 6, t: 0, kind: 'fix' });
+      p.text = p.good;
+      p.tw = 0;
+      G.stats.points += 20;
+      puff(p.x + p.w / 2, p.y + 8, 16, { jx: p.w / 2, s0: 20, s1: 120, col: '#fffaf0', grav: 40 });
+    }
+  for (const p of L.plats)
+    if (p.kind === 'flee' && onScreen(p, 0)) {
+      p.frz = 3.6;
+      p.fleeing = false;
+    }
+  G.proj = G.proj.filter(q => {
+    if (Math.hypot(cx - q.x, cy - q.y) < 185) {
+      puff(q.x, q.y, 10, { col: '#fffaf0', grav: 0, s0: 20, s1: 120 });
+      return false;
+    }
+    return true;
+  });
   if (G.boss) bossErase(cx, cy);
 }
 function killBug(b) {
-  b.dead = .001; G.stats.points += 50; G.stats.fixed++; G.fly.push({ text: b.good, x: b.x, y: b.y + 8, t: 0, kind: 'fix' });
+  b.dead = 0.001;
+  G.stats.points += 50;
+  G.stats.fixed++;
+  G.fly.push({ text: b.good, x: b.x, y: b.y + 8, t: 0, kind: 'fix' });
   puff(b.x, b.y + 10, 14, { s0: 30, s1: 160, col: VIOLET });
 }
 
 function updBugs(dt) {
   const L = G.L;
   for (const b of L.bugs) {
-    if (b.dead) { b.dead += dt; continue; }
-    b.t += dt; b.x += b.vx * dt;
-    if (b.x - b.w / 2 < b.minX) { b.x = b.minX + b.w / 2; b.vx = Math.abs(b.vx); }
-    if (b.x + b.w / 2 > b.maxX) { b.x = b.maxX - b.w / 2; b.vx = -Math.abs(b.vx); }
+    if (b.dead) {
+      b.dead += dt;
+      continue;
+    }
+    b.t += dt;
+    b.x += b.vx * dt;
+    if (b.x - b.w / 2 < b.minX) {
+      b.x = b.minX + b.w / 2;
+      b.vx = Math.abs(b.vx);
+    }
+    if (b.x + b.w / 2 > b.maxX) {
+      b.x = b.maxX - b.w / 2;
+      b.vx = -Math.abs(b.vx);
+    }
     if (P.dead > 0 || P.born > 0) continue;
     if (overlap(P, { x: b.x - b.w / 2 + 4, y: b.y + 3, w: b.w - 8, h: b.h - 3 })) {
-      if (P.vy > 30 && P.y + P.h < b.y + 16) { killBug(b); P.vy = -440; P.air = 0; P.cut = true; AU.sfx('stomp'); P.sx = 1.25; P.sy = .75; }
-      else die();
+      if (P.vy > 30 && P.y + P.h < b.y + 16) {
+        killBug(b);
+        P.vy = -440;
+        P.air = 0;
+        P.cut = true;
+        AU.sfx('stomp');
+        P.sx = 1.25;
+        P.sy = 0.75;
+      } else die();
     }
   }
 }
 
 function updItems(dt) {
-  const L = G.L, cx = P.x + P.w / 2, cy = P.y + P.h / 2;
+  const L = G.L,
+    cx = P.x + P.w / 2,
+    cy = P.y + P.h / 2;
   if (P.dead > 0) return;
-  for (const m of L.marks) if (!m.got && Math.hypot(cx - m.x, cy - m.y) < 30) {
-    m.got = true; G.stats.marks++; G.stats.points += 100; AU.sfx('mark');
-    const N = (CHAPTERS[G.chapter].notes || [])[G.li] || [], n = L.marks.filter(q => q.got).length - 1; if (N.length) G.note = { text: N[n % N.length], t: 0 };
-    puff(m.x, m.y, 14, { s0: 30, s1: 150, col: GRAPHITE, grav: 0, drag: 3, l0: .4, l1: .9 });
-  }
+  for (const m of L.marks)
+    if (!m.got && Math.hypot(cx - m.x, cy - m.y) < 30) {
+      m.got = true;
+      G.stats.marks++;
+      G.stats.points += 100;
+      AU.sfx('mark');
+      const N = (CHAPTERS[G.chapter].notes || [])[G.li] || [],
+        n = L.marks.filter(q => q.got).length - 1;
+      if (N.length) G.note = { text: N[n % N.length], t: 0 };
+      puff(m.x, m.y, 14, { s0: 30, s1: 150, col: GRAPHITE, grav: 0, drag: 3, l0: 0.4, l1: 0.9 });
+    }
   for (const c of L.candles) {
-    if (c.cd > 0) { c.cd -= dt; continue; }
-    if (Math.hypot(cx - c.x, cy - c.y) < 34) { P.light = 7.5; c.cd = 8.6; AU.sfx('candle'); puff(c.x, c.y - 10, 12, { s0: 20, s1: 100, col: '#ffcf7a', grav: -120, l0: .4, l1: .9 }); }
+    if (c.cd > 0) {
+      c.cd -= dt;
+      continue;
+    }
+    if (Math.hypot(cx - c.x, cy - c.y) < 34) {
+      P.light = 7.5;
+      c.cd = 8.6;
+      AU.sfx('candle');
+      puff(c.x, c.y - 10, 12, { s0: 20, s1: 100, col: '#ffcf7a', grav: -120, l0: 0.4, l1: 0.9 });
+    }
   }
-  for (const w of (L.words || [])) { if (w.cd > 0) { w.cd -= dt; continue; } if (Math.hypot(cx - w.x, cy - w.y) < 34) { P.form = { k: w.k, t: 6.5, max: 6.5 }; w.cd = 2.5; AU.sfx('candle'); puff(w.x, w.y, 14, { s0: 20, s1: 120, col: FORMCOL[w.k], grav: -60 }); } }
+  for (const w of L.words || []) {
+    if (w.cd > 0) {
+      w.cd -= dt;
+      continue;
+    }
+    if (Math.hypot(cx - w.x, cy - w.y) < 34) {
+      P.form = { k: w.k, t: 6.5, max: 6.5 };
+      w.cd = 2.5;
+      AU.sfx('candle');
+      puff(w.x, w.y, 14, { s0: 20, s1: 120, col: FORMCOL[w.k], grav: -60 });
+    }
+  }
   P.portCd -= dt;
-  if (P.portCd <= 0) for (const q of L.ports) if (Math.hypot(cx - q.x, cy - q.y) < 26) { puff(q.x, q.y, 16, { s0: 30, s1: 160, col: '#e2672a', grav: 0, drag: 2 }); P.x = q.tx - P.w / 2; P.y = q.ty - P.h; P.vx = 0; P.vy = 0; P.portCd = .9; G.flash = .3; AU.sfx('flip'); G.hist = []; G.br = null; camera(0, true); puff(q.tx, q.ty - 15, 16, { s0: 30, s1: 160, col: '#e2672a', grav: 0, drag: 2 }); break; }
-  for (const st of (L.stamps || [])) if (!st.got && Math.hypot(cx - st.x, cy - st.y) < 32) { st.got = true; G.stats.points += 50; AU.sfx('check'); G.shake = 4; puff(st.x, st.y, 14, { s0: 30, s1: 140, col: '#c0392b', grav: 100 }); if (!L.stamps.some(s => !s.got)) say('Pratica completa. Lo sportello finale apre.'); }
-  for (const n of (L.npcs || [])) { const d = Math.abs(cx - n.x); if (d < 230 && !n.seen) { n.seen = true; say(n.text); } if (n.seen) n.a = Math.max(0, n.a - dt * .8); }
+  if (P.portCd <= 0)
+    for (const q of L.ports)
+      if (Math.hypot(cx - q.x, cy - q.y) < 26) {
+        puff(q.x, q.y, 16, { s0: 30, s1: 160, col: '#e2672a', grav: 0, drag: 2 });
+        P.x = q.tx - P.w / 2;
+        P.y = q.ty - P.h;
+        P.vx = 0;
+        P.vy = 0;
+        P.portCd = 0.9;
+        G.flash = 0.3;
+        AU.sfx('flip');
+        G.hist = [];
+        G.br = null;
+        camera(0, true);
+        puff(q.tx, q.ty - 15, 16, { s0: 30, s1: 160, col: '#e2672a', grav: 0, drag: 2 });
+        break;
+      }
+  for (const n of L.npcs || []) {
+    const d = Math.abs(cx - n.x);
+    if (d < 230 && !n.seen) {
+      n.seen = true;
+      say(n.text);
+    }
+    if (n.seen) n.a = Math.max(0, n.a - dt * 0.8);
+  }
   let lit = false;
-  if (L.beams && (!L.boss || L.beamsOn) && P.born <= 0) for (const b of L.beams) { const bx = lerp(b.x0, b.x1, .5 + .5 * Math.sin(G.t * b.sp + b.ph)); if (Math.abs(cx - bx) < b.w / 2 - 14 && !P.hidden) lit = true; }
-  if (L.beams) { G.seenT = lit ? (G.seenT || 0) + dt : Math.max(0, (G.seenT || 0) - dt * 2); if (G.seenT > .45) { G.seenT = 0; say('Ti hanno vista.'); die(); return; } }
-  if (L.tunnel) { const T = L.tunnel, was = T.t % 5.8; T.t += dt; const ph = T.t % 5.8; if (was < 3.5 && ph >= 3.5) AU.sfx('whistle'); if (ph >= 4.5 && !P.ground && P.born <= 0 && P.coy <= 0) { say('In galleria si sta bassi.'); die(); return; } }
-  for (const w of (L.wolves || [])) {
-    const was = w.t % 4.8; w.t += dt; const ph = w.t % 4.8;
+  if (L.beams && (!L.boss || L.beamsOn) && P.born <= 0)
+    for (const b of L.beams) {
+      const bx = lerp(b.x0, b.x1, 0.5 + 0.5 * Math.sin(G.t * b.sp + b.ph));
+      if (Math.abs(cx - bx) < b.w / 2 - 14 && !P.hidden) lit = true;
+    }
+  if (L.beams) {
+    G.seenT = lit ? (G.seenT || 0) + dt : Math.max(0, (G.seenT || 0) - dt * 2);
+    if (G.seenT > 0.45) {
+      G.seenT = 0;
+      say('Ti hanno vista.');
+      die();
+      return;
+    }
+  }
+  if (L.tunnel) {
+    const T = L.tunnel,
+      was = T.t % 5.8;
+    T.t += dt;
+    const ph = T.t % 5.8;
+    if (was < 3.5 && ph >= 3.5) AU.sfx('whistle');
+    if (ph >= 4.5 && !P.ground && P.born <= 0 && P.coy <= 0) {
+      say('In galleria si sta bassi.');
+      die();
+      return;
+    }
+  }
+  for (const w of L.wolves || []) {
+    const was = w.t % 4.8;
+    w.t += dt;
+    const ph = w.t % 4.8;
     const inZ = cx > w.x0 && cx < w.x1;
     if (was < 2.7 && ph >= 2.7 && Math.abs(cx - (w.x0 + w.x1) / 2) < 700) AU.sfx('crack');
     if (was < 3.3 && ph >= 3.3 && Math.abs(cx - (w.x0 + w.x1) / 2) < 700) AU.sfx('growl');
-    if (ph >= 3.4 && inZ && P.born <= 0 && (Math.abs(P.vx) > 12 || !P.ground)) { say('Il lupo ti ha vista.'); die(); return; }
+    if (ph >= 3.4 && inZ && P.born <= 0 && (Math.abs(P.vx) > 12 || !P.ground)) {
+      say('Il lupo ti ha vista.');
+      die();
+      return;
+    }
   }
-  for (const c of L.checks) if (!c.got && Math.abs(cx - c.x) < 30 && Math.abs((c.inv ? P.y : P.y + P.h) - c.y) < (c.float ? 70 : 46)) {
-    c.got = true; G.cp = { x: c.x, y: c.y + (c.float ? 15 : 0), inv: c.inv, layer: G.layer }; AU.sfx('check');
-    puff(c.x, c.y + (c.inv ? 30 : -30), 16, { s0: 20, s1: 120, col: GRAPHITE, grav: -80, l0: .5, l1: 1 });
-  }
-  for (const m of (L.memories || [])) if (!m.seen && Math.hypot(cx - m.x, cy - m.y) < 40) { m.seen = true; say(m.text); AU.sfx('mark'); G.stats.points += 100; puff(m.x, m.y, 16, { col: CHAPTERS[m.book].cover[1], s0: 20, s1: 120, grav: -40 }); }
+  for (const c of L.checks)
+    if (!c.got && Math.abs(cx - c.x) < 30 && Math.abs((c.inv ? P.y : P.y + P.h) - c.y) < (c.float ? 70 : 46)) {
+      c.got = true;
+      G.cp = { x: c.x, y: c.y + (c.float ? 15 : 0), inv: c.inv, layer: G.layer };
+      AU.sfx('check');
+      puff(c.x, c.y + (c.inv ? 30 : -30), 16, { s0: 20, s1: 120, col: GRAPHITE, grav: -80, l0: 0.5, l1: 1 });
+    }
+  for (const m of L.memories || [])
+    if (!m.seen && Math.hypot(cx - m.x, cy - m.y) < 40) {
+      m.seen = true;
+      say(m.text);
+      AU.sfx('mark');
+      G.stats.points += 100;
+      puff(m.x, m.y, 16, { col: CHAPTERS[m.book].cover[1], s0: 20, s1: 120, grav: -40 });
+    }
   if (L.reader) {
     if (!G.dlg && Math.abs(cx - L.reader.x) < 300 && Math.abs(cy - L.reader.y) < 120) G.dlg = { i: -1, t: 99 };
-    if (G.dlg && !G.dlgDone) { G.dlg.t += dt; if (G.dlg.t > 4.2) { G.dlg.i++; G.dlg.t = 0; if (G.dlg.i < EPI_DIALOGUE.length) { G.cap = { text: EPI_DIALOGUE[G.dlg.i], t: 0, dur: 4.1 }; AU.sfx('whisper'); } else G.dlgDone = true; } }
-    if (G.epiEnd > 0) { G.epiEnd -= dt; if (G.epiEnd <= 0 && G.state === 'play' && !G.turn) startEnding(); }
+    if (G.dlg && !G.dlgDone) {
+      G.dlg.t += dt;
+      if (G.dlg.t > 4.2) {
+        G.dlg.i++;
+        G.dlg.t = 0;
+        if (G.dlg.i < EPI_DIALOGUE.length) {
+          G.cap = { text: EPI_DIALOGUE[G.dlg.i], t: 0, dur: 4.1 };
+          AU.sfx('whisper');
+        } else G.dlgDone = true;
+      }
+    }
+    if (G.epiEnd > 0) {
+      G.epiEnd -= dt;
+      if (G.epiEnd <= 0 && G.state === 'play' && !G.turn) startEnding();
+    }
   }
-  if (L.exit && overlap(P, L.exit) && !G.turn) { if (L.epi) { if (G.dlgDone && !G.epiChoice) { G.epiChoice = 'keep'; G.epiEnd = 1.6; AU.sfx('check'); } } else nextLevel(); }
+  if (L.exit && overlap(P, L.exit) && !G.turn) {
+    if (L.epi) {
+      if (G.dlgDone && !G.epiChoice) {
+        G.epiChoice = 'keep';
+        G.epiEnd = 1.6;
+        AU.sfx('check');
+      }
+    } else nextLevel();
+  }
 }
 
 function updChase(dt) {
-  if (!G.chaseOn) { if (P.x > 640) { G.chaseOn = true; } return; }
+  if (!G.chaseOn) {
+    if (P.x > 640) {
+      G.chaseOn = true;
+    }
+    return;
+  }
   if (P.dead > 0) return;
   const fast = G.L.fast && P.x > G.L.fast;
-  if (fast && !G.L.fastSaid) { G.L.fastSaid = true; say('Ha sentito il mio nome. Ora corre.'); }
-  G.chaseX += (G.L.chaseSpeed || (fast ? 160 : 142)) * dt; G.chaseX = Math.max(G.chaseX, P.x - 730);
+  if (fast && !G.L.fastSaid) {
+    G.L.fastSaid = true;
+    say('Ha sentito il mio nome. Ora corre.');
+  }
+  G.chaseX += (G.L.chaseSpeed || (fast ? 160 : 142)) * dt;
+  G.chaseX = Math.max(G.chaseX, P.x - 730);
   if (P.x < G.chaseX + 4 && P.born <= 0) die();
-  if (Math.random() < .5) puff(G.chaseX + rnd(-10, 14), G.cam.y + rnd(H), 1, { s0: 20, s1: 90, ang: 0, spread: 1, col: DEEP, grav: 0, z0: 2, z1: 5 });
+  if (Math.random() < 0.5)
+    puff(G.chaseX + rnd(-10, 14), G.cam.y + rnd(H), 1, {
+      s0: 20,
+      s1: 90,
+      ang: 0,
+      spread: 1,
+      col: DEEP,
+      grav: 0,
+      z0: 2,
+      z1: 5,
+    });
 }
 
 /* ---------------- il boss: La pagina ---------------- */
-function initBoss() { G.boss = { phase: 1, hp: 0, t: 0, shoot: 2.4, stainT: 3, hurt: 0, dead: 0, tgt: null, intro: 2.6, src: 0, said: 0 }; nextTarget(); }
+function initBoss() {
+  G.boss = { phase: 1, hp: 0, t: 0, shoot: 2.4, stainT: 3, hurt: 0, dead: 0, tgt: null, intro: 2.6, src: 0, said: 0 };
+  nextTarget();
+}
+/**
+ * Passa alla frase successiva del boss e applica le regole della fase:
+ * ogni boss ha un `bossMode` (beat, swap, clue, grav) che decide quando un colpo vale.
+ */
 function nextTarget() {
   const b = G.boss;
   const BT = G.L.targets;
-  if (b.hp >= BT.length) { b.tgt = null; return; }
-  const T = BT[b.hp]; b.tgt = { bad: T[0], good: T[1], x: T[2], y: T[3], t: 0 };
+  if (b.hp >= BT.length) {
+    b.tgt = null;
+    return;
+  }
+  const T = BT[b.hp];
+  b.tgt = { bad: T[0], good: T[1], x: T[2], y: T[3], t: 0 };
   b.phase = Math.floor(b.hp / 3) + 1;
-  if (G.L.fairyBoss) { G.L.water = b.phase === 2; G.bossDark = b.phase === 3; }
-  if (G.L.manBoss) { G.L.lowAll = b.phase === 2; if (b.phase !== 3) G.L.pull = 0; }
+  if (G.L.fairyBoss) {
+    G.L.water = b.phase === 2;
+    G.bossDark = b.phase === 3;
+  }
+  if (G.L.manBoss) {
+    G.L.lowAll = b.phase === 2;
+    if (b.phase !== 3) G.L.pull = 0;
+  }
   if (G.L.bossMode === 'beat') G.beatPeriod = [1.5, 1.25, 1.05][b.phase - 1];
-  if (G.L.bossMode === 'clue') { const Q = [[110, 444], [850, 444], [235, 330], [725, 330], [480, 240]]; let best = null; Q.forEach((q, k) => { const d = Math.hypot(q[0] - b.tgt.x, q[1] - b.tgt.y) + ((k * 7 + b.hp * 3) % 5) * 40; if (!best || d > best.d) best = { d, q }; }); G.clue = { x: best.q[0], y: best.q[1], name: G.L.clues[b.hp], got: false, t: 0 }; P.clue = false; }
-  if (G.L.noirBoss) { G.L.beamsOn = b.phase === 2; G.L.wind = b.phase === 3 ? -120 : 0; }
+  if (G.L.bossMode === 'clue') {
+    const Q = [
+      [110, 444],
+      [850, 444],
+      [235, 330],
+      [725, 330],
+      [480, 240],
+    ];
+    let best = null;
+    Q.forEach((q, k) => {
+      const d = Math.hypot(q[0] - b.tgt.x, q[1] - b.tgt.y) + ((k * 7 + b.hp * 3) % 5) * 40;
+      if (!best || d > best.d) best = { d, q };
+    });
+    G.clue = { x: best.q[0], y: best.q[1], name: G.L.clues[b.hp], got: false, t: 0 };
+    P.clue = false;
+  }
+  if (G.L.noirBoss) {
+    G.L.beamsOn = b.phase === 2;
+    G.L.wind = b.phase === 3 ? -120 : 0;
+  }
 }
-function bossSources() { if (G.L.bossPos) return G.L.bossPos; return G.boss.phase < 3 ? [{ x: 480, y: 104 }] : [{ x: 150, y: 104 }, { x: 810, y: 104 }]; }
-const BOSS_SAY = ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'];
+function bossSources() {
+  if (G.L.bossPos) return G.L.bossPos;
+  return G.boss.phase < 3
+    ? [{ x: 480, y: 104 }]
+    : [
+        { x: 150, y: 104 },
+        { x: 810, y: 104 },
+      ];
+}
 function updBoss(dt) {
-  const b = G.boss; b.t += dt; if (b.hurt > 0) b.hurt -= dt;
+  const b = G.boss;
+  b.t += dt;
+  if (b.hurt > 0) b.hurt -= dt;
   if (b.dead) {
     b.dead += dt;
-    if (Math.random() < .6) puff(rnd(300, 660), rnd(40, 300), 2, { col: pick([DEEP, VIOLET, '#fffaf0']), s0: 40, s1: 240, grav: 200 });
+    if (Math.random() < 0.6)
+      puff(rnd(300, 660), rnd(40, 300), 2, { col: pick([DEEP, VIOLET, '#fffaf0']), s0: 40, s1: 240, grav: 200 });
     if (b.dead > 3.4 && G.state === 'play') startEnding();
     return;
   }
-  if (b.said < b.phase && b.intro < 1.6) { b.said = b.phase; say(G.L.bossSay[b.phase - 1]); }
+  if (b.said < b.phase && b.intro < 1.6) {
+    b.said = b.phase;
+    say(G.L.bossSay[b.phase - 1]);
+  }
   if (G.L.manBoss && b.phase === 3) G.L.pull = (Math.floor(b.t / 3.2) % 2 ? 1 : -1) * 120;
-  if (b.intro > 0) { b.intro -= dt; return; }
+  if (b.intro > 0) {
+    b.intro -= dt;
+    return;
+  }
   if (P.dead > 0) return;
   if (b.tgt) b.tgt.t += dt;
-  if (G.clue && !G.clue.got) { G.clue.t += dt; if (Math.hypot(P.x + P.w / 2 - G.clue.x, P.y + P.h / 2 - G.clue.y) < 36) { G.clue.got = true; P.clue = true; AU.sfx('check'); say('Prova raccolta: ' + G.clue.name + '. Portala all\'accusa.'); puff(G.clue.x, G.clue.y, 16, { col: '#d8433a', s0: 30, s1: 140, grav: 0, drag: 2 }); } }
+  if (G.clue && !G.clue.got) {
+    G.clue.t += dt;
+    if (Math.hypot(P.x + P.w / 2 - G.clue.x, P.y + P.h / 2 - G.clue.y) < 36) {
+      G.clue.got = true;
+      P.clue = true;
+      AU.sfx('check');
+      say('Prova raccolta: ' + G.clue.name + ". Portala all'accusa.");
+      puff(G.clue.x, G.clue.y, 16, { col: '#d8433a', s0: 30, s1: 140, grav: 0, drag: 2 });
+    }
+  }
   b.shoot -= dt;
   if (b.shoot <= 0) {
-    const S = bossSources(), s = S[b.src++ % S.length];
-    const dx = P.x + P.w / 2 - s.x, dy = P.y + P.h / 2 - s.y, d = Math.hypot(dx, dy) || 1, sp = b.phase === 1 ? 190 : 225;
-    const text = pick(G.L.manBoss ? ['attenda', 'modulo 27-B', 'vedi sopra', 'ricalcolo', 'prema 9', 'in linea'] : G.L.noirBoss ? ['alibi?', 'movente', 'omissis', 'colpevole', 'obiezione', 'prove'] : G.L.fairyBoss ? ['forse', 'invece', 'oppure', 'macché', 'anzi no', 'chissà'] : ['erorre', 'sbalgio', 'refsuo', 'mahcia', 'buiga', 'slienzio', 'nesusno']);
-    G.proj.push({ x: s.x, y: s.y, vx: dx / d * sp, vy: dy / d * sp, text, w: text.length * 9 + 6, t: 0 });
-    AU.sfx('shoot'); b.shoot = [2.0, 1.7, G.L.manBoss ? .95 : 1.25][b.phase - 1];
+    const S = bossSources(),
+      s = S[b.src++ % S.length];
+    const dx = P.x + P.w / 2 - s.x,
+      dy = P.y + P.h / 2 - s.y,
+      d = Math.hypot(dx, dy) || 1,
+      sp = b.phase === 1 ? 190 : 225;
+    const text = pick(
+      G.L.manBoss
+        ? ['ricalcolo', 'fuori rotta', 'inversione', 'vuoto', 'orbita', 'attendere']
+        : G.L.noirBoss
+          ? ['alibi?', 'movente', 'omissis', 'colpevole', 'obiezione', 'prove']
+          : G.L.fairyBoss
+            ? ['forse', 'invece', 'oppure', 'macché', 'anzi no', 'chissà']
+            : ['erorre', 'sbalgio', 'refsuo', 'mahcia', 'buiga', 'slienzio', 'nesusno']
+    );
+    G.proj.push({ x: s.x, y: s.y, vx: (dx / d) * sp, vy: (dy / d) * sp, text, w: text.length * 9 + 6, t: 0 });
+    AU.sfx('shoot');
+    b.shoot = [2.0, 1.7, G.L.manBoss ? 0.95 : 1.25][b.phase - 1];
   }
   if (b.phase >= 2 && G.L.bossMode !== 'grav') {
     b.stainT -= dt;
     if (b.stainT <= 0) {
       b.stainT = b.phase === 3 ? 2.2 : 2.8;
       const pl = P.standOn && P.standOn.text !== undefined ? P.standOn : G.L.plats[0];
-      const x = clamp(P.x + P.w / 2 + P.vx * .3, pl.x + 45, pl.x + pl.w - 45);
+      const x = clamp(P.x + P.w / 2 + P.vx * 0.3, pl.x + 45, pl.x + pl.w - 45);
       G.dyn.push({ x: x - 45, y: pl.y - 13, w: 90, h: 18, t: 0, seed: rnd(99) });
     }
   }
 }
+/** Colpo di sbianchetto vicino alla frase corrotta del boss: controlla la regola del boss e, se rispettata, restaura la frase. */
 function bossErase(cx, cy) {
-  const b = G.boss, t = b.tgt;
+  const b = G.boss,
+    t = b.tgt;
   if (!t || b.dead || Math.hypot(cx - t.x, cy - t.y) > 130) return;
   const M = G.L.bossMode;
-  if (M === 'beat' && G.beatPh !== 0) { AU.sfx('nope'); G.fly.push({ text: 'fuori tempo', x: t.x, y: t.y - 30, t: 0, kind: 'fix' }); return; }
-  if (M === 'clue' && !P.clue) { AU.sfx('nope'); if (!b.noClueSaid) { b.noClueSaid = true; say('«Senza prove, signorina, è solo un\'opinione.»'); } G.fly.push({ text: 'servono prove', x: t.x, y: t.y - 30, t: 0, kind: 'fix' }); return; }
+  if (M === 'beat' && G.beatPh !== 0) {
+    AU.sfx('nope');
+    G.fly.push({ text: 'fuori tempo', x: t.x, y: t.y - 30, t: 0, kind: 'fix' });
+    return;
+  }
+  if (M === 'clue' && !P.clue) {
+    AU.sfx('nope');
+    if (!b.noClueSaid) {
+      b.noClueSaid = true;
+      say("«Senza prove, signorina, è solo un'opinione.»");
+    }
+    G.fly.push({ text: 'servono prove', x: t.x, y: t.y - 30, t: 0, kind: 'fix' });
+    return;
+  }
   P.clue = false;
-  if (M === 'swap') { for (const p of G.L.plats) if (p.kind === 'swap') { p.fixed = false; p.text = p.bad; p.tw = 0; } say(pick(['«E invece no.»', '«Ricomincio da capo.»', '«C\'era una volta un\'altra versione.»'])); }
-  b.hp++; b.hurt = .9; G.shake = 14; AU.sfx('hit');
+  if (M === 'swap') {
+    for (const p of G.L.plats)
+      if (p.kind === 'swap') {
+        p.fixed = false;
+        p.text = p.bad;
+        p.tw = 0;
+      }
+    say(pick(['«E invece no.»', '«Ricomincio da capo.»', "«C'era una volta un'altra versione.»"]));
+  }
+  b.hp++;
+  b.hurt = 0.9;
+  G.shake = 14;
+  AU.sfx('hit');
   G.fly.push({ text: t.good, x: t.x, y: t.y, t: 0, kind: 'restore' });
   puff(t.x, t.y, 30, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 });
   const old = b.phase;
-  if (b.hp >= G.L.targets.length) { b.tgt = null; b.dead = .001; G.L.lowAll = false; G.L.pull = 0; G.L.water = false; G.bossDark = false; G.L.beamsOn = false; G.L.wind = 0; G.proj = []; G.dyn = []; AU.sfx('win'); G.flash = 1; return; }
+  if (b.hp >= G.L.targets.length) {
+    b.tgt = null;
+    b.dead = 0.001;
+    G.L.lowAll = false;
+    G.L.pull = 0;
+    G.L.water = false;
+    G.bossDark = false;
+    G.L.beamsOn = false;
+    G.L.wind = 0;
+    G.proj = [];
+    G.dyn = [];
+    AU.sfx('win');
+    G.flash = 1;
+    return;
+  }
   nextTarget();
-  if (b.phase !== old) { G.proj = []; G.dyn = []; b.intro = 2; b.shoot = 1.4; b.stainT = 2.4; G.flash = .6; G.cp = M === 'grav' ? { x: 300, y: 470, inv: false, layer: 1 } : { x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110, y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470, inv: false, layer: 1 }; }
+  if (b.phase !== old) {
+    G.proj = [];
+    G.dyn = [];
+    b.intro = 2;
+    b.shoot = 1.4;
+    b.stainT = 2.4;
+    G.flash = 0.6;
+    G.cp =
+      M === 'grav'
+        ? { x: 300, y: 470, inv: false, layer: 1 }
+        : {
+            x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110,
+            y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470,
+            inv: false,
+            layer: 1,
+          };
+  }
 }
 function updProj(dt) {
   for (let i = G.proj.length - 1; i >= 0; i--) {
-    const q = G.proj[i]; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt;
-    if (q.t > 7 || q.x < -80 || q.x > W + 80 || q.y > H + 60 || q.y < -80) { G.proj.splice(i, 1); continue; }
-    if (P.dead <= 0 && P.born <= 0 && overlap(P, { x: q.x - q.w / 2 + 4, y: q.y - 8, w: q.w - 8, h: 16 })) { die(); }
-    if (Math.random() < .3) puff(q.x, q.y, 1, { s0: 0, s1: 20, col: VIOLET, grav: 0, z0: 1, z1: 3, l0: .2, l1: .5 });
+    const q = G.proj[i];
+    q.t += dt;
+    q.x += q.vx * dt;
+    q.y += q.vy * dt;
+    if (q.t > 7 || q.x < -80 || q.x > W + 80 || q.y > H + 60 || q.y < -80) {
+      G.proj.splice(i, 1);
+      continue;
+    }
+    if (P.dead <= 0 && P.born <= 0 && overlap(P, { x: q.x - q.w / 2 + 4, y: q.y - 8, w: q.w - 8, h: 16 })) {
+      die();
+    }
+    if (Math.random() < 0.3) puff(q.x, q.y, 1, { s0: 0, s1: 20, col: VIOLET, grav: 0, z0: 1, z1: 3, l0: 0.2, l1: 0.5 });
   }
-  for (let i = G.dyn.length - 1; i >= 0; i--) { G.dyn[i].t += dt; if (G.dyn[i].t > 2.9) G.dyn.splice(i, 1); }
+  for (let i = G.dyn.length - 1; i >= 0; i--) {
+    G.dyn[i].t += dt;
+    if (G.dyn[i].t > 2.9) G.dyn.splice(i, 1);
+  }
 }
 
 /* ---------------- camera e ciclo ---------------- */
 function camera(dt, snap) {
   const L = G.L;
-  if (L.fixed) { G.cam.x = 0; G.cam.y = 0; return; }
+  if (L.fixed) {
+    G.cam.x = 0;
+    G.cam.y = 0;
+    return;
+  }
   const tx = clamp(P.x + P.w / 2 - W / 2 + P.face * 70, L.b.x0, L.b.x1 - W);
-  const ty = clamp(P.y + P.h / 2 - H * .56, L.b.y0, L.b.y1 - H);
-  if (snap) { G.cam.x = tx; G.cam.y = ty; }
-  else { G.cam.x += (tx - G.cam.x) * Math.min(1, dt * 4.2); G.cam.y += (ty - G.cam.y) * Math.min(1, dt * 3.6); }
+  const ty = clamp(P.y + P.h / 2 - H * 0.56, L.b.y0, L.b.y1 - H);
+  if (snap) {
+    G.cam.x = tx;
+    G.cam.y = ty;
+  } else {
+    G.cam.x += (tx - G.cam.x) * Math.min(1, dt * 4.2);
+    G.cam.y += (ty - G.cam.y) * Math.min(1, dt * 3.6);
+  }
 }
 
+/** Un passo di simulazione del livello (dt fisso, 1/120 s). */
 function update(dt) {
   const L = G.L;
-  G.t += dt; G.stats.time += dt; G.cardT += dt;
+  G.t += dt;
+  G.stats.time += dt;
+  G.cardT += dt;
   if (L.beat) {
     G.beatAcc += dt / (G.beatPeriod / 2);
     const half = Math.floor(G.beatAcc);
-    if (half !== G.lastHalf) { G.lastHalf = half; G.beatPh = half % 2; AU.heart(G.beatPh === 0); G.pulse = 1; }
+    if (half !== G.lastHalf) {
+      G.lastHalf = half;
+      G.beatPh = half % 2;
+      AU.heart(G.beatPh === 0);
+      G.pulse = 1;
+    }
   } else if (L.boss || L.theme === 'lies') {
-    G.beatAcc += dt / (L.boss ? .5 : .95);
+    G.beatAcc += dt / (L.boss ? 0.5 : 0.95);
     const half = Math.floor(G.beatAcc);
-    if (half !== G.lastHalf) { G.lastHalf = half; if (half % 2 === 0 || L.boss) AU.heart(half % 2 === 0); G.pulse = .6; }
+    if (half !== G.lastHalf) {
+      G.lastHalf = half;
+      if (half % 2 === 0 || L.boss) AU.heart(half % 2 === 0);
+      G.pulse = 0.6;
+    }
   }
-  G.pulse = Math.max(0, G.pulse - dt * 3); G.coinAcc += dt / 2.8;
-  if (L.storm !== undefined && P.dead <= 0 && P.x > L.storm) { G.stormT -= dt; if (G.stormT <= 0) { G.stormT = 3.2; AU.rain(true); P.light = Math.max(P.light, .95); G.flash = .45; AU.sfx('thunder'); } }
+  G.pulse = Math.max(0, G.pulse - dt * 3);
+  if (L.storm !== undefined && P.dead <= 0 && P.x > L.storm) {
+    G.stormT -= dt;
+    if (G.stormT <= 0) {
+      G.stormT = 3.2;
+      AU.rain(true);
+      P.light = Math.max(P.light, 0.95);
+      G.flash = 0.45;
+      AU.sfx('thunder');
+    }
+  }
   if (L.auto !== undefined && P.dead <= 0 && P.x > L.auto) {
-    const was = G.autoT; G.autoT -= dt;
-    if (was > .7 && G.autoT <= .7) AU.sfx('crack');
-    if (G.autoT <= 0) { G.autoT = L.autoPeriod || 2.7; const nl = G.layer === 1 ? 2 : 1; let blocked = false; for (const b of L.blocks) if (b.layer === nl && overlap(P, b)) blocked = true; if (!blocked) { G.layer = nl; G.flash = .3; AU.sfx('flip'); G.rings.push({ x: P.x + P.w / 2, y: P.y + P.h / 2, t: 0, big: true }); } }
+    const was = G.autoT;
+    G.autoT -= dt;
+    if (was > 0.7 && G.autoT <= 0.7) AU.sfx('crack');
+    if (G.autoT <= 0) {
+      G.autoT = L.autoPeriod || 2.7;
+      const nl = G.layer === 1 ? 2 : 1;
+      let blocked = false;
+      for (const b of L.blocks) if (b.layer === nl && overlap(P, b)) blocked = true;
+      if (!blocked) {
+        G.layer = nl;
+        G.flash = 0.3;
+        AU.sfx('flip');
+        G.rings.push({ x: P.x + P.w / 2, y: P.y + P.h / 2, t: 0, big: true });
+      }
+    }
   }
   for (const s of L.stains) if (s.amp) s.y = s.y0 + Math.sin(G.t * s.sp + s.x) * s.amp;
-  updPlats(dt); updPlayer(dt); updBugs(dt); updItems(dt);
-  if (P.dead <= 0) { G.hist.push(P.x + P.w / 2, P.y + P.h, P.face); if (G.hist.length > 240) G.hist.splice(0, 3); }
+  updPlats(dt);
+  updPlayer(dt);
+  updBugs(dt);
+  updItems(dt);
+  if (P.dead <= 0) {
+    G.hist.push(P.x + P.w / 2, P.y + P.h, P.face);
+    if (G.hist.length > 240) G.hist.splice(0, 3);
+  }
   updBrina(dt);
   if (L.chase) updChase(dt);
   if (G.boss) updBoss(dt);
-  updProj(dt); updParts(dt); camera(dt);
-  for (let i = G.rings.length - 1; i >= 0; i--) { G.rings[i].t += dt; if (G.rings[i].t > .6) G.rings.splice(i, 1); }
-  for (let i = G.fly.length - 1; i >= 0; i--) { G.fly[i].t += dt; if (G.fly[i].t > 1.6) G.fly.splice(i, 1); }
-  for (const p of L.plats) if (p.glitchT > 0) { p.glitchT -= dt; if (p.glitchT <= 0) { p.text = p.text.replace(p.glitch[0], p.glitch[1]); p.tw = 0; p.gl2 = 1; AU.sfx('whisper'); } }
-  if (G.note) { G.note.t += dt; if (G.note.t > 5) G.note = null; }
-  if (G.cap) { G.cap.t += dt; if (G.cap.t > G.cap.dur) G.cap = null; }
-  G.shake = Math.max(0, G.shake - dt * 30); G.flash = Math.max(0, G.flash - dt * 1.6);
+  updProj(dt);
+  updParts(dt);
+  camera(dt);
+  for (let i = G.rings.length - 1; i >= 0; i--) {
+    G.rings[i].t += dt;
+    if (G.rings[i].t > 0.6) G.rings.splice(i, 1);
+  }
+  for (let i = G.fly.length - 1; i >= 0; i--) {
+    G.fly[i].t += dt;
+    if (G.fly[i].t > 1.6) G.fly.splice(i, 1);
+  }
+  for (const p of L.plats)
+    if (p.glitchT > 0) {
+      p.glitchT -= dt;
+      if (p.glitchT <= 0) {
+        p.text = p.text.replace(p.glitch[0], p.glitch[1]);
+        p.tw = 0;
+        p.gl2 = 1;
+        AU.sfx('whisper');
+      }
+    }
+  if (G.note) {
+    G.note.t += dt;
+    if (G.note.t > 5) G.note = null;
+  }
+  if (G.cap) {
+    G.cap.t += dt;
+    if (G.cap.t > G.cap.dur) G.cap = null;
+  }
+  G.shake = Math.max(0, G.shake - dt * 30);
+  G.flash = Math.max(0, G.flash - dt * 1.6);
 }

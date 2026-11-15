@@ -1,0 +1,26 @@
+{
+  "name": "marginalia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Platform narrativo per browser: Postilla, una nota a margine, entra nei libri per ripararli dal Refuso.",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "lint": "eslint . && node scripts/lint-bundle.mjs",
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.{js,mjs}\" \"scripts/**/*.mjs\" build.js eslint.config.mjs",
+    "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.{js,mjs}\" \"scripts/**/*.mjs\" build.js eslint.config.mjs",
+    "test": "node --test --test-concurrency=1 \"tests/*.test.mjs\"",
+    "check": "npm run format:check && npm run build && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
+    "playwright": "^1.65.1",
+    "prettier": "^3.10.1"
+  }
+}
