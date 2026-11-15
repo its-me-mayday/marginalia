@@ -772,12 +772,12 @@ const BOSS_TARGETS = [
   ['Qualcnuo mi rielgge', 'Qualcuno mi rilegge', 810, 432]
 ];
 function lv9() {
-  const L = mkLevel({ name: 'La pagina', date: '', theme: 'boss', mood: 8, boss: true, fixed: true, targets: BOSS_TARGETS, bossSay: ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'] });
+  const L = mkLevel({ name: 'La pagina', date: '', theme: 'boss', mood: 8, boss: true, fixed: true, bossMode: 'beat', beat: 1.5, targets: BOSS_TARGETS, bossSay: ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'] });
   const P = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   P(60, 470, 840, 'Questa è la mia casa. Questa è la mia pagina. Tu sei soltanto una nota a margine.');
-  P(150, 360, 170, 'un margine,');
-  P(640, 360, 170, 'una svista,');
-  P(395, 270, 170, 'una macchia.');
+  L.plats.push({ kind: 'beat', phase: 0, layer: 0, x: 150, x0: 150, y: 360, w: 170, h: LH, text: 'un margine,' });
+  L.plats.push({ kind: 'beat', phase: 1, layer: 0, x: 640, x0: 640, y: 360, w: 170, h: LH, text: 'una svista,' });
+  L.plats.push({ kind: 'beat', phase: 1, layer: 0, x: 395, x0: 395, y: 270, w: 170, h: LH, text: 'una macchia.' });
   L.spawn = { x: 110, y: 440 };
   return L;
 }
@@ -973,11 +973,12 @@ const FB_TARGETS = [
   ['E vissero, forse', 'E vissero felici e contenti', 810, 432]
 ];
 function fb8() {
-  const L = mkLevel({ name: 'Il Narratore', date: '', theme: 'teller', mood: 16, boss: true, fixed: true, brina: true, fairyBoss: true, targets: FB_TARGETS,
+  const L = mkLevel({ name: 'Il Narratore', date: '', theme: 'teller', mood: 16, boss: true, fixed: true, brina: true, fairyBoss: true, bossMode: 'swap', targets: FB_TARGETS,
     bossSay: ['«Le fiabe sono mie. Le racconto come mi pare.»', '«Vuoi il bosco? Eccoti il mare.»', '«Spengo la luce. Vediamo se la sai a memoria.»'] });
   const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   Pl(60, 470, 840, 'C\'era una volta chi decideva come finiscono le storie. E non eri tu, piccola nota.');
-  Pl(150, 360, 170, 'forse sì,'); Pl(640, 360, 170, 'forse no,'); Pl(395, 270, 170, 'forse.');
+  const S = (x, y, bad, good) => L.plats.push({ kind: 'swap', layer: 0, x, x0: x, y, w: 170, h: LH, text: bad, bad, good });
+  S(150, 360, 'una nuvola', 'un ponte'); S(640, 360, 'il fumo', 'la pietra'); S(395, 270, 'un sogno', 'una scala');
   L.spawn = { x: 110, y: 440 };
   return L;
 }
@@ -1177,7 +1178,8 @@ const NR_TARGETS = [
   ['L\'ultima pagina era ████████', 'L\'ultima pagina era bianca', 810, 432]
 ];
 function nr8() {
-  const L = mkLevel({ name: 'Tutti nel vagone ristorante', date: '', theme: 'dining', mood: 24, boss: true, fixed: true, noirBoss: true, targets: NR_TARGETS,
+  const L = mkLevel({ name: 'Tutti nel vagone ristorante', date: '', theme: 'dining', mood: 24, boss: true, fixed: true, noirBoss: true, bossMode: 'clue', targets: NR_TARGETS,
+    clues: ['un pelo grigio', 'un filo giallo', 'una goccia di cera', 'un dito di grafite', 'il copione del Narratore', 'una barra nera', 'una goccia d\'inchiostro', 'l\'elenco dei passeggeri', 'la pagina bianca'],
     bossSay: ['«Signori, il colpevole è in questo vagone.»', '«Controllore, faccia luce.»', '«Entriamo in galleria. Che peccato.»'] });
   const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   Pl(60, 470, 840, 'Uno di voi ha strappato l\'ultima pagina. E io so chi. O almeno, so da dove cominciare.');
@@ -1370,23 +1372,26 @@ function sp7() {
   return L;
 }
 const MN_TARGETS = [
-  ['Rotta: erorre', 'Rotta: avanti', 235, 322],
-  ['Gravità: quando capita', 'Gravità: quanto basta', 725, 322],
-  ['Ricalcolo, ricalcolo, ricalcolo', 'Calcolato', 480, 236],
-  ['Su è giù', 'Su è su', 480, 432],
-  ['Il vuoto è compreso nel prezzo', 'Il vuoto resta fuori', 235, 322],
-  ['Passeggeri: nessnuo', 'Passeggeri: tutti', 725, 322],
-  ['Finale: vedi alla voce Lettore', 'Finale: da scrivere', 480, 236],
-  ['Lettore: vedi alla voce Finale', 'Lettore: a bordo', 150, 432],
-  ['Destinazione: errore', 'Destinazione: avanti', 810, 432]
+  ['Rotta: erorre', 'Rotta: avanti', 300, 432],
+  ['Gravità: quando capita', 'Gravità: quanto basta', 700, 152],
+  ['Ricalcolo, ricalcolo', 'Calcolato', 660, 432],
+  ['Su è giù', 'Su è su', 260, 152],
+  ['Il vuoto è compreso nel prezzo', 'Il vuoto resta fuori', 480, 432],
+  ['Passeggeri: nessnuo', 'Passeggeri: tutti', 720, 152],
+  ['Finale: vedi alla voce Lettore', 'Finale: da scrivere', 280, 432],
+  ['Lettore: vedi alla voce Finale', 'Lettore: a bordo', 250, 152],
+  ['Destinazione: errore', 'Destinazione: avanti', 700, 432]
 ];
 function sp8() {
-  const L = mkLevel({ name: 'MARGINE', date: '', theme: 'ship', mood: 32, boss: true, fixed: true, manBoss: true, targets: MN_TARGETS,
-    bossSay: ['«Sono MARGINE, il navigatore. Ho sempre ragione. Ricalcolo.»', '«Riduco la gravità. Per il vostro bene.»', '«Ora la gravità tira di lato. Era previsto.»'] });
-  const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
-  Pl(60, 470, 840, 'Plancia di comando. Si prega di non toccare la rotta. La rotta è già stata toccata.');
-  Pl(150, 360, 170, 'ricalcolo'); Pl(640, 360, 170, 'ricalcolo'); Pl(395, 270, 170, 'ricalcolo');
-  L.spawn = { x: 110, y: 440 };
+  const L = mkLevel({ name: 'MARGINE', date: '', theme: 'ship', mood: 32, boss: true, fixed: true, manBoss: true, bossMode: 'grav', bossPos: [{ x: 480, y: 270 }], targets: MN_TARGETS,
+    bossSay: ['«Sono MARGINE, il navigatore. Le frasi sbagliate sono anche sul soffitto.»', '«Riduco la gravità. Per il vostro bene.»', '«Ora la gravità tira di lato. Era previsto.»'] });
+  const Pl = (x, y, w, text, o) => L.plats.push(Object.assign({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text }, o || {}));
+  Pl(200, 470, 560, 'Pavimento della plancia. Il soffitto è più in alto. Per ora.');
+  Pl(20, 470, 160, 'su', { flipG: true }); Pl(780, 470, 160, 'su', { flipG: true });
+  Pl(20, 80, 380, 'Soffitto della plancia. Per ora è il soffitto.');
+  Pl(560, 80, 380, 'Si prega di non camminare a testa in giù.');
+  Pl(410, 80, 140, 'giù', { flipG: true });
+  L.spawn = { x: 300, y: 440 };
   return L;
 }
 const NOTES4 = [
@@ -1448,7 +1453,7 @@ const GRAV = 1800, JUMP = 620, JUMP2 = 560, RUN = 250;
 
 const G = {
   state: 'title', chapter: 0, li: 0, L: null, t: 0, cam: { x: 0, y: 0 }, layer: 1, shake: 0,
-  cap: null, coinAcc: 0, seenT: 0, stormT: 0, autoT: 0, beatAcc: 0, beatPeriod: 1.7, lastHalf: -1, beatPh: 0, pulse: 0, cp: null,
+  cap: null, clue: null, coinAcc: 0, seenT: 0, stormT: 0, autoT: 0, beatAcc: 0, beatPeriod: 1.7, lastHalf: -1, beatPh: 0, pulse: 0, cp: null,
   chaseX: 0, chaseOn: false, proj: [], dyn: [], rings: [], fly: [], boss: null,
   stats: { deaths: 0, time: 0, marks: 0, total: 0, points: 0, fixed: 0 }, hist: [], bossDark: false, cardT: 0, turn: null, flash: 0, paused: false, end: null
 };
@@ -1476,7 +1481,7 @@ function loadLevel(i) {
   G.proj = []; G.dyn = []; G.rings = []; G.fly = []; parts.length = 0;
   G.stats.total += L.marks.length; if (i === 0) G.stats.full = true;
   G.chaseOn = false; G.cardT = 0; G.cap = null; G.note = null; G.boss = null; G.flash = 0;
-  P.light = 0; P.cd = 0; P.form = null; G.hist = []; G.bossDark = false;
+  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.hist = []; G.bossDark = false;
   if (L.boss) initBoss();
   AU.setMood(L.mood);
   respawn(true);
@@ -1496,7 +1501,8 @@ function respawn(first) {
   P.form = null; G.hist = []; for (const w of (L.words || [])) w.cd = 0; for (const w of (L.wolves || [])) w.t = 0; G.autoT = L.autoPeriod || 2.7;
   for (const k of L.candles) k.cd = 0;
   for (const b of L.blocks) b.off = 0;
-  if (G.boss && !first) { G.boss.hp = (G.boss.phase - 1) * 3; G.boss.intro = 1.1; G.boss.shoot = 1.6; G.boss.stainT = 2.6; nextTarget(); }
+  P.clue = false;
+  if (G.boss && !first) { G.boss.hp = (G.boss.phase - 1) * 3; for (const p of L.plats) if (p.kind === 'swap' && p.bad) { p.fixed = false; p.text = p.bad; p.tw = 0; } G.boss.intro = 1.1; G.boss.shoot = 1.6; G.boss.stainT = 2.6; nextTarget(); }
   camera(0, true);
 }
 
@@ -1773,9 +1779,11 @@ function nextTarget() {
   b.phase = Math.floor(b.hp / 3) + 1;
   if (G.L.fairyBoss) { G.L.water = b.phase === 2; G.bossDark = b.phase === 3; }
   if (G.L.manBoss) { G.L.lowAll = b.phase === 2; if (b.phase !== 3) G.L.pull = 0; }
+  if (G.L.bossMode === 'beat') G.beatPeriod = [1.5, 1.25, 1.05][b.phase - 1];
+  if (G.L.bossMode === 'clue') { const Q = [[110, 444], [850, 444], [235, 330], [725, 330], [480, 240]]; let best = null; Q.forEach((q, k) => { const d = Math.hypot(q[0] - b.tgt.x, q[1] - b.tgt.y) + ((k * 7 + b.hp * 3) % 5) * 40; if (!best || d > best.d) best = { d, q }; }); G.clue = { x: best.q[0], y: best.q[1], name: G.L.clues[b.hp], got: false, t: 0 }; P.clue = false; }
   if (G.L.noirBoss) { G.L.beamsOn = b.phase === 2; G.L.wind = b.phase === 3 ? -120 : 0; }
 }
-function bossSources() { return G.boss.phase < 3 ? [{ x: 480, y: 104 }] : [{ x: 150, y: 104 }, { x: 810, y: 104 }]; }
+function bossSources() { if (G.L.bossPos) return G.L.bossPos; return G.boss.phase < 3 ? [{ x: 480, y: 104 }] : [{ x: 150, y: 104 }, { x: 810, y: 104 }]; }
 const BOSS_SAY = ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'];
 function updBoss(dt) {
   const b = G.boss; b.t += dt; if (b.hurt > 0) b.hurt -= dt;
@@ -1790,6 +1798,7 @@ function updBoss(dt) {
   if (b.intro > 0) { b.intro -= dt; return; }
   if (P.dead > 0) return;
   if (b.tgt) b.tgt.t += dt;
+  if (G.clue && !G.clue.got) { G.clue.t += dt; if (Math.hypot(P.x + P.w / 2 - G.clue.x, P.y + P.h / 2 - G.clue.y) < 36) { G.clue.got = true; P.clue = true; AU.sfx('check'); say('Prova raccolta: ' + G.clue.name + '. Portala all\'accusa.'); puff(G.clue.x, G.clue.y, 16, { col: '#d8433a', s0: 30, s1: 140, grav: 0, drag: 2 }); } }
   b.shoot -= dt;
   if (b.shoot <= 0) {
     const S = bossSources(), s = S[b.src++ % S.length];
@@ -1798,7 +1807,7 @@ function updBoss(dt) {
     G.proj.push({ x: s.x, y: s.y, vx: dx / d * sp, vy: dy / d * sp, text, w: text.length * 9 + 6, t: 0 });
     AU.sfx('shoot'); b.shoot = [2.0, 1.7, G.L.manBoss ? .95 : 1.25][b.phase - 1];
   }
-  if (b.phase >= 2) {
+  if (b.phase >= 2 && G.L.bossMode !== 'grav') {
     b.stainT -= dt;
     if (b.stainT <= 0) {
       b.stainT = b.phase === 3 ? 2.2 : 2.8;
@@ -1811,13 +1820,18 @@ function updBoss(dt) {
 function bossErase(cx, cy) {
   const b = G.boss, t = b.tgt;
   if (!t || b.dead || Math.hypot(cx - t.x, cy - t.y) > 130) return;
+  const M = G.L.bossMode;
+  if (M === 'beat' && G.beatPh !== 0) { AU.sfx('nope'); G.fly.push({ text: 'fuori tempo', x: t.x, y: t.y - 30, t: 0, kind: 'fix' }); return; }
+  if (M === 'clue' && !P.clue) { AU.sfx('nope'); if (!b.noClueSaid) { b.noClueSaid = true; say('«Senza prove, signorina, è solo un\'opinione.»'); } G.fly.push({ text: 'servono prove', x: t.x, y: t.y - 30, t: 0, kind: 'fix' }); return; }
+  P.clue = false;
+  if (M === 'swap') { for (const p of G.L.plats) if (p.kind === 'swap') { p.fixed = false; p.text = p.bad; p.tw = 0; } say(pick(['«E invece no.»', '«Ricomincio da capo.»', '«C\'era una volta un\'altra versione.»'])); }
   b.hp++; b.hurt = .9; G.shake = 14; AU.sfx('hit');
   G.fly.push({ text: t.good, x: t.x, y: t.y, t: 0, kind: 'restore' });
   puff(t.x, t.y, 30, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 });
   const old = b.phase;
   if (b.hp >= G.L.targets.length) { b.tgt = null; b.dead = .001; G.L.lowAll = false; G.L.pull = 0; G.L.water = false; G.bossDark = false; G.L.beamsOn = false; G.L.wind = 0; G.proj = []; G.dyn = []; AU.sfx('win'); G.flash = 1; return; }
   nextTarget();
-  if (b.phase !== old) { G.proj = []; G.dyn = []; b.intro = 2; b.shoot = 1.4; b.stainT = 2.4; G.flash = .6; G.cp = { x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110, y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470, inv: false, layer: 1 }; }
+  if (b.phase !== old) { G.proj = []; G.dyn = []; b.intro = 2; b.shoot = 1.4; b.stainT = 2.4; G.flash = .6; G.cp = M === 'grav' ? { x: 300, y: 470, inv: false, layer: 1 } : { x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110, y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470, inv: false, layer: 1 }; }
 }
 function updProj(dt) {
   for (let i = G.proj.length - 1; i >= 0; i--) {
@@ -2310,14 +2324,30 @@ function drawBossPage(cx, cy, w, h, from, to, big) {
   ctx.restore(); ctx.globalAlpha = 1;
 }
 
+function drawMargine() {
+  const b = G.boss, t = G.t, x = 480, y = 270 + Math.sin(t * 1.2) * 6, hurt = b.hurt > 0 ? Math.sin(t * 80) * 6 * b.hurt : 0;
+  ctx.save(); ctx.translate(x + hurt, y); if (b.dead) ctx.globalAlpha = Math.max(0, 1 - b.dead / 3);
+  ctx.strokeStyle = 'rgba(160,185,220,.35)'; ctx.lineWidth = 2; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(0, 0, 86 + k * 16 + Math.sin(t * 2 + k) * 3, 0, TAU); ctx.stroke(); }
+  ctx.fillStyle = '#0d1424'; ctx.beginPath(); ctx.arc(0, 0, 78, 0, TAU); ctx.fill(); ctx.strokeStyle = '#8fa6c8'; ctx.lineWidth = 6; ctx.stroke();
+  const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 52); const col = b.phase === 3 ? '255,90,60' : b.phase === 2 ? '255,170,60' : '255,120,60';
+  g.addColorStop(0, 'rgba(255,240,210,1)'); g.addColorStop(.25, 'rgba(' + col + ',1)'); g.addColorStop(1, 'rgba(' + col + ',0)');
+  const ex = clamp((P.x - x) / 60, -1, 1) * 14, ey = clamp((P.y - y) / 60, -1, 1) * 14, pr = 1 + G.pulse * .2 + (b.hurt > 0 ? .4 : 0);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ex, ey, 52 * pr, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#fff6e0'; ctx.beginPath(); ctx.arc(ex, ey, 9, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#8fa6c8'; ctx.font = 'bold 13px "Courier New", monospace'; ctx.textAlign = 'center'; ctx.fillText('MARGINE', 0, 104);
+  ctx.fillStyle = '#e2672a'; ctx.fillText(G.gflip ? '▲ GRAVITÀ ▲' : '▼ GRAVITÀ ▼', 0, -94);
+  ctx.restore(); ctx.textAlign = 'left';
+}
 function drawBoss() {
   const b = G.boss, t = G.t;
-  if (b.phase < 3) drawBossPage(480, 104, 230, 180, 0, 9, true);
+  const M = G.L.bossMode;
+  if (M === 'grav') drawMargine();
+  else if (b.phase < 3) drawBossPage(480, 104, 230, 180, 0, 9, true);
   else { drawBossPage(150, 104, 185, 170, 0, 9, true); drawBossPage(810, 104, 185, 170, 0, 9, true); }
   const tg = b.tgt;
   if (tg && b.intro <= .8 && !b.dead) {
     const near = Math.hypot(P.x + P.w / 2 - tg.x, P.y + P.h / 2 - tg.y) < 130;
-    const a = Math.min(1, tg.t * 2 + .01);
+    const a = Math.min(1, tg.t * 2 + .01) * (M === 'beat' && G.beatPh !== 0 ? .3 : 1);
     ctx.globalAlpha = a * (near ? .9 : .5); ctx.strokeStyle = near ? '#fffaf0' : VIOLET; ctx.lineWidth = near ? 2.5 : 1.5; ctx.setLineDash([6, 7]); ctx.lineDashOffset = -t * 30;
     ctx.beginPath(); ctx.arc(tg.x, tg.y, 62 + Math.sin(t * 4) * 4, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
     ctx.font = 'bold 19px ' + SERIF; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
@@ -2325,7 +2355,15 @@ function drawBoss() {
     ctx.globalAlpha = a; ctx.fillStyle = 'rgba(12,6,20,.82)'; rr(x - 10, tg.y - 20, w + 20, 32, 8); ctx.fill();
     for (let i = 0; i < tg.bad.length; i++) { const ch = tg.bad[i]; ctx.fillStyle = i % 3 ? '#c9a2ff' : '#fff2ff'; ctx.fillText(ch, x, tg.y + 2 + Math.sin(t * 8 + i) * 1.8); x += ctx.measureText(ch).width; }
     ctx.globalAlpha = 1;
+    if (M === 'beat') { ctx.font = 'italic 15px ' + SERIF; ctx.textAlign = 'center'; ctx.fillStyle = G.beatPh === 0 ? '#fffaf0' : 'rgba(255,250,240,.45)'; ctx.fillText(G.beatPh === 0 ? 'ora!' : 'aspetta il battito', tg.x, tg.y + 34); ctx.textAlign = 'left'; }
   }
+  if (G.clue && !G.clue.got && b.intro <= .8 && !b.dead) {
+    const c = G.clue, y = c.y + Math.sin(t * 3) * 4; ctx.save(); ctx.translate(c.x, y);
+    const gl = ctx.createRadialGradient(0, 0, 2, 0, 0, 34); gl.addColorStop(0, 'rgba(216,67,58,.6)'); gl.addColorStop(1, 'rgba(216,67,58,0)'); ctx.fillStyle = gl; ctx.fillRect(-36, -36, 72, 72);
+    ctx.rotate(-.12); ctx.fillStyle = '#ece6d8'; ctx.fillRect(-15, -11, 30, 22); ctx.strokeStyle = '#d8433a'; ctx.lineWidth = 2; ctx.strokeRect(-15, -11, 30, 22); ctx.beginPath(); ctx.moveTo(-15, -11); ctx.lineTo(0, 2); ctx.lineTo(15, -11); ctx.stroke();
+    ctx.rotate(.12); ctx.font = 'bold 13px "Courier New", monospace'; ctx.fillStyle = '#ece6d8'; ctx.textAlign = 'center'; ctx.fillText('PROVA: ' + c.name, 0, -24); ctx.restore(); ctx.textAlign = 'left';
+  }
+  if (P.clue && P.dead <= 0) { ctx.fillStyle = '#ece6d8'; ctx.fillRect(P.x + P.w / 2 - 9, P.y - 40, 18, 13); ctx.strokeStyle = '#d8433a'; ctx.lineWidth = 1.5; ctx.strokeRect(P.x + P.w / 2 - 9, P.y - 40, 18, 13); }
 }
 
 function drawWorld() {

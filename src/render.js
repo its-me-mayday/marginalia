@@ -435,14 +435,30 @@ function drawBossPage(cx, cy, w, h, from, to, big) {
   ctx.restore(); ctx.globalAlpha = 1;
 }
 
+function drawMargine() {
+  const b = G.boss, t = G.t, x = 480, y = 270 + Math.sin(t * 1.2) * 6, hurt = b.hurt > 0 ? Math.sin(t * 80) * 6 * b.hurt : 0;
+  ctx.save(); ctx.translate(x + hurt, y); if (b.dead) ctx.globalAlpha = Math.max(0, 1 - b.dead / 3);
+  ctx.strokeStyle = 'rgba(160,185,220,.35)'; ctx.lineWidth = 2; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(0, 0, 86 + k * 16 + Math.sin(t * 2 + k) * 3, 0, TAU); ctx.stroke(); }
+  ctx.fillStyle = '#0d1424'; ctx.beginPath(); ctx.arc(0, 0, 78, 0, TAU); ctx.fill(); ctx.strokeStyle = '#8fa6c8'; ctx.lineWidth = 6; ctx.stroke();
+  const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 52); const col = b.phase === 3 ? '255,90,60' : b.phase === 2 ? '255,170,60' : '255,120,60';
+  g.addColorStop(0, 'rgba(255,240,210,1)'); g.addColorStop(.25, 'rgba(' + col + ',1)'); g.addColorStop(1, 'rgba(' + col + ',0)');
+  const ex = clamp((P.x - x) / 60, -1, 1) * 14, ey = clamp((P.y - y) / 60, -1, 1) * 14, pr = 1 + G.pulse * .2 + (b.hurt > 0 ? .4 : 0);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ex, ey, 52 * pr, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#fff6e0'; ctx.beginPath(); ctx.arc(ex, ey, 9, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#8fa6c8'; ctx.font = 'bold 13px "Courier New", monospace'; ctx.textAlign = 'center'; ctx.fillText('MARGINE', 0, 104);
+  ctx.fillStyle = '#e2672a'; ctx.fillText(G.gflip ? '▲ GRAVITÀ ▲' : '▼ GRAVITÀ ▼', 0, -94);
+  ctx.restore(); ctx.textAlign = 'left';
+}
 function drawBoss() {
   const b = G.boss, t = G.t;
-  if (b.phase < 3) drawBossPage(480, 104, 230, 180, 0, 9, true);
+  const M = G.L.bossMode;
+  if (M === 'grav') drawMargine();
+  else if (b.phase < 3) drawBossPage(480, 104, 230, 180, 0, 9, true);
   else { drawBossPage(150, 104, 185, 170, 0, 9, true); drawBossPage(810, 104, 185, 170, 0, 9, true); }
   const tg = b.tgt;
   if (tg && b.intro <= .8 && !b.dead) {
     const near = Math.hypot(P.x + P.w / 2 - tg.x, P.y + P.h / 2 - tg.y) < 130;
-    const a = Math.min(1, tg.t * 2 + .01);
+    const a = Math.min(1, tg.t * 2 + .01) * (M === 'beat' && G.beatPh !== 0 ? .3 : 1);
     ctx.globalAlpha = a * (near ? .9 : .5); ctx.strokeStyle = near ? '#fffaf0' : VIOLET; ctx.lineWidth = near ? 2.5 : 1.5; ctx.setLineDash([6, 7]); ctx.lineDashOffset = -t * 30;
     ctx.beginPath(); ctx.arc(tg.x, tg.y, 62 + Math.sin(t * 4) * 4, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
     ctx.font = 'bold 19px ' + SERIF; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
@@ -450,7 +466,15 @@ function drawBoss() {
     ctx.globalAlpha = a; ctx.fillStyle = 'rgba(12,6,20,.82)'; rr(x - 10, tg.y - 20, w + 20, 32, 8); ctx.fill();
     for (let i = 0; i < tg.bad.length; i++) { const ch = tg.bad[i]; ctx.fillStyle = i % 3 ? '#c9a2ff' : '#fff2ff'; ctx.fillText(ch, x, tg.y + 2 + Math.sin(t * 8 + i) * 1.8); x += ctx.measureText(ch).width; }
     ctx.globalAlpha = 1;
+    if (M === 'beat') { ctx.font = 'italic 15px ' + SERIF; ctx.textAlign = 'center'; ctx.fillStyle = G.beatPh === 0 ? '#fffaf0' : 'rgba(255,250,240,.45)'; ctx.fillText(G.beatPh === 0 ? 'ora!' : 'aspetta il battito', tg.x, tg.y + 34); ctx.textAlign = 'left'; }
   }
+  if (G.clue && !G.clue.got && b.intro <= .8 && !b.dead) {
+    const c = G.clue, y = c.y + Math.sin(t * 3) * 4; ctx.save(); ctx.translate(c.x, y);
+    const gl = ctx.createRadialGradient(0, 0, 2, 0, 0, 34); gl.addColorStop(0, 'rgba(216,67,58,.6)'); gl.addColorStop(1, 'rgba(216,67,58,0)'); ctx.fillStyle = gl; ctx.fillRect(-36, -36, 72, 72);
+    ctx.rotate(-.12); ctx.fillStyle = '#ece6d8'; ctx.fillRect(-15, -11, 30, 22); ctx.strokeStyle = '#d8433a'; ctx.lineWidth = 2; ctx.strokeRect(-15, -11, 30, 22); ctx.beginPath(); ctx.moveTo(-15, -11); ctx.lineTo(0, 2); ctx.lineTo(15, -11); ctx.stroke();
+    ctx.rotate(.12); ctx.font = 'bold 13px "Courier New", monospace'; ctx.fillStyle = '#ece6d8'; ctx.textAlign = 'center'; ctx.fillText('PROVA: ' + c.name, 0, -24); ctx.restore(); ctx.textAlign = 'left';
+  }
+  if (P.clue && P.dead <= 0) { ctx.fillStyle = '#ece6d8'; ctx.fillRect(P.x + P.w / 2 - 9, P.y - 40, 18, 13); ctx.strokeStyle = '#d8433a'; ctx.lineWidth = 1.5; ctx.strokeRect(P.x + P.w / 2 - 9, P.y - 40, 18, 13); }
 }
 
 function drawWorld() {

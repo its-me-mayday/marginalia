@@ -347,12 +347,12 @@ const BOSS_TARGETS = [
   ['Qualcnuo mi rielgge', 'Qualcuno mi rilegge', 810, 432]
 ];
 function lv9() {
-  const L = mkLevel({ name: 'La pagina', date: '', theme: 'boss', mood: 8, boss: true, fixed: true, targets: BOSS_TARGETS, bossSay: ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'] });
+  const L = mkLevel({ name: 'La pagina', date: '', theme: 'boss', mood: 8, boss: true, fixed: true, bossMode: 'beat', beat: 1.5, targets: BOSS_TARGETS, bossSay: ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'] });
   const P = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   P(60, 470, 840, 'Questa è la mia casa. Questa è la mia pagina. Tu sei soltanto una nota a margine.');
-  P(150, 360, 170, 'un margine,');
-  P(640, 360, 170, 'una svista,');
-  P(395, 270, 170, 'una macchia.');
+  L.plats.push({ kind: 'beat', phase: 0, layer: 0, x: 150, x0: 150, y: 360, w: 170, h: LH, text: 'un margine,' });
+  L.plats.push({ kind: 'beat', phase: 1, layer: 0, x: 640, x0: 640, y: 360, w: 170, h: LH, text: 'una svista,' });
+  L.plats.push({ kind: 'beat', phase: 1, layer: 0, x: 395, x0: 395, y: 270, w: 170, h: LH, text: 'una macchia.' });
   L.spawn = { x: 110, y: 440 };
   return L;
 }
@@ -548,11 +548,12 @@ const FB_TARGETS = [
   ['E vissero, forse', 'E vissero felici e contenti', 810, 432]
 ];
 function fb8() {
-  const L = mkLevel({ name: 'Il Narratore', date: '', theme: 'teller', mood: 16, boss: true, fixed: true, brina: true, fairyBoss: true, targets: FB_TARGETS,
+  const L = mkLevel({ name: 'Il Narratore', date: '', theme: 'teller', mood: 16, boss: true, fixed: true, brina: true, fairyBoss: true, bossMode: 'swap', targets: FB_TARGETS,
     bossSay: ['«Le fiabe sono mie. Le racconto come mi pare.»', '«Vuoi il bosco? Eccoti il mare.»', '«Spengo la luce. Vediamo se la sai a memoria.»'] });
   const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   Pl(60, 470, 840, 'C\'era una volta chi decideva come finiscono le storie. E non eri tu, piccola nota.');
-  Pl(150, 360, 170, 'forse sì,'); Pl(640, 360, 170, 'forse no,'); Pl(395, 270, 170, 'forse.');
+  const S = (x, y, bad, good) => L.plats.push({ kind: 'swap', layer: 0, x, x0: x, y, w: 170, h: LH, text: bad, bad, good });
+  S(150, 360, 'una nuvola', 'un ponte'); S(640, 360, 'il fumo', 'la pietra'); S(395, 270, 'un sogno', 'una scala');
   L.spawn = { x: 110, y: 440 };
   return L;
 }
@@ -752,7 +753,8 @@ const NR_TARGETS = [
   ['L\'ultima pagina era ████████', 'L\'ultima pagina era bianca', 810, 432]
 ];
 function nr8() {
-  const L = mkLevel({ name: 'Tutti nel vagone ristorante', date: '', theme: 'dining', mood: 24, boss: true, fixed: true, noirBoss: true, targets: NR_TARGETS,
+  const L = mkLevel({ name: 'Tutti nel vagone ristorante', date: '', theme: 'dining', mood: 24, boss: true, fixed: true, noirBoss: true, bossMode: 'clue', targets: NR_TARGETS,
+    clues: ['un pelo grigio', 'un filo giallo', 'una goccia di cera', 'un dito di grafite', 'il copione del Narratore', 'una barra nera', 'una goccia d\'inchiostro', 'l\'elenco dei passeggeri', 'la pagina bianca'],
     bossSay: ['«Signori, il colpevole è in questo vagone.»', '«Controllore, faccia luce.»', '«Entriamo in galleria. Che peccato.»'] });
   const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
   Pl(60, 470, 840, 'Uno di voi ha strappato l\'ultima pagina. E io so chi. O almeno, so da dove cominciare.');
@@ -945,23 +947,26 @@ function sp7() {
   return L;
 }
 const MN_TARGETS = [
-  ['Rotta: erorre', 'Rotta: avanti', 235, 322],
-  ['Gravità: quando capita', 'Gravità: quanto basta', 725, 322],
-  ['Ricalcolo, ricalcolo, ricalcolo', 'Calcolato', 480, 236],
-  ['Su è giù', 'Su è su', 480, 432],
-  ['Il vuoto è compreso nel prezzo', 'Il vuoto resta fuori', 235, 322],
-  ['Passeggeri: nessnuo', 'Passeggeri: tutti', 725, 322],
-  ['Finale: vedi alla voce Lettore', 'Finale: da scrivere', 480, 236],
-  ['Lettore: vedi alla voce Finale', 'Lettore: a bordo', 150, 432],
-  ['Destinazione: errore', 'Destinazione: avanti', 810, 432]
+  ['Rotta: erorre', 'Rotta: avanti', 300, 432],
+  ['Gravità: quando capita', 'Gravità: quanto basta', 700, 152],
+  ['Ricalcolo, ricalcolo', 'Calcolato', 660, 432],
+  ['Su è giù', 'Su è su', 260, 152],
+  ['Il vuoto è compreso nel prezzo', 'Il vuoto resta fuori', 480, 432],
+  ['Passeggeri: nessnuo', 'Passeggeri: tutti', 720, 152],
+  ['Finale: vedi alla voce Lettore', 'Finale: da scrivere', 280, 432],
+  ['Lettore: vedi alla voce Finale', 'Lettore: a bordo', 250, 152],
+  ['Destinazione: errore', 'Destinazione: avanti', 700, 432]
 ];
 function sp8() {
-  const L = mkLevel({ name: 'MARGINE', date: '', theme: 'ship', mood: 32, boss: true, fixed: true, manBoss: true, targets: MN_TARGETS,
-    bossSay: ['«Sono MARGINE, il navigatore. Ho sempre ragione. Ricalcolo.»', '«Riduco la gravità. Per il vostro bene.»', '«Ora la gravità tira di lato. Era previsto.»'] });
-  const Pl = (x, y, w, text) => L.plats.push({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text });
-  Pl(60, 470, 840, 'Plancia di comando. Si prega di non toccare la rotta. La rotta è già stata toccata.');
-  Pl(150, 360, 170, 'ricalcolo'); Pl(640, 360, 170, 'ricalcolo'); Pl(395, 270, 170, 'ricalcolo');
-  L.spawn = { x: 110, y: 440 };
+  const L = mkLevel({ name: 'MARGINE', date: '', theme: 'ship', mood: 32, boss: true, fixed: true, manBoss: true, bossMode: 'grav', bossPos: [{ x: 480, y: 270 }], targets: MN_TARGETS,
+    bossSay: ['«Sono MARGINE, il navigatore. Le frasi sbagliate sono anche sul soffitto.»', '«Riduco la gravità. Per il vostro bene.»', '«Ora la gravità tira di lato. Era previsto.»'] });
+  const Pl = (x, y, w, text, o) => L.plats.push(Object.assign({ kind: 'line', layer: 0, x, x0: x, y, w, h: LH, text }, o || {}));
+  Pl(200, 470, 560, 'Pavimento della plancia. Il soffitto è più in alto. Per ora.');
+  Pl(20, 470, 160, 'su', { flipG: true }); Pl(780, 470, 160, 'su', { flipG: true });
+  Pl(20, 80, 380, 'Soffitto della plancia. Per ora è il soffitto.');
+  Pl(560, 80, 380, 'Si prega di non camminare a testa in giù.');
+  Pl(410, 80, 140, 'giù', { flipG: true });
+  L.spawn = { x: 300, y: 440 };
   return L;
 }
 const NOTES4 = [

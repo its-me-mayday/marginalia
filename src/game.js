@@ -6,7 +6,7 @@ const GRAV = 1800, JUMP = 620, JUMP2 = 560, RUN = 250;
 
 const G = {
   state: 'title', chapter: 0, li: 0, L: null, t: 0, cam: { x: 0, y: 0 }, layer: 1, shake: 0,
-  cap: null, coinAcc: 0, seenT: 0, stormT: 0, autoT: 0, beatAcc: 0, beatPeriod: 1.7, lastHalf: -1, beatPh: 0, pulse: 0, cp: null,
+  cap: null, clue: null, coinAcc: 0, seenT: 0, stormT: 0, autoT: 0, beatAcc: 0, beatPeriod: 1.7, lastHalf: -1, beatPh: 0, pulse: 0, cp: null,
   chaseX: 0, chaseOn: false, proj: [], dyn: [], rings: [], fly: [], boss: null,
   stats: { deaths: 0, time: 0, marks: 0, total: 0, points: 0, fixed: 0 }, hist: [], bossDark: false, cardT: 0, turn: null, flash: 0, paused: false, end: null
 };
@@ -34,7 +34,7 @@ function loadLevel(i) {
   G.proj = []; G.dyn = []; G.rings = []; G.fly = []; parts.length = 0;
   G.stats.total += L.marks.length; if (i === 0) G.stats.full = true;
   G.chaseOn = false; G.cardT = 0; G.cap = null; G.note = null; G.boss = null; G.flash = 0;
-  P.light = 0; P.cd = 0; P.form = null; G.hist = []; G.bossDark = false;
+  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.hist = []; G.bossDark = false;
   if (L.boss) initBoss();
   AU.setMood(L.mood);
   respawn(true);
@@ -54,7 +54,8 @@ function respawn(first) {
   P.form = null; G.hist = []; for (const w of (L.words || [])) w.cd = 0; for (const w of (L.wolves || [])) w.t = 0; G.autoT = L.autoPeriod || 2.7;
   for (const k of L.candles) k.cd = 0;
   for (const b of L.blocks) b.off = 0;
-  if (G.boss && !first) { G.boss.hp = (G.boss.phase - 1) * 3; G.boss.intro = 1.1; G.boss.shoot = 1.6; G.boss.stainT = 2.6; nextTarget(); }
+  P.clue = false;
+  if (G.boss && !first) { G.boss.hp = (G.boss.phase - 1) * 3; for (const p of L.plats) if (p.kind === 'swap' && p.bad) { p.fixed = false; p.text = p.bad; p.tw = 0; } G.boss.intro = 1.1; G.boss.shoot = 1.6; G.boss.stainT = 2.6; nextTarget(); }
   camera(0, true);
 }
 
@@ -331,9 +332,11 @@ function nextTarget() {
   b.phase = Math.floor(b.hp / 3) + 1;
   if (G.L.fairyBoss) { G.L.water = b.phase === 2; G.bossDark = b.phase === 3; }
   if (G.L.manBoss) { G.L.lowAll = b.phase === 2; if (b.phase !== 3) G.L.pull = 0; }
+  if (G.L.bossMode === 'beat') G.beatPeriod = [1.5, 1.25, 1.05][b.phase - 1];
+  if (G.L.bossMode === 'clue') { const Q = [[110, 444], [850, 444], [235, 330], [725, 330], [480, 240]]; let best = null; Q.forEach((q, k) => { const d = Math.hypot(q[0] - b.tgt.x, q[1] - b.tgt.y) + ((k * 7 + b.hp * 3) % 5) * 40; if (!best || d > best.d) best = { d, q }; }); G.clue = { x: best.q[0], y: best.q[1], name: G.L.clues[b.hp], got: false, t: 0 }; P.clue = false; }
   if (G.L.noirBoss) { G.L.beamsOn = b.phase === 2; G.L.wind = b.phase === 3 ? -120 : 0; }
 }
-function bossSources() { return G.boss.phase < 3 ? [{ x: 480, y: 104 }] : [{ x: 150, y: 104 }, { x: 810, y: 104 }]; }
+function bossSources() { if (G.L.bossPos) return G.L.bossPos; return G.boss.phase < 3 ? [{ x: 480, y: 104 }] : [{ x: 150, y: 104 }, { x: 810, y: 104 }]; }
 const BOSS_SAY = ['«Tu correggi. Io riscrivo.»', '«Anche il pavimento è una frase. E le frasi si cambiano.»', '«Ci ha scritti la stessa mano. Guardami: sono te, senza la gomma.»'];
 function updBoss(dt) {
   const b = G.boss; b.t += dt; if (b.hurt > 0) b.hurt -= dt;
@@ -348,6 +351,7 @@ function updBoss(dt) {
   if (b.intro > 0) { b.intro -= dt; return; }
   if (P.dead > 0) return;
   if (b.tgt) b.tgt.t += dt;
+  if (G.clue && !G.clue.got) { G.clue.t += dt; if (Math.hypot(P.x + P.w / 2 - G.clue.x, P.y + P.h / 2 - G.clue.y) < 36) { G.clue.got = true; P.clue = true; AU.sfx('check'); say('Prova raccolta: ' + G.clue.name + '. Portala all\'accusa.'); puff(G.clue.x, G.clue.y, 16, { col: '#d8433a', s0: 30, s1: 140, grav: 0, drag: 2 }); } }
   b.shoot -= dt;
   if (b.shoot <= 0) {
     const S = bossSources(), s = S[b.src++ % S.length];
@@ -356,7 +360,7 @@ function updBoss(dt) {
     G.proj.push({ x: s.x, y: s.y, vx: dx / d * sp, vy: dy / d * sp, text, w: text.length * 9 + 6, t: 0 });
     AU.sfx('shoot'); b.shoot = [2.0, 1.7, G.L.manBoss ? .95 : 1.25][b.phase - 1];
   }
-  if (b.phase >= 2) {
+  if (b.phase >= 2 && G.L.bossMode !== 'grav') {
     b.stainT -= dt;
     if (b.stainT <= 0) {
       b.stainT = b.phase === 3 ? 2.2 : 2.8;
@@ -369,13 +373,18 @@ function updBoss(dt) {
 function bossErase(cx, cy) {
   const b = G.boss, t = b.tgt;
   if (!t || b.dead || Math.hypot(cx - t.x, cy - t.y) > 130) return;
+  const M = G.L.bossMode;
+  if (M === 'beat' && G.beatPh !== 0) { AU.sfx('nope'); G.fly.push({ text: 'fuori tempo', x: t.x, y: t.y - 30, t: 0, kind: 'fix' }); return; }
+  if (M === 'clue' && !P.clue) { AU.sfx('nope'); if (!b.noClueSaid) { b.noClueSaid = true; say('«Senza prove, signorina, è solo un\'opinione.»'); } G.fly.push({ text: 'servono prove', x: t.x, y: t.y - 30, t: 0, kind: 'fix' }); return; }
+  P.clue = false;
+  if (M === 'swap') { for (const p of G.L.plats) if (p.kind === 'swap') { p.fixed = false; p.text = p.bad; p.tw = 0; } say(pick(['«E invece no.»', '«Ricomincio da capo.»', '«C\'era una volta un\'altra versione.»'])); }
   b.hp++; b.hurt = .9; G.shake = 14; AU.sfx('hit');
   G.fly.push({ text: t.good, x: t.x, y: t.y, t: 0, kind: 'restore' });
   puff(t.x, t.y, 30, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 });
   const old = b.phase;
   if (b.hp >= G.L.targets.length) { b.tgt = null; b.dead = .001; G.L.lowAll = false; G.L.pull = 0; G.L.water = false; G.bossDark = false; G.L.beamsOn = false; G.L.wind = 0; G.proj = []; G.dyn = []; AU.sfx('win'); G.flash = 1; return; }
   nextTarget();
-  if (b.phase !== old) { G.proj = []; G.dyn = []; b.intro = 2; b.shoot = 1.4; b.stainT = 2.4; G.flash = .6; G.cp = { x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110, y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470, inv: false, layer: 1 }; }
+  if (b.phase !== old) { G.proj = []; G.dyn = []; b.intro = 2; b.shoot = 1.4; b.stainT = 2.4; G.flash = .6; G.cp = M === 'grav' ? { x: 300, y: 470, inv: false, layer: 1 } : { x: P.standOn && P.standOn.text !== undefined ? clamp(P.x + P.w / 2, 80, 880) : 110, y: P.standOn && P.standOn.text !== undefined ? P.standOn.y : 470, inv: false, layer: 1 }; }
 }
 function updProj(dt) {
   for (let i = G.proj.length - 1; i >= 0; i--) {

@@ -140,6 +140,15 @@ Livelli:
 7. **Teletrasporto** — asterischi arancioni come varchi tra due navi, una delle quali a gravità ridotta.
 8. **MARGINE** (boss) — il navigatore in persona. Prima fase normale, nella seconda la gravità è ridotta, nella terza tira di lato e cambia verso ogni pochi secondi.
 
+### Boss: uno schema diverso per libro
+
+Ogni boss chiede una cosa diversa, legata al suo libro. Lo schema comune resta: nove frasi corrotte in tre fasi, da raggiungere e restaurare con lo sbianchetto. Cambia la condizione per riuscirci.
+
+- **I — La pagina (gotico): il battito.** Le frasi si possono restaurare solo sul battito del cuore: tra un colpo e l'altro sbiadiscono e lo sbianchetto non fa presa («fuori tempo»). Anche le righe sospese esistono a battiti alterni, e il cuore accelera a ogni fase.
+- **II — Il Narratore (fiaba): le parole rimescolate.** Le righe sospese sono parole scambiate («una nuvola» invece di «un ponte»): vanno rimesse a posto per salirci. A ogni frase restaurata il Narratore rimescola tutto («E invece no»), e si ricomincia.
+- **III — Il vagone ristorante (noir): le prove.** Corsivo non accetta correzioni senza prove. Per ogni frase compare nel vagone una prova (un pelo grigio, un filo giallo, una goccia di cera…): bisogna raccoglierla e portarla all'accusa. Senza prova: «Senza prove, signorina, è solo un'opinione.»
+- **IV — MARGINE (fantascienza): il soffitto.** Il boss è un occhio-console al centro della plancia. Metà delle frasi sono sul soffitto: piastre arancioni ai lati del pavimento capovolgono la gravità e ti portano su, una al centro del soffitto ti riporta giù. Nella seconda fase la gravità è ridotta, nella terza tira di lato.
+
 ### Prologhi
 
 - **All'apertura del gioco**, la prima volta, un prologo in quattro schermate presenta la Biblioteca dei Margini, il Refuso e Postilla. Si può rivedere dal pulsante «Prologo» e saltare in qualsiasi momento.
@@ -200,3 +209,4 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 25 | Nei livelli scuri (noir, spazio) le parole-nemico sono chiare su fondo rosso e le macchie hanno un bordo viola. | Segnalazione dell'autore: non si vedevano e si confondevano con lo sfondo. |
 | 26 | Quarto libro rifatto da capo: tutto nello spazio, con la gravità come idea centrale; via ufficio moduli, note a piè di pagina, coincidenze, traduttore letterale e «vedi alla voce». | Giudizio dell'autore: «penoso tranne la gravità», e non c'entrava con la fantascienza. |
 | 27 | Il bordo superiore della pagina fa da soffitto invece di uccidere: si muore solo cadendo nel verso della gravità. | Nei pianeti leggeri i salti alti uscivano dalla pagina. |
+| 28 | Ogni boss ha una regola propria: battito, parole rimescolate, prove da consegnare, frasi sul soffitto. | I quattro boss erano tutti uguali. |
