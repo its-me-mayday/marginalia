@@ -2798,7 +2798,7 @@ function drawCover(c, x, y, w, h, sel) {
   ctx.font = '500 15px ' + SERIF; ctx.fillText('LIBRO ' + C.roman, 6, -h / 2 + 40);
   const words = C.title.split(' '); let lines = [], fs = 25;
   for (fs of [25, 22, 19]) { ctx.font = 'italic 500 ' + fs + 'px ' + SERIF; lines = []; let cur = ''; for (const wd of words) { if (cur && ctx.measureText(cur + ' ' + wd).width > w - 56) { lines.push(cur); cur = wd; } else cur = cur ? cur + ' ' + wd : wd; } lines.push(cur); if (lines.length <= 3) break; }
-  const lh = fs + 4; lines.forEach((l, i) => ctx.fillText(l, 6, -40 - (lines.length - 1) * lh / 2 + i * lh));
+  const lh = fs + 4, top = Math.max(-h / 2 + 70, -40 - (lines.length - 1) * lh / 2); lines.forEach((l, i) => ctx.fillText(l, 6, top + i * lh));
   if (open) {
     ctx.font = 'italic 15px ' + SERIF; ctx.globalAlpha = .9;
     ctx.fillText(B.done ? 'letto fino in fondo' : B.max > 0 ? 'segnalibro: ' + ROMAN[B.li] : 'mai aperto', 6, h / 2 - 48);
