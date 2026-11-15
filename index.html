@@ -340,7 +340,8 @@ const MUSIC = [
   { root: 63, st: .22, prog: 7, dens: .8, pad: .02, bass: .08, style: 'pluck', ost: .016, sour: true },// Il motore a coincidenze
   { root: 60, st: .27, prog: 5, dens: .75, pad: .018, bass: .07, style: 'box', motif: 0 },           // Il traduttore letterale
   { root: 53, st: .4, prog: 6, dens: .4, pad: .034, bass: .08, style: 'box', dec: 2.4 },             // Vedi alla voce
-  { root: 57, st: .2, prog: 8, dens: .9, pad: .02, bass: .09, style: 'pluck', ost: .03 }             // Il Servizio Clienti
+  { root: 57, st: .2, prog: 8, dens: .9, pad: .02, bass: .09, style: 'pluck', ost: .03 },            // MARGINE
+  { root: 55, st: .6, prog: 5, dens: .45, pad: .036, bass: .08, motif: 0, dec: 3.2 }                 // Epilogo: pianoforte e il tema di Postilla
 ];
 
 /* ---------- particelle ---------- */
@@ -1445,6 +1446,64 @@ CHAPTERS[3].register = 'man'; CHAPTERS[3].intro = [
   ['NOTA TECNICA', 'La Biblioteca in cui tutto ciò è avvenuto è un\'astronave.', 'Ha sbagliato strada. La gravità è stata ridotta per risparmiare.', 'Il navigatore sta ricalcolando. È tutto previsto.']
 ];
 
+/* ================= EPILOGO — Il margine ================= */
+const NB = CHAPTERS.length; // i libri veri; l'epilogo viene dopo e non compare tra le copertine
+Object.assign(THEMES, { reading: { p0: '#3a2616', p1: '#120a06', decor: 'shelves', noir: true, epi: true } });
+function ep1() {
+  const L = mkLevel({ name: 'Il margine', date: 'in fondo alla biblioteca', theme: 'reading', mood: 33, epi: true });
+  const b = builder(L, 120, 430);
+  const S = (gap, dy, w, o) => b.ln('', gap, dy, Object.assign({ kind: 'shelf', w }, o || {}));
+  L.memories = [];
+  const mem = (book, text) => { const p = b.last; L.memories.push({ x: p.x + p.w / 2, y: p.y - 46, book, text, seen: false }); return b; };
+  S(0, 0, 520).spawn(); b.last.say = 'Quattro libri dopo. La biblioteca è silenziosa, per una volta.';
+  S(110, -70, 200).mark(); S(100, -70, 200); mem(0, 'Una villa. L\'ospite riparte al mattino. Ma come finiva, prima?');
+  S(110, -60, 220).check(); S(100, -70, 180).mark(); S(110, 60, 200); mem(1, 'Una fiaba. E vissero felici e contenti. Forse.');
+  S(110, -60, 240).check(); S(110, -80, 180).mark(); S(110, 0, 200); mem(2, 'Un treno. Colpevoli: tutti. L\'ultima pagina era bianca.');
+  S(110, 70, 220).check(); S(100, 70, 200).mark(); mem(3, 'Un manuale. Finale: vedi alla voce Lettore.');
+  S(110, 80, 260).check(); S(100, 30, 820).mark(.2);
+  const fl = b.last; L.reader = { x: fl.x + fl.w - 170, y: fl.y }; L.refuso = { x: fl.x + fl.w - 330, y: fl.y - 16, alive: true };
+  L.exit = { x: L.reader.x + 40, y: fl.y - 74, w: 50, h: 74 };
+  return L;
+}
+const NOTES_E = [['Questo non è un libro. È casa.', 'Ho letto tutti questi scaffali. Male, ma tutti.', 'Su ogni libro ho lasciato qualcosa.', 'A volte una nota. A volte una macchia.', 'Non sempre sapevo quale delle due.', 'Adesso ti aspetto. Ho tenuto il posto.']];
+const EPI_DIALOGUE = [
+  '«Eccoti. Ti ho disegnata io, tanti anni fa: un ciao a matita.»',
+  '«Poi ho sbagliato una parola. E anche l\'errore ha imparato a camminare.»',
+  '«Vi ho seguiti in quattro libri. Lui macchiava, tu correggevi.»',
+  '«E ogni volta il libro diventava un po\' meno suo e un po\' più nostro.»',
+  '«Adesso decidi tu. Lo sbianchetto ce l\'hai.»'
+];
+CHAPTERS.push({
+  id: 5, roman: '∞', title: 'Il margine', epi: true, levels: [ep1], notes: NOTES_E, cover: ['#2a1a10', '#ffd27a'], register: 'lib',
+  intro: [
+    ['Quattro libri dopo,', 'in fondo alla Biblioteca dei Margini,', 'si è accesa una lampada.'],
+    ['Sotto la lampada c\'è una poltrona.', 'Sulla poltrona, qualcuno legge.', 'Ha una matita dietro l\'orecchio.'],
+    ['Postilla lo riconosce dalla calligrafia.']
+  ],
+  endings: {
+    erase: {
+      secret: '✶  Ultima nota a margine: «Grazie. Era ora.»',
+      ending: [
+        { left: true, mark: true, dur: 8, lines: [['Postilla cancellò il Refuso.', .4], ['La macchia sparì, pulita, senza lasciare alone.', 1.8], ['Il lettore sorrise, e chiuse gli occhi.', 3.2]] },
+        { dur: 4.2, big: true, lines: [['Silenzio.', .3]] },
+        { dur: 8, lines: [['Senza errori, i libri tornarono perfetti.', .3], ['Nessuno ci scrisse più a margine.', 2.2], ['Non ce n\'era bisogno.', 4]] },
+        { dur: 9, lines: [['Postilla restò ferma sulla pagina, a guardarla.', .3], ['Era bellissima.', 2.4], ['E non aveva più niente da dire.', 3.8, VIOLET]] }
+      ],
+      shelf: ['La Biblioteca dei Margini è in ordine.', 'Fin troppo.']
+    },
+    keep: {
+      secret: '✶  Ultima nota a margine: «Ciao. — Ciao.»',
+      ending: [
+        { left: true, mark: true, dur: 8, lines: [['Postilla si sedette sul bracciolo, accanto al lettore.', .4], ['Il Refuso si accucciò ai loro piedi, come un gatto.', 1.8], ['Nessuno cancellò niente.', 3.2]] },
+        { dur: 4.2, big: true, lines: [['Ciao.', .3]] },
+        { dur: 8, lines: [['«La mia prima nota a margine», disse il lettore.', .3], ['«E il mio primo errore.»', 2.2], ['«Siete quello che resta di chi legge.»', 4]] },
+        { dur: 9, lines: [['Poi prese dallo scaffale un libro nuovo, ancora intatto,', .3], ['e glielo passò.', 2.2], ['Tocca a qualcun altro, adesso.', 3.8, VIOLET]] }
+      ],
+      shelf: ['La Biblioteca dei Margini è in disordine, come sempre.', 'È così che si capisce che qualcuno la legge.']
+    }
+  }
+});
+
 /* ============================================================
    MARGINALIA — mondo di gioco: Postilla, fisica, nemici, boss
    ============================================================ */
@@ -1481,7 +1540,7 @@ function loadLevel(i) {
   G.proj = []; G.dyn = []; G.rings = []; G.fly = []; parts.length = 0;
   G.stats.total += L.marks.length; if (i === 0) G.stats.full = true;
   G.chaseOn = false; G.cardT = 0; G.cap = null; G.note = null; G.boss = null; G.flash = 0;
-  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.hist = []; G.bossDark = false;
+  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.dlg = null; G.dlgDone = false; G.epiChoice = null; G.epiEnd = 0; G.hist = []; G.bossDark = false;
   if (L.boss) initBoss();
   AU.setMood(L.mood);
   respawn(true);
@@ -1683,6 +1742,7 @@ function onLand(p) {
 function erase() {
   const L = G.L, cx = P.x + P.w / 2, cy = P.y + P.h / 2;
   if (L.noErase) { AU.sfx('nope'); G.shake = 3; return; }
+  if (L.refuso) { const R = L.refuso; if (R.alive && G.dlgDone && !G.epiChoice && Math.hypot(cx - R.x, cy - R.y) < 160) { R.alive = false; G.epiChoice = 'erase'; G.epiEnd = 2.4; AU.sfx('erase'); G.flash = .8; G.rings.push({ x: R.x, y: R.y, t: 0, big: true }); puff(R.x, R.y, 40, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 }); return; } if (!G.dlgDone) { AU.sfx('nope'); return; } }
   if (L.mirror) {
     const nl = G.layer === 1 ? 2 : 1;
     for (const b of L.blocks) if (b.layer === nl && overlap(P, b)) { AU.sfx('nope'); return; }
@@ -1756,7 +1816,13 @@ function updItems(dt) {
     c.got = true; G.cp = { x: c.x, y: c.y + (c.float ? 15 : 0), inv: c.inv, layer: G.layer }; AU.sfx('check');
     puff(c.x, c.y + (c.inv ? 30 : -30), 16, { s0: 20, s1: 120, col: GRAPHITE, grav: -80, l0: .5, l1: 1 });
   }
-  if (L.exit && overlap(P, L.exit) && !G.turn) nextLevel();
+  for (const m of (L.memories || [])) if (!m.seen && Math.hypot(cx - m.x, cy - m.y) < 40) { m.seen = true; say(m.text); AU.sfx('mark'); G.stats.points += 100; puff(m.x, m.y, 16, { col: CHAPTERS[m.book].cover[1], s0: 20, s1: 120, grav: -40 }); }
+  if (L.reader) {
+    if (!G.dlg && Math.abs(cx - L.reader.x) < 300 && Math.abs(cy - L.reader.y) < 120) G.dlg = { i: -1, t: 99 };
+    if (G.dlg && !G.dlgDone) { G.dlg.t += dt; if (G.dlg.t > 4.2) { G.dlg.i++; G.dlg.t = 0; if (G.dlg.i < EPI_DIALOGUE.length) { G.cap = { text: EPI_DIALOGUE[G.dlg.i], t: 0, dur: 4.1 }; AU.sfx('whisper'); } else G.dlgDone = true; } }
+    if (G.epiEnd > 0) { G.epiEnd -= dt; if (G.epiEnd <= 0 && G.state === 'play' && !G.turn) startEnding(); }
+  }
+  if (L.exit && overlap(P, L.exit) && !G.turn) { if (L.epi) { if (G.dlgDone && !G.epiChoice) { G.epiChoice = 'keep'; G.epiEnd = 1.6; AU.sfx('check'); } } else nextLevel(); }
 }
 
 function updChase(dt) {
@@ -2034,8 +2100,16 @@ function drawLineText(p, col, alpha, font) {
   ctx.globalAlpha = alpha; ctx.fillStyle = col;
   ctx.save(); ctx.translate(p.x + 4, p.y + 18); ctx.scale(sx, 1); ctx.fillText(p.text, 0, 0); ctx.restore();
 }
+function drawShelfPlank(p) {
+  const r = rng(Math.round(p.x0) * 7 + 1);
+  let x = p.x + 4;
+  while (x < p.x + p.w - 12) { const bw = 9 + r() * 14, bh = 30 + r() * 30, hue = r(); const c = hue < .3 ? [120, 46, 38] : hue < .55 ? [52, 80, 66] : hue < .8 ? [140, 104, 52] : [60, 58, 96]; ctx.fillStyle = 'rgb(' + c.join(',') + ')'; ctx.fillRect(x, p.y - bh, bw, bh); ctx.fillStyle = 'rgba(255,220,150,.25)'; ctx.fillRect(x + 1, p.y - bh + 6, bw - 2, 2); x += bw + 1 + (r() < .1 ? 14 : 0); }
+  const g = ctx.createLinearGradient(0, p.y, 0, p.y + 14); g.addColorStop(0, '#a36b38'); g.addColorStop(1, '#5c3a1c'); ctx.fillStyle = g; ctx.fillRect(p.x - 4, p.y, p.w + 8, 14);
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(p.x - 4, p.y + 14, p.w + 8, 5);
+}
 function drawPlat(p, L, litK) {
   if (!onScreen(p, 60)) return;
+  if (p.kind === 'shelf') { drawShelfPlank(p); return; }
   const t = G.t;
   const fairy = THEMES[L.theme].fairy, TH = THEMES[L.theme], noir = TH.noir;
   let col = noir ? (TH.lightBg ? '#1b2130' : '#ece6d8') : TH.man ? '#1c4a55' : fairy ? '#2a2018' : INK, a = 1, font = noir ? MONO : (fairy || TH.man) ? '500 25px ' + SERIF : null, ox = 0, oy = 0, under = .22;
@@ -2338,6 +2412,28 @@ function drawMargine() {
   ctx.fillStyle = '#e2672a'; ctx.fillText(G.gflip ? '▲ GRAVITÀ ▲' : '▼ GRAVITÀ ▼', 0, -94);
   ctx.restore(); ctx.textAlign = 'left';
 }
+function drawEpilogue(L) {
+  const t = G.t;
+  for (const m of L.memories) if (!m.seen) { const C = CHAPTERS[m.book], y = m.y + Math.sin(t * 2 + m.x) * 4; const g = ctx.createRadialGradient(m.x, y, 2, m.x, y, 34); g.addColorStop(0, 'rgba(255,220,140,.6)'); g.addColorStop(1, 'rgba(255,220,140,0)'); ctx.fillStyle = g; ctx.fillRect(m.x - 36, y - 36, 72, 72); ctx.save(); ctx.translate(m.x, y); ctx.rotate(Math.sin(t + m.x) * .1); ctx.fillStyle = C.cover[0]; ctx.fillRect(-12, -16, 24, 32); ctx.strokeStyle = C.cover[1]; ctx.lineWidth = 1.5; ctx.strokeRect(-9, -13, 18, 26); ctx.fillStyle = C.cover[1]; ctx.font = '500 11px ' + SERIF; ctx.textAlign = 'center'; ctx.fillText(C.roman, 0, 4); ctx.restore(); ctx.textAlign = 'left'; }
+  const R = L.reader, x = R.x, y = R.y;
+  // lampada
+  const lg = ctx.createRadialGradient(x + 60, y - 150, 10, x + 60, y - 150, 300); lg.addColorStop(0, 'rgba(255,214,140,.45)'); lg.addColorStop(1, 'rgba(255,214,140,0)'); ctx.fillStyle = lg; ctx.fillRect(x - 260, y - 450, 640, 470);
+  ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x + 90, y); ctx.lineTo(x + 90, y - 140); ctx.stroke(); ctx.fillStyle = '#d9a648'; ctx.beginPath(); ctx.moveTo(x + 62, y - 140); ctx.lineTo(x + 118, y - 140); ctx.lineTo(x + 104, y - 168); ctx.lineTo(x + 76, y - 168); ctx.closePath(); ctx.fill();
+  // poltrona
+  ctx.fillStyle = '#6e2a22'; rr(x - 46, y - 92, 92, 92, 14); ctx.fill(); ctx.fillStyle = '#86352b'; rr(x - 58, y - 52, 26, 52, 8); ctx.fill(); rr(x + 32, y - 52, 26, 52, 8); ctx.fill(); ctx.fillStyle = '#5a221c'; rr(x - 34, y - 40, 68, 22, 6); ctx.fill();
+  // il lettore, a matita, invecchiato
+  ctx.save(); ctx.translate(x, y - 34); ctx.strokeStyle = '#d8d2c4'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const br = Math.sin(t * 1.6) * 1.2;
+  ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-12, -40 + br); ctx.lineTo(12, -40 + br); ctx.lineTo(10, 0); ctx.moveTo(-10, 0); ctx.lineTo(18, 4); ctx.lineTo(20, 30); ctx.moveTo(10, 0); ctx.lineTo(30, 2); ctx.lineTo(32, 30); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, -52 + br, 10, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-12, -32 + br); ctx.lineTo(16, -22); ctx.lineTo(28, -26); ctx.stroke();
+  ctx.fillStyle = '#efe3c6'; ctx.save(); ctx.translate(28, -28); ctx.rotate(-.3); ctx.fillRect(-12, -9, 24, 16); ctx.restore();
+  ctx.strokeStyle = GRAPHITE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(9, -64 + br); ctx.lineTo(18, -54 + br); ctx.stroke();
+  ctx.restore();
+  // il Refuso, accucciato
+  const F = L.refuso;
+  if (F.alive) { const fy = F.y + Math.sin(t * 2.2) * 2; ctx.fillStyle = DEEP; blobPath(F.x, fy, 22, 15, t * 1.5, 7, .16); ctx.fill(); ctx.strokeStyle = '#b98cff'; ctx.lineWidth = 1.5; ctx.stroke(); const lx = clamp((P.x - F.x) / 80, -1, 1) * 3; ctx.fillStyle = '#e9dcbb'; const bl = Math.sin(t * .9) > .96 ? .2 : 1; ctx.beginPath(); ctx.ellipse(F.x - 7 + lx, fy - 2, 2.6, 3.6 * bl, 0, 0, TAU); ctx.ellipse(F.x + 6 + lx, fy - 2, 2.6, 3.6 * bl, 0, 0, TAU); ctx.fill(); }
+  if (G.dlgDone && !G.epiChoice) { ctx.font = 'italic 500 19px ' + SERIF; ctx.textAlign = 'center'; ctx.globalAlpha = .65 + Math.sin(t * 3) * .25; ctx.fillStyle = '#ffe9b0'; ctx.fillText(IS_TOUCH ? '✎ cancella il Refuso   ·   oppure siediti accanto al lettore ▶' : 'X: cancella il Refuso   ·   oppure siediti accanto al lettore →', x - 120, y - 200); ctx.globalAlpha = 1; ctx.textAlign = 'left'; }
+}
 function drawBoss() {
   const b = G.boss, t = G.t;
   const M = G.L.bossMode;
@@ -2486,6 +2582,7 @@ function drawWorld() {
   for (const q of G.proj) { ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(Math.sin(q.t * 9) * .2); ctx.fillStyle = 'rgba(8,4,14,.85)'; rr(-q.w / 2 - 3, -13, q.w + 6, 24, 8); ctx.fill(); ctx.fillStyle = '#d7b8ff'; ctx.fillText(q.text, 0, 5); ctx.restore(); }
   ctx.textAlign = 'left';
 
+  if (L.epi) drawEpilogue(L);
   drawBrina();
   drawPostilla();
   if (G.seenT > 0 && P.dead <= 0) { ctx.fillStyle = '#d8433a'; ctx.font = 'bold 26px ' + SERIF; ctx.textAlign = 'center'; ctx.globalAlpha = Math.min(1, G.seenT / .2); ctx.fillText('!', P.x + P.w / 2, P.y - 28); ctx.globalAlpha = 1; ctx.textAlign = 'left'; }
@@ -2556,10 +2653,10 @@ function loadSave() {
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); } catch (e) { } }
 const unlocked = c => c === 0 || SAVE.all || SAVE.books[c - 1].done;
 const LEVEL_NAMES = CHAPTERS.map(c => c.levels.map(f => f().name));
-const TOTAL_MARKS = CHAPTERS.map(c => c.levels.reduce((n, f) => n + f().marks.length, 0));
+const TOTAL_MARKS = CHAPTERS.slice(0, NB).map(c => c.levels.reduce((n, f) => n + f().marks.length, 0));
 
 let BTN = [], SEL = 0, HOP = { from: 0, to: 0, t: 1, land: 1, last: 0 }, prevNav = 0;
-function setSel(c) { if (c === SEL || c < 0 || c >= CHAPTERS.length || HOP.t < 1) return; HOP.from = SEL; HOP.to = c; HOP.t = 0; SEL = c; AU.sfx('jump'); }
+function setSel(c) { if (c === SEL || c < 0 || c >= NB || HOP.t < 1) return; HOP.from = SEL; HOP.to = c; HOP.t = 0; SEL = c; AU.sfx('jump'); }
 function button(x, y, w, h, label, fn, primary, paper) {
   BTN.push({ x, y, w, h, fn });
   ctx.fillStyle = paper ? (primary ? INK : 'rgba(60,40,20,.10)') : (primary ? 'rgba(244,232,205,.95)' : 'rgba(244,232,205,.12)');
@@ -2584,7 +2681,7 @@ function startGame(c, i) {
   if (i === 0) startTurn(() => { G.chapter = c; AU.setMood(BOOK_MOOD[c] || 0); startIntro(CHAPTERS[c].intro, CHAPTERS[c].register, () => startTurn(go), CHAPTERS[c]); });
   else startTurn(go);
 }
-const BOOK_MOOD = [0, 9, 17, 25];
+const BOOK_MOOD = [0, 9, 17, 25, 33];
 function startIntro(pages, style, then, C) { G.state = 'intro'; G.intro = { pages, style, then, t: 0, page: 0, C }; }
 function introReveal(pg, style) { let t = .3; const out = []; for (const ln of pg) { out.push(t); t += style === 'noir' ? ln.length / 34 + .35 : 1.5; } return [out, t + (style === 'noir' ? 0 : -.3)]; }
 function drawIntro() {
@@ -2640,14 +2737,15 @@ function nextLevel() {
   startTurn(() => { loadLevel(n); const B = SAVE.books[G.chapter]; B.li = n; B.max = Math.max(B.max, n); writeSave(); });
 }
 function startEnding() {
-  const B = SAVE.books[G.chapter], s = G.stats;
+  const B = SAVE.books[G.chapter], s = G.stats, CE = CHAPTERS[G.chapter];
+  if (CE.epi) { const E = CE.endings[G.epiChoice || 'keep']; CE.ending = E.ending; CE.shelf = E.shelf; CE.secret = E.secret; }
   s.points += 1200; if (s.full && s.deaths < 15) s.points += (15 - s.deaths) * 40;
   B.done = true; B.li = 0; B.max = CHAPTERS[G.chapter].levels.length - 1;
   if (s.full && (!B.best || s.points > B.best.points)) B.best = { points: s.points, marks: s.marks, time: Math.round(s.time), deaths: s.deaths };
   writeSave();
   startTurn(() => { G.state = 'ending'; G.end = { t: 0, page: 0 }; AU.setMood(BOOK_MOOD[G.chapter] || 0); parts.length = 0; });
 }
-function toTitle() { startTurn(() => { G.state = 'title'; G.paused = false; SEL = Math.min(G.chapter, CHAPTERS.length - 1); AU.setMood(0); }); }
+function toTitle() { startTurn(() => { G.state = 'title'; G.paused = false; SEL = Math.min(G.chapter, NB - 1); AU.setMood(0); }); }
 
 /* ---------------- la biblioteca ---------------- */
 function drawShelf(stainK) {
@@ -2698,11 +2796,9 @@ function drawCover(c, x, y, w, h, sel) {
   }
   ctx.textAlign = 'center'; ctx.fillStyle = open ? C.cover[1] : 'rgba(200,180,140,.35)';
   ctx.font = '500 15px ' + SERIF; ctx.fillText('LIBRO ' + C.roman, 6, -h / 2 + 40);
-  ctx.font = 'italic 500 25px ' + SERIF;
-  const words = C.title.split(' '), lines = []; let cur = '';
-  for (const wd of words) { if (cur && ctx.measureText(cur + ' ' + wd).width > w - 60) { lines.push(cur); cur = wd; } else cur = cur ? cur + ' ' + wd : wd; } lines.push(cur);
-  if (lines.length > 2) ctx.font = 'italic 500 22px ' + SERIF;
-  lines.forEach((l, i) => ctx.fillText(l, 6, (lines.length > 2 ? -56 + i * 25 : -44 + i * 30 - (lines.length - 1) * 10)));
+  const words = C.title.split(' '); let lines = [], fs = 25;
+  for (fs of [25, 22, 19]) { ctx.font = 'italic 500 ' + fs + 'px ' + SERIF; lines = []; let cur = ''; for (const wd of words) { if (cur && ctx.measureText(cur + ' ' + wd).width > w - 56) { lines.push(cur); cur = wd; } else cur = cur ? cur + ' ' + wd : wd; } lines.push(cur); if (lines.length <= 3) break; }
+  const lh = fs + 4; lines.forEach((l, i) => ctx.fillText(l, 6, -40 - (lines.length - 1) * lh / 2 + i * lh));
   if (open) {
     ctx.font = 'italic 15px ' + SERIF; ctx.globalAlpha = .9;
     ctx.fillText(B.done ? 'letto fino in fondo' : B.max > 0 ? 'segnalibro: ' + ROMAN[B.li] : 'mai aperto', 6, h / 2 - 48);
@@ -2723,8 +2819,8 @@ function drawTitle() {
   drawShelf(0);
   ctx.textAlign = 'center'; ctx.fillStyle = '#f1e6cc'; ctx.font = '500 58px ' + SERIF; ctx.fillText('MARGINALIA', W / 2, 70);
   ctx.font = F_HAND; ctx.fillStyle = 'rgba(241,230,204,.6)'; ctx.fillText('chi legge un libro, lo cambia', W / 2, 98); ctx.textAlign = 'left';
-  const cw = CHAPTERS.length > 3 ? 184 : 210, ch = 262, gap = CHAPTERS.length > 3 ? 34 : 60, x0 = W / 2 - (CHAPTERS.length * cw + (CHAPTERS.length - 1) * gap) / 2, cy = 128;
-  CHAPTERS.forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL && HOP.t >= 1); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => setSel(c) }); });
+  const cw = NB > 3 ? 184 : 210, ch = 262, gap = NB > 3 ? 34 : 60, x0 = W / 2 - (NB * cw + (NB - 1) * gap) / 2, cy = 128;
+  CHAPTERS.slice(0, NB).forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL && HOP.t >= 1); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => setSel(c) }); });
   // Postilla salta da un libro all'altro
   const dtT = clamp(t - HOP.last, 0, .05); HOP.last = t;
   const seat = c => x0 + c * (cw + gap) + cw / 2 - 40, baseY = cy - 2;
@@ -2742,7 +2838,7 @@ function drawTitle() {
   // frecce per cambiare libro
   ctx.font = '30px ' + SERIF; ctx.textAlign = 'center';
   if (SEL > 0) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('‹', x0 - 34, cy + ch / 2 + 8); BTN.push({ x: x0 - 64, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL - 1) }); }
-  if (SEL < CHAPTERS.length - 1) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('›', x0 + CHAPTERS.length * (cw + gap) - gap + 34, cy + ch / 2 + 8); BTN.push({ x: x0 + CHAPTERS.length * (cw + gap) - gap + 4, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL + 1) }); }
+  if (SEL < NB - 1) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('›', x0 + NB * (cw + gap) - gap + 34, cy + ch / 2 + 8); BTN.push({ x: x0 + NB * (cw + gap) - gap + 4, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL + 1) }); }
   ctx.textAlign = 'left';
   const B = SAVE.books[SEL], open = unlocked(SEL), cont = B.li > 0 && !B.done;
   if (!open) { ctx.textAlign = 'center'; ctx.font = 'italic 19px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.7)'; ctx.fillText('Questo libro è ancora chiuso.', W / 2, 446); ctx.textAlign = 'left'; }
@@ -2760,6 +2856,8 @@ function drawTitle() {
     }
   }
   button(W - 172, 418, 144, 44, 'Registro', () => { G.reg = true; }, false);
+  if (unlocked(NB)) { const gl = .5 + .5 * Math.sin(t * 2.4); ctx.fillStyle = 'rgba(255,210,122,' + (.15 + gl * .2) + ')'; rr(24, 466, 152, 46, 8); ctx.fill(); button(28, 470, 144, 38, 'Epilogo', () => startGame(NB, 0), true); }
+  else { ctx.font = 'italic 13px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.35)'; ctx.fillText('epilogo: dopo i quattro libri', 30, 494); }
   button(28, 418, 144, 44, 'Prologo', () => startTurn(() => startIntro(PROLOGUE, 'lib', () => startTurn(() => { G.state = 'title'; }))), false);
   ctx.textAlign = 'center'; ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)';
   ctx.fillText(IS_TOUCH ? '◀ ▶ scegli il libro  ·  in gioco: ▲ salta (due volte), ✎ sbianchetto' : '← → scegli il libro  ·  in gioco: SPAZIO salta (due volte), X sbianchetto, P pausa, M audio', W / 2, 526);
@@ -2789,7 +2887,7 @@ function drawRegister(y0) {
     ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)'; ctx.fillText(note, cols[5], y); y += 38;
   };
   if (G.state === 'play') { const s = G.stats; row('questa lettura', s.points, s.marks + '/' + s.total, mmss(s.time), s.deaths, 'in corso', '#ffe9b0'); }
-  CHAPTERS.forEach((C, c) => {
+  CHAPTERS.slice(0, NB).forEach((C, c) => {
     const B = SAVE.books[c];
     if (!unlocked(c)) row('«' + C.title + '»', '—', '—', '—', '—', 'chiuso', 'rgba(241,230,204,.4)');
     else if (B.best) { row('«' + C.title + '»', B.best.points, B.best.marks + '/' + TOTAL_MARKS[c], mmss(B.best.time), B.best.deaths, 'migliore'); tot += B.best.points; totM += B.best.marks; }
@@ -2889,7 +2987,7 @@ function drawEnding() {
     }
     if (t > 2.5) { ctx.textAlign = 'center'; ctx.globalAlpha = .45 + Math.sin(t * 3) * .2; ctx.font = F_HAND; ctx.fillStyle = GRAPHITE; ctx.fillText(IS_TOUCH ? 'tocca per voltare pagina' : 'SPAZIO per voltare pagina', W / 2, 500); ctx.globalAlpha = 1; }
   } else {
-    const last = G.chapter === CHAPTERS.length - 1;
+    const epi = !!CHAPTERS[G.chapter].epi, last = epi || G.chapter === NB - 1;
     drawShelf(last ? clamp((t - 1.5) / 6, 0, 1) : 0);
     ctx.textAlign = 'center';
     fadeText(C.shelf[0], W / 2, 120, t, .5, 'italic 25px ' + SERIF, '#f1e6cc');
@@ -2900,6 +2998,8 @@ function drawEnding() {
     if (s.full && s.marks >= s.total) fadeText(C.secret, W / 2, 322, t, 5.5, 'italic 500 24px ' + SERIF, '#ffe9b0');
     else fadeText('Il lettore ha lasciato altre note a margine. Non le hai trovate tutte.', W / 2, 322, t, 5.5, F_HAND, 'rgba(241,230,204,.6)');
     if (!last) fadeText('Sullo scaffale, un altro libro si è aperto.', W / 2, 362, t, 6, F_HAND, '#ffe9b0');
+    else if (!epi) fadeText('In fondo alla biblioteca si è accesa una lampada. L\'epilogo ti aspetta.', W / 2, 362, t, 6, F_HAND, '#ffe9b0');
+    else fadeText('Grazie per aver letto Marginalia.', W / 2, 362, t, 6, 'italic 22px ' + SERIF, '#ffe9b0');
     if (t > 5.5) button(W / 2 - 130, 400, 260, 46, 'Torna alla biblioteca', () => { if (!last) G.chapter++; toTitle(); }, true);
   }
   ctx.textAlign = 'left';
@@ -2957,7 +3057,7 @@ function frame(ts) {
 function syncMute() { const b = document.getElementById('bMute'); if (b) b.classList.toggle('off', AU.muted); }
 function boot() {
   loadSave(); buildTextures(); fit(); bindPad();
-  for (let c = CHAPTERS.length - 1; c >= 0; c--) if (unlocked(c) && !SAVE.books[c].done) SEL = c;
+  for (let c = NB - 1; c >= 0; c--) if (unlocked(c) && !SAVE.books[c].done) SEL = c;
   HOP.from = HOP.to = SEL;
   if (!SAVE.pro) { startIntro(PROLOGUE, 'lib', () => { SAVE.pro = true; writeSave(); startTurn(() => { G.state = 'title'; }); }); }
   const bm = document.getElementById('bMute'), bp = document.getElementById('bPause'), bf = document.getElementById('bFull');

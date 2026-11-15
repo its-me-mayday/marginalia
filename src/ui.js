@@ -17,10 +17,10 @@ function loadSave() {
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); } catch (e) { } }
 const unlocked = c => c === 0 || SAVE.all || SAVE.books[c - 1].done;
 const LEVEL_NAMES = CHAPTERS.map(c => c.levels.map(f => f().name));
-const TOTAL_MARKS = CHAPTERS.map(c => c.levels.reduce((n, f) => n + f().marks.length, 0));
+const TOTAL_MARKS = CHAPTERS.slice(0, NB).map(c => c.levels.reduce((n, f) => n + f().marks.length, 0));
 
 let BTN = [], SEL = 0, HOP = { from: 0, to: 0, t: 1, land: 1, last: 0 }, prevNav = 0;
-function setSel(c) { if (c === SEL || c < 0 || c >= CHAPTERS.length || HOP.t < 1) return; HOP.from = SEL; HOP.to = c; HOP.t = 0; SEL = c; AU.sfx('jump'); }
+function setSel(c) { if (c === SEL || c < 0 || c >= NB || HOP.t < 1) return; HOP.from = SEL; HOP.to = c; HOP.t = 0; SEL = c; AU.sfx('jump'); }
 function button(x, y, w, h, label, fn, primary, paper) {
   BTN.push({ x, y, w, h, fn });
   ctx.fillStyle = paper ? (primary ? INK : 'rgba(60,40,20,.10)') : (primary ? 'rgba(244,232,205,.95)' : 'rgba(244,232,205,.12)');
@@ -45,7 +45,7 @@ function startGame(c, i) {
   if (i === 0) startTurn(() => { G.chapter = c; AU.setMood(BOOK_MOOD[c] || 0); startIntro(CHAPTERS[c].intro, CHAPTERS[c].register, () => startTurn(go), CHAPTERS[c]); });
   else startTurn(go);
 }
-const BOOK_MOOD = [0, 9, 17, 25];
+const BOOK_MOOD = [0, 9, 17, 25, 33];
 function startIntro(pages, style, then, C) { G.state = 'intro'; G.intro = { pages, style, then, t: 0, page: 0, C }; }
 function introReveal(pg, style) { let t = .3; const out = []; for (const ln of pg) { out.push(t); t += style === 'noir' ? ln.length / 34 + .35 : 1.5; } return [out, t + (style === 'noir' ? 0 : -.3)]; }
 function drawIntro() {
@@ -101,14 +101,15 @@ function nextLevel() {
   startTurn(() => { loadLevel(n); const B = SAVE.books[G.chapter]; B.li = n; B.max = Math.max(B.max, n); writeSave(); });
 }
 function startEnding() {
-  const B = SAVE.books[G.chapter], s = G.stats;
+  const B = SAVE.books[G.chapter], s = G.stats, CE = CHAPTERS[G.chapter];
+  if (CE.epi) { const E = CE.endings[G.epiChoice || 'keep']; CE.ending = E.ending; CE.shelf = E.shelf; CE.secret = E.secret; }
   s.points += 1200; if (s.full && s.deaths < 15) s.points += (15 - s.deaths) * 40;
   B.done = true; B.li = 0; B.max = CHAPTERS[G.chapter].levels.length - 1;
   if (s.full && (!B.best || s.points > B.best.points)) B.best = { points: s.points, marks: s.marks, time: Math.round(s.time), deaths: s.deaths };
   writeSave();
   startTurn(() => { G.state = 'ending'; G.end = { t: 0, page: 0 }; AU.setMood(BOOK_MOOD[G.chapter] || 0); parts.length = 0; });
 }
-function toTitle() { startTurn(() => { G.state = 'title'; G.paused = false; SEL = Math.min(G.chapter, CHAPTERS.length - 1); AU.setMood(0); }); }
+function toTitle() { startTurn(() => { G.state = 'title'; G.paused = false; SEL = Math.min(G.chapter, NB - 1); AU.setMood(0); }); }
 
 /* ---------------- la biblioteca ---------------- */
 function drawShelf(stainK) {
@@ -159,11 +160,9 @@ function drawCover(c, x, y, w, h, sel) {
   }
   ctx.textAlign = 'center'; ctx.fillStyle = open ? C.cover[1] : 'rgba(200,180,140,.35)';
   ctx.font = '500 15px ' + SERIF; ctx.fillText('LIBRO ' + C.roman, 6, -h / 2 + 40);
-  ctx.font = 'italic 500 25px ' + SERIF;
-  const words = C.title.split(' '), lines = []; let cur = '';
-  for (const wd of words) { if (cur && ctx.measureText(cur + ' ' + wd).width > w - 60) { lines.push(cur); cur = wd; } else cur = cur ? cur + ' ' + wd : wd; } lines.push(cur);
-  if (lines.length > 2) ctx.font = 'italic 500 22px ' + SERIF;
-  lines.forEach((l, i) => ctx.fillText(l, 6, (lines.length > 2 ? -56 + i * 25 : -44 + i * 30 - (lines.length - 1) * 10)));
+  const words = C.title.split(' '); let lines = [], fs = 25;
+  for (fs of [25, 22, 19]) { ctx.font = 'italic 500 ' + fs + 'px ' + SERIF; lines = []; let cur = ''; for (const wd of words) { if (cur && ctx.measureText(cur + ' ' + wd).width > w - 56) { lines.push(cur); cur = wd; } else cur = cur ? cur + ' ' + wd : wd; } lines.push(cur); if (lines.length <= 3) break; }
+  const lh = fs + 4; lines.forEach((l, i) => ctx.fillText(l, 6, -40 - (lines.length - 1) * lh / 2 + i * lh));
   if (open) {
     ctx.font = 'italic 15px ' + SERIF; ctx.globalAlpha = .9;
     ctx.fillText(B.done ? 'letto fino in fondo' : B.max > 0 ? 'segnalibro: ' + ROMAN[B.li] : 'mai aperto', 6, h / 2 - 48);
@@ -184,8 +183,8 @@ function drawTitle() {
   drawShelf(0);
   ctx.textAlign = 'center'; ctx.fillStyle = '#f1e6cc'; ctx.font = '500 58px ' + SERIF; ctx.fillText('MARGINALIA', W / 2, 70);
   ctx.font = F_HAND; ctx.fillStyle = 'rgba(241,230,204,.6)'; ctx.fillText('chi legge un libro, lo cambia', W / 2, 98); ctx.textAlign = 'left';
-  const cw = CHAPTERS.length > 3 ? 184 : 210, ch = 262, gap = CHAPTERS.length > 3 ? 34 : 60, x0 = W / 2 - (CHAPTERS.length * cw + (CHAPTERS.length - 1) * gap) / 2, cy = 128;
-  CHAPTERS.forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL && HOP.t >= 1); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => setSel(c) }); });
+  const cw = NB > 3 ? 184 : 210, ch = 262, gap = NB > 3 ? 34 : 60, x0 = W / 2 - (NB * cw + (NB - 1) * gap) / 2, cy = 128;
+  CHAPTERS.slice(0, NB).forEach((C, c) => { const x = x0 + c * (cw + gap); drawCover(c, x, cy, cw, ch, c === SEL && HOP.t >= 1); BTN.push({ x, y: cy, w: cw, h: ch, fn: () => setSel(c) }); });
   // Postilla salta da un libro all'altro
   const dtT = clamp(t - HOP.last, 0, .05); HOP.last = t;
   const seat = c => x0 + c * (cw + gap) + cw / 2 - 40, baseY = cy - 2;
@@ -203,7 +202,7 @@ function drawTitle() {
   // frecce per cambiare libro
   ctx.font = '30px ' + SERIF; ctx.textAlign = 'center';
   if (SEL > 0) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('‹', x0 - 34, cy + ch / 2 + 8); BTN.push({ x: x0 - 64, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL - 1) }); }
-  if (SEL < CHAPTERS.length - 1) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('›', x0 + CHAPTERS.length * (cw + gap) - gap + 34, cy + ch / 2 + 8); BTN.push({ x: x0 + CHAPTERS.length * (cw + gap) - gap + 4, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL + 1) }); }
+  if (SEL < NB - 1) { ctx.fillStyle = 'rgba(241,230,204,.75)'; ctx.fillText('›', x0 + NB * (cw + gap) - gap + 34, cy + ch / 2 + 8); BTN.push({ x: x0 + NB * (cw + gap) - gap + 4, y: cy + ch / 2 - 40, w: 60, h: 80, fn: () => setSel(SEL + 1) }); }
   ctx.textAlign = 'left';
   const B = SAVE.books[SEL], open = unlocked(SEL), cont = B.li > 0 && !B.done;
   if (!open) { ctx.textAlign = 'center'; ctx.font = 'italic 19px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.7)'; ctx.fillText('Questo libro è ancora chiuso.', W / 2, 446); ctx.textAlign = 'left'; }
@@ -221,6 +220,8 @@ function drawTitle() {
     }
   }
   button(W - 172, 418, 144, 44, 'Registro', () => { G.reg = true; }, false);
+  if (unlocked(NB)) { const gl = .5 + .5 * Math.sin(t * 2.4); ctx.fillStyle = 'rgba(255,210,122,' + (.15 + gl * .2) + ')'; rr(24, 466, 152, 46, 8); ctx.fill(); button(28, 470, 144, 38, 'Epilogo', () => startGame(NB, 0), true); }
+  else { ctx.font = 'italic 13px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.35)'; ctx.fillText('epilogo: dopo i quattro libri', 30, 494); }
   button(28, 418, 144, 44, 'Prologo', () => startTurn(() => startIntro(PROLOGUE, 'lib', () => startTurn(() => { G.state = 'title'; }))), false);
   ctx.textAlign = 'center'; ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)';
   ctx.fillText(IS_TOUCH ? '◀ ▶ scegli il libro  ·  in gioco: ▲ salta (due volte), ✎ sbianchetto' : '← → scegli il libro  ·  in gioco: SPAZIO salta (due volte), X sbianchetto, P pausa, M audio', W / 2, 526);
@@ -250,7 +251,7 @@ function drawRegister(y0) {
     ctx.font = 'italic 15px ' + SERIF; ctx.fillStyle = 'rgba(241,230,204,.55)'; ctx.fillText(note, cols[5], y); y += 38;
   };
   if (G.state === 'play') { const s = G.stats; row('questa lettura', s.points, s.marks + '/' + s.total, mmss(s.time), s.deaths, 'in corso', '#ffe9b0'); }
-  CHAPTERS.forEach((C, c) => {
+  CHAPTERS.slice(0, NB).forEach((C, c) => {
     const B = SAVE.books[c];
     if (!unlocked(c)) row('«' + C.title + '»', '—', '—', '—', '—', 'chiuso', 'rgba(241,230,204,.4)');
     else if (B.best) { row('«' + C.title + '»', B.best.points, B.best.marks + '/' + TOTAL_MARKS[c], mmss(B.best.time), B.best.deaths, 'migliore'); tot += B.best.points; totM += B.best.marks; }
@@ -350,7 +351,7 @@ function drawEnding() {
     }
     if (t > 2.5) { ctx.textAlign = 'center'; ctx.globalAlpha = .45 + Math.sin(t * 3) * .2; ctx.font = F_HAND; ctx.fillStyle = GRAPHITE; ctx.fillText(IS_TOUCH ? 'tocca per voltare pagina' : 'SPAZIO per voltare pagina', W / 2, 500); ctx.globalAlpha = 1; }
   } else {
-    const last = G.chapter === CHAPTERS.length - 1;
+    const epi = !!CHAPTERS[G.chapter].epi, last = epi || G.chapter === NB - 1;
     drawShelf(last ? clamp((t - 1.5) / 6, 0, 1) : 0);
     ctx.textAlign = 'center';
     fadeText(C.shelf[0], W / 2, 120, t, .5, 'italic 25px ' + SERIF, '#f1e6cc');
@@ -361,6 +362,8 @@ function drawEnding() {
     if (s.full && s.marks >= s.total) fadeText(C.secret, W / 2, 322, t, 5.5, 'italic 500 24px ' + SERIF, '#ffe9b0');
     else fadeText('Il lettore ha lasciato altre note a margine. Non le hai trovate tutte.', W / 2, 322, t, 5.5, F_HAND, 'rgba(241,230,204,.6)');
     if (!last) fadeText('Sullo scaffale, un altro libro si è aperto.', W / 2, 362, t, 6, F_HAND, '#ffe9b0');
+    else if (!epi) fadeText('In fondo alla biblioteca si è accesa una lampada. L\'epilogo ti aspetta.', W / 2, 362, t, 6, F_HAND, '#ffe9b0');
+    else fadeText('Grazie per aver letto Marginalia.', W / 2, 362, t, 6, 'italic 22px ' + SERIF, '#ffe9b0');
     if (t > 5.5) button(W / 2 - 130, 400, 260, 46, 'Torna alla biblioteca', () => { if (!last) G.chapter++; toTitle(); }, true);
   }
   ctx.textAlign = 'left';
@@ -418,7 +421,7 @@ function frame(ts) {
 function syncMute() { const b = document.getElementById('bMute'); if (b) b.classList.toggle('off', AU.muted); }
 function boot() {
   loadSave(); buildTextures(); fit(); bindPad();
-  for (let c = CHAPTERS.length - 1; c >= 0; c--) if (unlocked(c) && !SAVE.books[c].done) SEL = c;
+  for (let c = NB - 1; c >= 0; c--) if (unlocked(c) && !SAVE.books[c].done) SEL = c;
   HOP.from = HOP.to = SEL;
   if (!SAVE.pro) { startIntro(PROLOGUE, 'lib', () => { SAVE.pro = true; writeSave(); startTurn(() => { G.state = 'title'; }); }); }
   const bm = document.getElementById('bMute'), bp = document.getElementById('bPause'), bf = document.getElementById('bFull');

@@ -34,7 +34,7 @@ function loadLevel(i) {
   G.proj = []; G.dyn = []; G.rings = []; G.fly = []; parts.length = 0;
   G.stats.total += L.marks.length; if (i === 0) G.stats.full = true;
   G.chaseOn = false; G.cardT = 0; G.cap = null; G.note = null; G.boss = null; G.flash = 0;
-  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.hist = []; G.bossDark = false;
+  P.light = 0; P.cd = 0; P.form = null; G.clue = null; P.clue = false; G.dlg = null; G.dlgDone = false; G.epiChoice = null; G.epiEnd = 0; G.hist = []; G.bossDark = false;
   if (L.boss) initBoss();
   AU.setMood(L.mood);
   respawn(true);
@@ -236,6 +236,7 @@ function onLand(p) {
 function erase() {
   const L = G.L, cx = P.x + P.w / 2, cy = P.y + P.h / 2;
   if (L.noErase) { AU.sfx('nope'); G.shake = 3; return; }
+  if (L.refuso) { const R = L.refuso; if (R.alive && G.dlgDone && !G.epiChoice && Math.hypot(cx - R.x, cy - R.y) < 160) { R.alive = false; G.epiChoice = 'erase'; G.epiEnd = 2.4; AU.sfx('erase'); G.flash = .8; G.rings.push({ x: R.x, y: R.y, t: 0, big: true }); puff(R.x, R.y, 40, { col: '#fffaf0', s0: 40, s1: 260, grav: 0, drag: 2 }); return; } if (!G.dlgDone) { AU.sfx('nope'); return; } }
   if (L.mirror) {
     const nl = G.layer === 1 ? 2 : 1;
     for (const b of L.blocks) if (b.layer === nl && overlap(P, b)) { AU.sfx('nope'); return; }
@@ -309,7 +310,13 @@ function updItems(dt) {
     c.got = true; G.cp = { x: c.x, y: c.y + (c.float ? 15 : 0), inv: c.inv, layer: G.layer }; AU.sfx('check');
     puff(c.x, c.y + (c.inv ? 30 : -30), 16, { s0: 20, s1: 120, col: GRAPHITE, grav: -80, l0: .5, l1: 1 });
   }
-  if (L.exit && overlap(P, L.exit) && !G.turn) nextLevel();
+  for (const m of (L.memories || [])) if (!m.seen && Math.hypot(cx - m.x, cy - m.y) < 40) { m.seen = true; say(m.text); AU.sfx('mark'); G.stats.points += 100; puff(m.x, m.y, 16, { col: CHAPTERS[m.book].cover[1], s0: 20, s1: 120, grav: -40 }); }
+  if (L.reader) {
+    if (!G.dlg && Math.abs(cx - L.reader.x) < 300 && Math.abs(cy - L.reader.y) < 120) G.dlg = { i: -1, t: 99 };
+    if (G.dlg && !G.dlgDone) { G.dlg.t += dt; if (G.dlg.t > 4.2) { G.dlg.i++; G.dlg.t = 0; if (G.dlg.i < EPI_DIALOGUE.length) { G.cap = { text: EPI_DIALOGUE[G.dlg.i], t: 0, dur: 4.1 }; AU.sfx('whisper'); } else G.dlgDone = true; } }
+    if (G.epiEnd > 0) { G.epiEnd -= dt; if (G.epiEnd <= 0 && G.state === 'play' && !G.turn) startEnding(); }
+  }
+  if (L.exit && overlap(P, L.exit) && !G.turn) { if (L.epi) { if (G.dlgDone && !G.epiChoice) { G.epiChoice = 'keep'; G.epiEnd = 1.6; AU.sfx('check'); } } else nextLevel(); }
 }
 
 function updChase(dt) {

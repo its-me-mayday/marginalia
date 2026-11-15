@@ -1019,3 +1019,61 @@ CHAPTERS[3].register = 'man'; CHAPTERS[3].intro = [
   ['RIASSUNTO DELLE PUNTATE PRECEDENTI', '(obbligatorio per legge)', '1. Una villa: riparata.   2. Una fiaba: riparata, forse.', '3. Un treno: colpevoli, tutti.'],
   ['NOTA TECNICA', 'La Biblioteca in cui tutto ciò è avvenuto è un\'astronave.', 'Ha sbagliato strada. La gravità è stata ridotta per risparmiare.', 'Il navigatore sta ricalcolando. È tutto previsto.']
 ];
+
+/* ================= EPILOGO — Il margine ================= */
+const NB = CHAPTERS.length; // i libri veri; l'epilogo viene dopo e non compare tra le copertine
+Object.assign(THEMES, { reading: { p0: '#3a2616', p1: '#120a06', decor: 'shelves', noir: true, epi: true } });
+function ep1() {
+  const L = mkLevel({ name: 'Il margine', date: 'in fondo alla biblioteca', theme: 'reading', mood: 33, epi: true });
+  const b = builder(L, 120, 430);
+  const S = (gap, dy, w, o) => b.ln('', gap, dy, Object.assign({ kind: 'shelf', w }, o || {}));
+  L.memories = [];
+  const mem = (book, text) => { const p = b.last; L.memories.push({ x: p.x + p.w / 2, y: p.y - 46, book, text, seen: false }); return b; };
+  S(0, 0, 520).spawn(); b.last.say = 'Quattro libri dopo. La biblioteca è silenziosa, per una volta.';
+  S(110, -70, 200).mark(); S(100, -70, 200); mem(0, 'Una villa. L\'ospite riparte al mattino. Ma come finiva, prima?');
+  S(110, -60, 220).check(); S(100, -70, 180).mark(); S(110, 60, 200); mem(1, 'Una fiaba. E vissero felici e contenti. Forse.');
+  S(110, -60, 240).check(); S(110, -80, 180).mark(); S(110, 0, 200); mem(2, 'Un treno. Colpevoli: tutti. L\'ultima pagina era bianca.');
+  S(110, 70, 220).check(); S(100, 70, 200).mark(); mem(3, 'Un manuale. Finale: vedi alla voce Lettore.');
+  S(110, 80, 260).check(); S(100, 30, 820).mark(.2);
+  const fl = b.last; L.reader = { x: fl.x + fl.w - 170, y: fl.y }; L.refuso = { x: fl.x + fl.w - 330, y: fl.y - 16, alive: true };
+  L.exit = { x: L.reader.x + 40, y: fl.y - 74, w: 50, h: 74 };
+  return L;
+}
+const NOTES_E = [['Questo non è un libro. È casa.', 'Ho letto tutti questi scaffali. Male, ma tutti.', 'Su ogni libro ho lasciato qualcosa.', 'A volte una nota. A volte una macchia.', 'Non sempre sapevo quale delle due.', 'Adesso ti aspetto. Ho tenuto il posto.']];
+const EPI_DIALOGUE = [
+  '«Eccoti. Ti ho disegnata io, tanti anni fa: un ciao a matita.»',
+  '«Poi ho sbagliato una parola. E anche l\'errore ha imparato a camminare.»',
+  '«Vi ho seguiti in quattro libri. Lui macchiava, tu correggevi.»',
+  '«E ogni volta il libro diventava un po\' meno suo e un po\' più nostro.»',
+  '«Adesso decidi tu. Lo sbianchetto ce l\'hai.»'
+];
+CHAPTERS.push({
+  id: 5, roman: '∞', title: 'Il margine', epi: true, levels: [ep1], notes: NOTES_E, cover: ['#2a1a10', '#ffd27a'], register: 'lib',
+  intro: [
+    ['Quattro libri dopo,', 'in fondo alla Biblioteca dei Margini,', 'si è accesa una lampada.'],
+    ['Sotto la lampada c\'è una poltrona.', 'Sulla poltrona, qualcuno legge.', 'Ha una matita dietro l\'orecchio.'],
+    ['Postilla lo riconosce dalla calligrafia.']
+  ],
+  endings: {
+    erase: {
+      secret: '✶  Ultima nota a margine: «Grazie. Era ora.»',
+      ending: [
+        { left: true, mark: true, dur: 8, lines: [['Postilla cancellò il Refuso.', .4], ['La macchia sparì, pulita, senza lasciare alone.', 1.8], ['Il lettore sorrise, e chiuse gli occhi.', 3.2]] },
+        { dur: 4.2, big: true, lines: [['Silenzio.', .3]] },
+        { dur: 8, lines: [['Senza errori, i libri tornarono perfetti.', .3], ['Nessuno ci scrisse più a margine.', 2.2], ['Non ce n\'era bisogno.', 4]] },
+        { dur: 9, lines: [['Postilla restò ferma sulla pagina, a guardarla.', .3], ['Era bellissima.', 2.4], ['E non aveva più niente da dire.', 3.8, VIOLET]] }
+      ],
+      shelf: ['La Biblioteca dei Margini è in ordine.', 'Fin troppo.']
+    },
+    keep: {
+      secret: '✶  Ultima nota a margine: «Ciao. — Ciao.»',
+      ending: [
+        { left: true, mark: true, dur: 8, lines: [['Postilla si sedette sul bracciolo, accanto al lettore.', .4], ['Il Refuso si accucciò ai loro piedi, come un gatto.', 1.8], ['Nessuno cancellò niente.', 3.2]] },
+        { dur: 4.2, big: true, lines: [['Ciao.', .3]] },
+        { dur: 8, lines: [['«La mia prima nota a margine», disse il lettore.', .3], ['«E il mio primo errore.»', 2.2], ['«Siete quello che resta di chi legge.»', 4]] },
+        { dur: 9, lines: [['Poi prese dallo scaffale un libro nuovo, ancora intatto,', .3], ['e glielo passò.', 2.2], ['Tocca a qualcun altro, adesso.', 3.8, VIOLET]] }
+      ],
+      shelf: ['La Biblioteca dei Margini è in disordine, come sempre.', 'È così che si capisce che qualcuno la legge.']
+    }
+  }
+});

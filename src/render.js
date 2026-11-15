@@ -145,8 +145,16 @@ function drawLineText(p, col, alpha, font) {
   ctx.globalAlpha = alpha; ctx.fillStyle = col;
   ctx.save(); ctx.translate(p.x + 4, p.y + 18); ctx.scale(sx, 1); ctx.fillText(p.text, 0, 0); ctx.restore();
 }
+function drawShelfPlank(p) {
+  const r = rng(Math.round(p.x0) * 7 + 1);
+  let x = p.x + 4;
+  while (x < p.x + p.w - 12) { const bw = 9 + r() * 14, bh = 30 + r() * 30, hue = r(); const c = hue < .3 ? [120, 46, 38] : hue < .55 ? [52, 80, 66] : hue < .8 ? [140, 104, 52] : [60, 58, 96]; ctx.fillStyle = 'rgb(' + c.join(',') + ')'; ctx.fillRect(x, p.y - bh, bw, bh); ctx.fillStyle = 'rgba(255,220,150,.25)'; ctx.fillRect(x + 1, p.y - bh + 6, bw - 2, 2); x += bw + 1 + (r() < .1 ? 14 : 0); }
+  const g = ctx.createLinearGradient(0, p.y, 0, p.y + 14); g.addColorStop(0, '#a36b38'); g.addColorStop(1, '#5c3a1c'); ctx.fillStyle = g; ctx.fillRect(p.x - 4, p.y, p.w + 8, 14);
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(p.x - 4, p.y + 14, p.w + 8, 5);
+}
 function drawPlat(p, L, litK) {
   if (!onScreen(p, 60)) return;
+  if (p.kind === 'shelf') { drawShelfPlank(p); return; }
   const t = G.t;
   const fairy = THEMES[L.theme].fairy, TH = THEMES[L.theme], noir = TH.noir;
   let col = noir ? (TH.lightBg ? '#1b2130' : '#ece6d8') : TH.man ? '#1c4a55' : fairy ? '#2a2018' : INK, a = 1, font = noir ? MONO : (fairy || TH.man) ? '500 25px ' + SERIF : null, ox = 0, oy = 0, under = .22;
@@ -449,6 +457,28 @@ function drawMargine() {
   ctx.fillStyle = '#e2672a'; ctx.fillText(G.gflip ? '▲ GRAVITÀ ▲' : '▼ GRAVITÀ ▼', 0, -94);
   ctx.restore(); ctx.textAlign = 'left';
 }
+function drawEpilogue(L) {
+  const t = G.t;
+  for (const m of L.memories) if (!m.seen) { const C = CHAPTERS[m.book], y = m.y + Math.sin(t * 2 + m.x) * 4; const g = ctx.createRadialGradient(m.x, y, 2, m.x, y, 34); g.addColorStop(0, 'rgba(255,220,140,.6)'); g.addColorStop(1, 'rgba(255,220,140,0)'); ctx.fillStyle = g; ctx.fillRect(m.x - 36, y - 36, 72, 72); ctx.save(); ctx.translate(m.x, y); ctx.rotate(Math.sin(t + m.x) * .1); ctx.fillStyle = C.cover[0]; ctx.fillRect(-12, -16, 24, 32); ctx.strokeStyle = C.cover[1]; ctx.lineWidth = 1.5; ctx.strokeRect(-9, -13, 18, 26); ctx.fillStyle = C.cover[1]; ctx.font = '500 11px ' + SERIF; ctx.textAlign = 'center'; ctx.fillText(C.roman, 0, 4); ctx.restore(); ctx.textAlign = 'left'; }
+  const R = L.reader, x = R.x, y = R.y;
+  // lampada
+  const lg = ctx.createRadialGradient(x + 60, y - 150, 10, x + 60, y - 150, 300); lg.addColorStop(0, 'rgba(255,214,140,.45)'); lg.addColorStop(1, 'rgba(255,214,140,0)'); ctx.fillStyle = lg; ctx.fillRect(x - 260, y - 450, 640, 470);
+  ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x + 90, y); ctx.lineTo(x + 90, y - 140); ctx.stroke(); ctx.fillStyle = '#d9a648'; ctx.beginPath(); ctx.moveTo(x + 62, y - 140); ctx.lineTo(x + 118, y - 140); ctx.lineTo(x + 104, y - 168); ctx.lineTo(x + 76, y - 168); ctx.closePath(); ctx.fill();
+  // poltrona
+  ctx.fillStyle = '#6e2a22'; rr(x - 46, y - 92, 92, 92, 14); ctx.fill(); ctx.fillStyle = '#86352b'; rr(x - 58, y - 52, 26, 52, 8); ctx.fill(); rr(x + 32, y - 52, 26, 52, 8); ctx.fill(); ctx.fillStyle = '#5a221c'; rr(x - 34, y - 40, 68, 22, 6); ctx.fill();
+  // il lettore, a matita, invecchiato
+  ctx.save(); ctx.translate(x, y - 34); ctx.strokeStyle = '#d8d2c4'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const br = Math.sin(t * 1.6) * 1.2;
+  ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-12, -40 + br); ctx.lineTo(12, -40 + br); ctx.lineTo(10, 0); ctx.moveTo(-10, 0); ctx.lineTo(18, 4); ctx.lineTo(20, 30); ctx.moveTo(10, 0); ctx.lineTo(30, 2); ctx.lineTo(32, 30); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, -52 + br, 10, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-12, -32 + br); ctx.lineTo(16, -22); ctx.lineTo(28, -26); ctx.stroke();
+  ctx.fillStyle = '#efe3c6'; ctx.save(); ctx.translate(28, -28); ctx.rotate(-.3); ctx.fillRect(-12, -9, 24, 16); ctx.restore();
+  ctx.strokeStyle = GRAPHITE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(9, -64 + br); ctx.lineTo(18, -54 + br); ctx.stroke();
+  ctx.restore();
+  // il Refuso, accucciato
+  const F = L.refuso;
+  if (F.alive) { const fy = F.y + Math.sin(t * 2.2) * 2; ctx.fillStyle = DEEP; blobPath(F.x, fy, 22, 15, t * 1.5, 7, .16); ctx.fill(); ctx.strokeStyle = '#b98cff'; ctx.lineWidth = 1.5; ctx.stroke(); const lx = clamp((P.x - F.x) / 80, -1, 1) * 3; ctx.fillStyle = '#e9dcbb'; const bl = Math.sin(t * .9) > .96 ? .2 : 1; ctx.beginPath(); ctx.ellipse(F.x - 7 + lx, fy - 2, 2.6, 3.6 * bl, 0, 0, TAU); ctx.ellipse(F.x + 6 + lx, fy - 2, 2.6, 3.6 * bl, 0, 0, TAU); ctx.fill(); }
+  if (G.dlgDone && !G.epiChoice) { ctx.font = 'italic 500 19px ' + SERIF; ctx.textAlign = 'center'; ctx.globalAlpha = .65 + Math.sin(t * 3) * .25; ctx.fillStyle = '#ffe9b0'; ctx.fillText(IS_TOUCH ? '✎ cancella il Refuso   ·   oppure siediti accanto al lettore ▶' : 'X: cancella il Refuso   ·   oppure siediti accanto al lettore →', x - 120, y - 200); ctx.globalAlpha = 1; ctx.textAlign = 'left'; }
+}
 function drawBoss() {
   const b = G.boss, t = G.t;
   const M = G.L.bossMode;
@@ -597,6 +627,7 @@ function drawWorld() {
   for (const q of G.proj) { ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(Math.sin(q.t * 9) * .2); ctx.fillStyle = 'rgba(8,4,14,.85)'; rr(-q.w / 2 - 3, -13, q.w + 6, 24, 8); ctx.fill(); ctx.fillStyle = '#d7b8ff'; ctx.fillText(q.text, 0, 5); ctx.restore(); }
   ctx.textAlign = 'left';
 
+  if (L.epi) drawEpilogue(L);
   drawBrina();
   drawPostilla();
   if (G.seenT > 0 && P.dead <= 0) { ctx.fillStyle = '#d8433a'; ctx.font = 'bold 26px ' + SERIF; ctx.textAlign = 'center'; ctx.globalAlpha = Math.min(1, G.seenT / .2); ctx.fillText('!', P.x + P.w / 2, P.y - 28); ctx.globalAlpha = 1; ctx.textAlign = 'left'; }

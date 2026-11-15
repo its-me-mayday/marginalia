@@ -300,7 +300,8 @@ const MUSIC = [
   { root: 63, st: .22, prog: 7, dens: .8, pad: .02, bass: .08, style: 'pluck', ost: .016, sour: true },// Il motore a coincidenze
   { root: 60, st: .27, prog: 5, dens: .75, pad: .018, bass: .07, style: 'box', motif: 0 },           // Il traduttore letterale
   { root: 53, st: .4, prog: 6, dens: .4, pad: .034, bass: .08, style: 'box', dec: 2.4 },             // Vedi alla voce
-  { root: 57, st: .2, prog: 8, dens: .9, pad: .02, bass: .09, style: 'pluck', ost: .03 }             // Il Servizio Clienti
+  { root: 57, st: .2, prog: 8, dens: .9, pad: .02, bass: .09, style: 'pluck', ost: .03 },            // MARGINE
+  { root: 55, st: .6, prog: 5, dens: .45, pad: .036, bass: .08, motif: 0, dec: 3.2 }                 // Epilogo: pianoforte e il tema di Postilla
 ];
 
 /* ---------- particelle ---------- */

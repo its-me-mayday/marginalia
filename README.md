@@ -15,6 +15,8 @@ Le piattaforme sono le righe del testo. Ogni libro è un genere, e ogni livello 
 - **Libro III — «Chi ha strappato l'ultima pagina»**: un giallo su un treno di notte, che si apre a secondo libro finito. Sette livelli e un boss: le ombre dei lampioni, gli omissis, il tetto del treno, gli interrogatori a tre versioni, il pedinamento nell'ombra, il palazzo mentale, la fuga senza sbianchetto.
 - **Libro IV — «Manuale del passeggero interstellare smarrito»**: fantascienza comica nello spazio, che si apre a terzo libro finito. Sette livelli e un boss, tutti giocati sulla gravità: ridotta, diversa per ogni pianetino, invertita, risucchiata da un buco nero.
 
+Finiti i quattro libri si apre l'**epilogo**, «Il margine»: l'incontro con il lettore e una scelta che decide il finale.
+
 All'avvio un prologo presenta la biblioteca, e ogni libro si apre con il suo, scritto nel registro del genere.
 
 Gli asterischi a matita nascondono le note del lettore che ha dato origine a tutto. In pausa c'è il registro del lettore, con punti e statistiche di ogni libro. I progressi si salvano nel browser.

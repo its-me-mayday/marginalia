@@ -155,6 +155,19 @@ Ogni boss chiede una cosa diversa, legata al suo libro. Lo schema comune resta: 
 - **Ogni libro**, quando lo si comincia dal primo livello, si apre con il suo prologo: racconta la storia e, dal secondo in poi, i legami con i libri precedenti.
 - **Il registro segue il genere**, nel testo e nell'aspetto: il gotico è un diario in corsivo su carta seppia a lume di candela, in seconda persona solenne; la fiaba è in tondo su carta bianca con colline e sole, e comincia con «C'era una volta»; il noir è un verbale battuto a macchina sotto la pioggia, in prima persona asciutta, lettera per lettera; il manuale è una prefazione a punti, burocratica e impassibile, con timbro e diagramma.
 
+### Epilogo: «Il margine»
+
+Si apre solo dopo aver finito i quattro libri (o in modalità prova), da un pulsante «Epilogo» che si illumina in biblioteca. Non è una copertina sullo scaffale: viene dopo.
+
+- **Prologo** nel registro della biblioteca: quattro libri dopo, in fondo alla Biblioteca dei Margini si è accesa una lampada; sulla poltrona qualcuno legge, con una matita dietro l'orecchio. Postilla lo riconosce dalla calligrafia.
+- **Livello**: niente testo-piattaforma, niente nemici. Si sale e si scende su scaffali di legno pieni di libri. Lungo la strada quattro piccoli libri luminosi, uno per libro, ricordano com'è finito ciascuno; sei asterischi portano le ultime note del lettore.
+- **L'incontro**: in fondo, sotto la lampada, il lettore invecchiato nella sua poltrona, e ai suoi piedi il Refuso, accucciato. Avvicinandosi, il lettore parla: ha disegnato Postilla con un «ciao» a matita, poi ha sbagliato una parola e anche l'errore ha imparato a camminare. «Adesso decidi tu. Lo sbianchetto ce l'hai.»
+- **La scelta**, possibile solo dopo il dialogo:
+  - **Cancellare il Refuso**: i libri tornano perfetti e nessuno ci scrive più a margine. «La Biblioteca dei Margini è in ordine. Fin troppo.»
+  - **Sedersi accanto al lettore**: il Refuso si accuccia ai loro piedi, il lettore passa a Postilla un libro nuovo, intatto. «Tocca a qualcun altro, adesso.»
+- **Musica**: pianoforte lento con il tema di Postilla.
+- Chiude con «Grazie per aver letto Marginalia».
+
 ### Punti e registro del lettore
 
 - Punti: 100 per annotazione, 50 per parola corretta, 20 per parola rimessa a posto, 200 per livello finito, 1200 per libro finito, 40 per ogni caduta in meno di 15; ogni caduta toglie 10.
@@ -210,3 +223,5 @@ Game feel curato: particelle d'inchiostro, screen shake calibrato, transizioni m
 | 26 | Quarto libro rifatto da capo: tutto nello spazio, con la gravità come idea centrale; via ufficio moduli, note a piè di pagina, coincidenze, traduttore letterale e «vedi alla voce». | Giudizio dell'autore: «penoso tranne la gravità», e non c'entrava con la fantascienza. |
 | 27 | Il bordo superiore della pagina fa da soffitto invece di uccidere: si muore solo cadendo nel verso della gravità. | Nei pianeti leggeri i salti alti uscivano dalla pagina. |
 | 28 | Ogni boss ha una regola propria: battito, parole rimescolate, prove da consegnare, frasi sul soffitto. | I quattro boss erano tutti uguali. |
+| 29 | Epilogo «Il margine», sbloccato dai quattro libri: l'incontro con il lettore e una scelta con due finali. | Il gioco non aveva una conclusione. |
+| 30 | I titoli lunghi sulle copertine si rimpiccioliscono per stare in tre righe. | Il titolo del quarto libro sbordava. |
